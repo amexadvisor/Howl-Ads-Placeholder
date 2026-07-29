@@ -49,16 +49,29 @@
         <p id="status" style="margin-top: 15px; font-size: 14px;"></p>
     </div>
 
-    <script>
-        // Initialize Telegram Web App
+        <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        document.getElementById('adButton').addEventListener('click', () => {
-            const statusEl = document.getElementById('status');
+        const statusEl = document.getElementById('status');
+        const adButton = document.getElementById('adButton');
+        
+        // Disable button until ad system is ready
+        adButton.disabled = true;
+        statusEl.innerText = "Initializing ad network...";
+
+        // Check every second if Monetag's function has loaded
+        const checkInterval = setInterval(() => {
+            if (typeof window['show_11448261'] === "function") {
+                clearInterval(checkInterval);
+                statusEl.innerText = "Ad system ready!";
+                adButton.disabled = false;
+            }
+        }, 1000);
+
+        adButton.addEventListener('click', () => {
             statusEl.innerText = "Loading ad...";
 
-            // Dynamically call your specific Zone ID function created by the SDK
             const showMethod = window['show_11448261'];
 
             if (typeof showMethod === "function") {
@@ -66,12 +79,13 @@
                     statusEl.innerText = "Reward granted successfully!";
                 }).catch((error) => {
                     console.error("Ad error:", error);
-                    statusEl.innerText = "Ad unavailable or skipped.";
+                    statusEl.innerText = "Ad unavailable or closed.";
                 });
             } else {
-                statusEl.innerText = "Ad system is still initializing. Try again.";
+                statusEl.innerText = "Ad system is still initializing. Check your ad blocker!";
             }
         });
     </script>
+
 </body>
 </html>

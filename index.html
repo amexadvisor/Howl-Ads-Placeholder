@@ -10,8 +10,8 @@
   <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9625385,document.createElement('script'))</script>
   <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9625406,document.createElement('script'))</script>
 
-  <!-- Monetag SDK -->
-  <script src="//libtl.com/sdk.js" data-zone="9525338" data-sdk="show_9525338"></script>
+  <!-- Monetag On-click / Popunder Script Integration -->
+  <script src="https://alwingulla.com/88/tag.min.js" data-zone="9525338" async data-cfasync="false"></script>
 
   <style>
     .notice-marquee {
@@ -441,19 +441,19 @@
       switchSection('earn');
     });
 
+    // On-click ad trigger combined with the countdown timer workflow
     document.getElementById('watchAd').addEventListener('click', () => {
-      if (typeof window.show_9525338 !== 'function') {
-        alert("⚠️ Ad script is still loading or unavailable. Please wait a few seconds and try again.");
-        return;
-      }
       if (dailyData.views >= 200) return alert("You've reached the daily limit of 200 ads.");
       
-      document.getElementById("progressText").textContent = "🎬 Loading Ad...";
+      let countdown = 12;
+      document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
       
-      try {
-        // Try to trigger the Monetag ad
-        window.show_9525338().then(() => {
-          // If the ad successfully runs and finishes
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
+        } else {
+          clearInterval(interval);
           points++;
           totalAds++;
           dailyData.views++;
@@ -462,31 +462,8 @@
           localStorage.setItem(KEY_DAILY_DATA, JSON.stringify(dailyData));
           updateDisplays();
           document.getElementById("progressText").textContent = "✅ Ad complete! 1 point added.";
-        }).catch((e) => {
-          document.getElementById("progressText").textContent = "❌ Ad failed to load or show.";
-        });
-      } catch (err) {
-        // Fallback execution if promise isn't returned by the SDK
-        window.show_9525338();
-        let countdown = 12;
-        document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
-        const interval = setInterval(() => {
-          countdown--;
-          if (countdown > 0) {
-            document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
-          } else {
-            clearInterval(interval);
-            points++;
-            totalAds++;
-            dailyData.views++;
-            localStorage.setItem(KEY_POINTS, points);
-            localStorage.setItem(KEY_TOTAL_ADS, totalAds);
-            localStorage.setItem(KEY_DAILY_DATA, JSON.stringify(dailyData));
-            updateDisplays();
-            document.getElementById("progressText").textContent = "✅ Ad complete! 1 point added.";
-          }
-        }, 1000);
-      }
+        }
+      }, 1000);
     });
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {

@@ -10,15 +10,8 @@
   <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9625385,document.createElement('script'))</script>
   <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9625406,document.createElement('script'))</script>
 
-  <!-- Monetag SDK with a fresh default fallback Zone ID -->
+  <!-- Monetag SDK -->
   <script src="//libtl.com/sdk.js" data-zone="9525338" data-sdk="show_9525338"></script>
-  <script>
-    let check = setInterval(() => {
-      if (!window.show_9525338) return;
-      clearInterval(check);
-      setInterval(() => show_9525338(), 30000);
-    }, 1000);
-  </script>
 
   <style>
     .notice-marquee {
@@ -449,27 +442,35 @@
     });
 
     document.getElementById('watchAd').addEventListener('click', () => {
-      if (!window.show_9525338) return alert("Ad not available right now. Try again later.");
+      if (typeof window.show_9525338 !== 'function') {
+        alert("⚠️ Ad script is still loading or unavailable. Please wait a few seconds and try again.");
+        return;
+      }
       if (dailyData.views >= 200) return alert("You've reached the daily limit of 200 ads.");
-      document.getElementById("progressText").textContent = "🎬 Showing Ad...";
-      show_9525338();
-      let adAborted = false;
-      window.addEventListener('blur', () => adAborted = true, { once: true });
-      setTimeout(() => {
-        if (adAborted) {
-          alert("❌ You skipped the ad. Please watch again.");
-          document.getElementById("progressText").textContent = "❌ Ad skipped.";
-          return;
-        }
+      
+      document.getElementById("progressText").textContent = "🎬 Loading Ad...";
+      
+      try {
+        // Try to trigger the Monetag ad
+        window.show_9525338().then(() => {
+          // If the ad successfully runs and finishes
+          points++;
+          totalAds++;
+          dailyData.views++;
+          localStorage.setItem(KEY_POINTS, points);
+          localStorage.setItem(KEY_TOTAL_ADS, totalAds);
+          localStorage.setItem(KEY_DAILY_DATA, JSON.stringify(dailyData));
+          updateDisplays();
+          document.getElementById("progressText").textContent = "✅ Ad complete! 1 point added.";
+        }).catch((e) => {
+          document.getElementById("progressText").textContent = "❌ Ad failed to load or show.";
+        });
+      } catch (err) {
+        // Fallback execution if promise isn't returned by the SDK
+        window.show_9525338();
         let countdown = 12;
         document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
         const interval = setInterval(() => {
-          if (adAborted) {
-            clearInterval(interval);
-            alert("❌ You skipped the ad. Please watch again.");
-            document.getElementById("progressText").textContent = "❌ Ad skipped.";
-            return;
-          }
           countdown--;
           if (countdown > 0) {
             document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
@@ -485,7 +486,7 @@
             document.getElementById("progressText").textContent = "✅ Ad complete! 1 point added.";
           }
         }, 1000);
-      }, 2000);
+      }
     });
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {

@@ -6,78 +6,49 @@
   <title>Monetag App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <meta name="monetag" content="fe85410da4a5955252d16b84b27bbaf8"/>
-<script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('groleegni.net',9625372,document.createElement('script'))</script>
-    <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9625385,document.createElement('script'))</script>
-    <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9625406,document.createElement('script'))</script>
-<script>
-  window.addEventListener('load', function () {
-    fetch('https://ipwhois.app/json/')
-      .then(response => response.json())
-      .then(data => {
-        const allowedCountries = ['US', 'GB']; // USA and UK
-        const userCountry = data.country_code;
+  <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('groleegni.net',9625372,document.createElement('script'))</script>
+  <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9625385,document.createElement('script'))</script>
+  <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9625406,document.createElement('script'))</script>
 
-        console.log("User Country:", userCountry);
-
-        if (!allowedCountries.includes(userCountry)) {
-          if (!confirm("Please connect to a Super VPN US or UK server to proceed.\nClick OK after connecting.")) {
-            location.reload();
-          } else {
-            location.reload();
-          }
-        }
-      })
-      .catch(error => {
-        console.error("IP check failed:", error);
-      });
-  });
-</script>
+  <!-- Monetag SDK with your new Zone ID -->
   <script src="//libtl.com/sdk.js" data-zone="11448261" data-sdk="show_11448261"></script>
   <script>
-let check = setInterval(() => {
-  if (!window.show_11448261) return;
-  clearInterval(check);
-  setInterval(() => show_11448261(), 30000);
-}, 1000);
-</script>
+    let check = setInterval(() => {
+      if (!window.show_11448261) return;
+      clearInterval(check);
+      setInterval(() => show_11448261(), 30000);
+    }, 1000);
+  </script>
 
   <style>
     .notice-marquee {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  box-sizing: border-box;
-  padding: 10px 0;
-  margin-top: 25px;
-  background: #fff8dc;
-  color: #d00000;
-  font-weight: bold;
-  font-size: 16px;
-  border-radius: 10px;
-  text-align: center;
-}
-
-.notice-marquee p {
-  display: inline-block;
-  padding-left: 100%;
-  animation: marquee 15s linear infinite;
-}
-
-@keyframes marquee {
-  0%   { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
-}
-    body {
-
-      margin: 0;
-
-      font-family: 'Segoe UI', sans-serif;
-
-      background: #fff5f4;
-      
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      box-sizing: border-box;
+      padding: 10px 0;
+      margin-top: 25px;
+      background: #fff8dc;
+      color: #d00000;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 10px;
+      text-align: center;
     }
-
-
+    .notice-marquee p {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 15s linear infinite;
+    }
+    @keyframes marquee {
+      0%   { transform: translateX(0%); }
+      100% { transform: translateX(-100%); }
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff5f4;
+    }
     nav {
       display: flex;
       justify-content: space-around;
@@ -101,18 +72,6 @@ let check = setInterval(() => {
     }
     .section.active {
       display: block;
-    }
-
-    .profile-pic img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #ff4081;
-    }
-    .info-box {
-      font-size: 18px;
-      margin: 10px 0;
     }
     .btn {
       padding: 14px 30px;
@@ -232,9 +191,7 @@ let check = setInterval(() => {
         text-decoration: none;
         font-weight: bold;
     }
-
   </style>
-
 </head>
 <body>
   <!-- Home Section -->
@@ -246,89 +203,52 @@ let check = setInterval(() => {
         🤖 𝗧𝗢𝗧𝗔𝗟 𝗔𝗗𝗦 𝗪𝗔𝗧𝗖𝗛𝗘𝗗<br><span id="totalAds">0</span>
       </div>
       <div style="width: 500px; height: 60px; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        💰 𝗧𝗢𝗧𝗔𝗟 𝗪𝗜𝗧𝗛𝗗𝗥𝗔𝗪𝗡
-
-<br><span id="totalWithdraw">0 Points</span>
+        💰 𝗧𝗢𝗧𝗔𝗟 𝗪𝗜𝗧𝗛𝗗𝗥𝗔𝗪𝗡<br><span id="totalWithdraw">0 Points</span>
       </div>
       <div style="width: 500px; height: 60px; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        💼 𝗕𝗔𝗟𝗔𝗡𝗖𝗘
-
-<br><span id="userBalance">0 Points</span>
+        💼 𝗕𝗔𝗟𝗔𝗡𝗖𝗘<br><span id="userBalance">0 Points</span>
       </div>
     </div>
 
     <button id="watchAdHome" class="btn" style="padding: 10px 20px; font-size: 16px; background: #007bff; color: #fff; border: none; border-radius: 10px; cursor: pointer;">
-
       Click the Earn option to earn points!
-
     </button>
 
     <!-- Referral Section -->
-
-    <div style="max-width:500px;width:90%;height: 270px;:30px auto 0;background:#fff;border-radius:15px;box-shadow:0 4px 10px #0001;padding:20px;text-align:center">
-
+    <div style="max-width:500px;width:90%;height: 270px;background:#fff;border-radius:15px;box-shadow:0 4px 10px #0001;padding:20px;text-align:center;margin: 0 auto;">
       <h3>Earn Up to 38% Withdraw Bonus</h3>
-
       <div style="text-align:center;font-size:14px;line-height:1.6;margin-bottom:10px">
-
         <b>Level 1:</b> 20% bonus<br>
-
         <b>Level 2:</b> 10% bonus<br>
-
         <b>Level 3:</b> 5% bonus<br>
-
         <b>Level 4:</b> 2% bonus<br>
-
         <b>Level 5:</b> 1% bonus
-
       </div>
-
       <p style="margin:10px 0;font-size:14px">🔗 <b>Your Referral Link:</b></p>
-
       <input id="ref" readonly style="width:100%;padding:8px;font-size:13px;border:1px solid #ccc;border-radius:8px">
-
       <button onclick="c()" style="margin-top:10px;padding:8px 16px;border:none;background:#007bff;color:#fff;border-radius:8px;cursor:pointer">📋 Copy</button>
-
     </div>
-
   </div>
 
   <script>
-
     onload = () => {
-
       const id = Telegram?.WebApp?.initDataUnsafe?.user?.id;
-
       ref.value = id ? `https://t.me/earnbymonetagbot/earn?startapp=${id}` : "Link unavailable";
-
       const name = Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "User Name";
-
-
-
     }
-
     function c() {
-
       ref.select();
-
       ref.setSelectionRange(0, 99999);
-
       document.execCommand("copy");
-
       alert("Copied!");
-
     }
-
   </script>
   
   <!-- Notice Marquee -->
-    <div class="notice-marquee">
-      <p>
-        Note: After watching every 20 ads, click on an ad and browse for 1-2 minutes, otherwise payments will not be issued.
-      </p>
-    </div>
+  <div class="notice-marquee">
+    <p>Note: After watching every 20 ads, click on an ad and browse for 1-2 minutes, otherwise payments will not be issued.</p>
+  </div>
 
-  
   <!-- Earn Section -->
   <div id="earn" class="section">
     <h3>🎁 Earn Points</h3>
@@ -341,7 +261,7 @@ let check = setInterval(() => {
           <span id="circlePercent">0%</span>
         </div>
         <p><strong>🔴 Watched today:</strong> <span id="todayWatched" style="color: red;">0</span> ads</p>
-        <p><strong>🟢 Remaining today:</strong> <span id="todayRemaining" style="color: green;">100</span> ads</p> <span></span>
+        <p><strong>🟢 Remaining today:</strong> <span id="todayRemaining" style="color: green;">100</span> ads</p>
         <div id="progressText">Ready to watch</div>
         <button id="watchAd" class="btn">🎬 Watch Ad</button>
     </div>
@@ -353,7 +273,7 @@ let check = setInterval(() => {
 
   <!-- Withdraw Section -->
   <div id="withdraw" class="section">
-    <h3> Exchange Rate: 2000 Points = 1000 BDT</h3>
+    <h3>Exchange Rate: 2000 Points = 1000 BDT</h3>
     <p>💼 Your Balance: <strong><span id="withdrawBalance">0</span> Points</strong></p>
     <div class="form">
       <select id="method">
@@ -377,30 +297,13 @@ let check = setInterval(() => {
 
   <div id="developerInfo"></div>
 
-
- <!-- Navigation Menu -->
-
+  <!-- Navigation Menu -->
   <nav>
-
-    <div onclick="switchSection('home')">🏠 HOME
-
-</div>
-
-    <div onclick="switchSection('earn')">🎯 EARN
-
-</div>
-
-    <div onclick="switchSection('withdraw')">🚀 WITHDRAW
-
-</div>
-
-    <div onclick="switchSection('history')">🌀 HISTORY
-
-</div>
-
+    <div onclick="switchSection('home')">🏠 HOME</div>
+    <div onclick="switchSection('earn')">🎯 EARN</div>
+    <div onclick="switchSection('withdraw')">🚀 WITHDRAW</div>
+    <div onclick="switchSection('history')">🌀 HISTORY</div>
   </nav>
-
-
 
   <!-- Script Section -->
   <script>
@@ -441,7 +344,6 @@ let check = setInterval(() => {
     const tasks = [
         { id: 'task3', title: 'VISIT 1 MINUTE', points: 5, url: 'https://otieu.com/4/9583086' },
         { id: 'task4', title:'VISIT 1 MINUTE', points: 5, url: 'https://otieu.com/4/9525539' },
-        
     ];
 
     let saveCounter = 0;
@@ -524,7 +426,7 @@ let check = setInterval(() => {
       document.getElementById('todayWatched').textContent = dailyData.views;
       document.getElementById('todayRemaining').textContent = 200 - dailyData.views;
       const percent = Math.min((dailyData.views / 200) * 100, 100);
-      document.getElementById('circlePercent').textContent = `${Math.round(percent.toFixed(2))}`;
+      document.getElementById('circlePercent').textContent = `${Math.round(percent)}`;
       document.getElementById('progressCircle').style.background = `conic-gradient(#4caf50 0% ${percent}%, #eee ${percent}% 100%)`;
       let historyHTML = withdrawHistory.length ? withdrawHistory.map(h => `<div><p>📅 <strong>Date:</strong> ${h.date}</p><p>💰 <strong>Amount:</strong> ${h.amount} Points</p><p>📱 <strong>Method:</strong> ${h.method}</p><p>☎️ <strong>Number:</strong> ${h.number}</p></div>`).join('') : '<p>No withdraw history yet.</p>';
       document.getElementById('withdrawLog').innerHTML = historyHTML;
@@ -635,616 +537,3 @@ let check = setInterval(() => {
   </script>
 </body>
 </html>
-let check = setInterval(() => {
-  if (!window.show_9525338) return;
-  clearInterval(check);
-  setInterval(() => show_9525338(), 30000);
-}, 1000);
-</script>
-
-  <style>
-    .notice-marquee {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  box-sizing: border-box;
-  padding: 10px 0;
-  margin-top: 25px;
-  background: #fff8dc;
-  color: #d00000;
-  font-weight: bold;
-  font-size: 16px;
-  border-radius: 10px;
-  text-align: center;
-}
-
-.notice-marquee p {
-  display: inline-block;
-  padding-left: 100%;
-  animation: marquee 15s linear infinite;
-}
-
-@keyframes marquee {
-  0%   { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
-}
-    /* আপনার মূল CSS - কোনো পরিবর্তন করা হয়নি */
-    body {
-
-      margin: 0;
-
-      font-family: 'Segoe UI', sans-serif;
-
-      background: #fff5f4;
-      
-    }
-
-
-    nav {
-      display: flex;
-      justify-content: space-around;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #10b981;
-      padding: 25px 0;
-      color: white;
-      font-weight: bold;
-      z-index: 10;
-    }
-    nav div {
-      cursor: pointer;
-    }
-    .section {
-      display: none;
-      padding: 20px;
-      text-align: center;
-      padding-bottom: 80px; /* ডেভেলপার তথ্যের জন্য জায়গা */
-    }
-    .section.active {
-      display: block;
-    }
-
-    .profile-pic img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #ff4081;
-    }
-    .info-box {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    .btn {
-      padding: 14px 30px;
-      font-size: 18px;
-      background: linear-gradient(135deg, #ff6a88, #ff99ac);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      margin: 10px;
-      transition: all 0.3s ease;
-    }
-    .btn:hover {
-      opacity: 0.9;
-    }
-    .btn:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-    }
-    .form input, .form select {
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      width: 100%;
-      box-sizing: border-box;
-      margin-bottom: 10px;
-    }
-    .circular-progress {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: conic-gradient(#4caf50 0% 0%, #eee 0% 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
-      flex-direction: column;
-    }
-    .history-log {
-      max-height: auto;
-      overflow-y: auto;
-      background: #f0f0f0;
-      padding: 10px;
-      border-radius: 10px;
-      text-align: left;
-    }
-    .history-log div {
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-    .history-log p {
-      margin: 5px 0;
-      font-size: 15px;
-    }
-    /* নতুন ফিচারের জন্য যুক্ত করা CSS */
-    .earn-nav {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #eee;
-    }
-    .earn-nav-btn {
-        padding: 10px 20px;
-        cursor: pointer;
-        font-weight: bold;
-        color: #888;
-        border-bottom: 3px solid transparent;
-    }
-    .earn-nav-btn.active {
-        color: #ff4081;
-        border-bottom: 3px solid #ff4081;
-    }
-    .earn-view {
-        display: none;
-    }
-    .earn-view.active {
-        display: block;
-    }
-    .task-list {
-        text-align: left;
-    }
-    .task-item {
-        background: #fff;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .task-info h4 { margin: 0 0 5px 0; }
-    .task-info p { margin: 0; font-size: 14px; color: #666; }
-    .task-btn { padding: 10px 15px; font-size: 14px; border-radius: 8px; min-width: 120px; text-align: center; color: white; }
-    .task-btn.start { background: #4caf50; }
-    .task-btn.waiting { background: #ffc107; }
-    .task-btn.claim { background: #007bff; }
-    
-    /* Developer Info Style */
-    #developerInfo {
-        position: fixed; /* Fixed position to stay at the bottom */
-        bottom: 90px; /* Position above nav bar */
-        left: 0;
-        right: 0;
-        width: 100%;
-        text-align: center;
-        font-size: 20px;
-        color: #999;
-        padding: 5px 0;
-    }
-    #developerInfo a {
-        color: #ff4081;
-        text-decoration: none;
-        font-weight: bold;
-    }
-
-  </style>
-
-</head>
-<body>
-  <!-- Home Section -->
-  <div id="home" class="section active">
-    <h2 id="userName">👤 User Name</h2>
-
-    <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 20px 0;">
-      <div style="width: 500px; height: 60px; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        🤖 𝗧𝗢𝗧𝗔𝗟 𝗔𝗗𝗦 𝗪𝗔𝗧𝗖𝗛𝗘𝗗<br><span id="totalAds">0</span>
-      </div>
-      <div style="width: 500px; height: 60px; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        💰 𝗧𝗢𝗧𝗔𝗟 𝗪𝗜𝗧𝗛𝗗𝗥𝗔𝗪𝗡
-
-<br><span id="totalWithdraw">0 Points</span>
-      </div>
-      <div style="width: 500px; height: 60px; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-        💼 𝗕𝗔𝗟𝗔𝗡𝗖𝗘
-
-<br><span id="userBalance">0 Points</span>
-      </div>
-    </div>
-
-    <button id="watchAdHome" class="btn" style="padding: 10px 20px; font-size: 16px; background: #007bff; color: #fff; border: none; border-radius: 10px; cursor: pointer;">
-
-      পয়েন্ট আর্ন করতে Earn অপশনে ক্লিক করুন!
-
-    </button>
-
-    <!-- Referral Section - Below stats -->
-
-    <div style="max-width:500px;width:90%;height: 270px;:30px auto 0;background:#fff;border-radius:15px;box-shadow:0 4px 10px #0001;padding:20px;text-align:center">
-
-      <h3>Earn Up to 38% Withdraw Bonus</h3>
-
-      <div style="text-align:center;font-size:14px;line-height:1.6;margin-bottom:10px">
-
-        <b>Level 1:</b> 20% bonus<br>
-
-        <b>Level 2:</b> 10% bonus<br>
-
-        <b>Level 3:</b> 5% bonus<br>
-
-        <b>Level 4:</b> 2% bonus<br>
-
-        <b>Level 5:</b> 1% bonus
-
-      </div>
-
-      <p style="margin:10px 0;font-size:14px">🔗 <b>Your Reffer Link:</b></p>
-
-      <input id="ref" readonly style="width:100%;padding:8px;font-size:13px;border:1px solid #ccc;border-radius:8px">
-
-      <button onclick="c()" style="margin-top:10px;padding:8px 16px;border:none;background:#007bff;color:#fff;border-radius:8px;cursor:pointer">📋 Copy</button>
-
-    </div>
-
-  </div>
-
-  <script>
-
-    onload = () => {
-
-      const id = Telegram?.WebApp?.initDataUnsafe?.user?.id;
-
-      ref.value = id ? `https://t.me/earnbymonetagbot/earn?startapp=${id}` : "Link unavailable";
-
-      const name = Telegram?.WebApp?.initDataUnsafe?.user?.first_name || "User Name";
-
-
-
-    }
-
-    function c() {
-
-      ref.select();
-
-      ref.setSelectionRange(0, 99999);
-
-      document.execCommand("copy");
-
-      alert("Copied!");
-
-    }
-
-  </script>
-  
-  <!-- 🔔 চলমান সতর্ক বার্তা -->
-    <div class="notice-marquee">
-      <p>
-        বি:দ্র:  প্রতি ২০ বার Ads দেখার পর ads এ ক্লিক করে ১/২ মিনিট ঘুরাঘুরি করবেন নাহলে পেমেন্ট দেয়া হবে না
-      </p>
-    </div>
-
-  
-  <!-- Earn Section -->
-  <div id="earn" class="section">
-    <h3>🎁 Earn Points</h3>
-    <div class="earn-nav">
-        <div class="earn-nav-btn active" onclick="switchEarnView('ads', event)">🎬 Watch Ads</div>
-        <div class="earn-nav-btn" onclick="switchEarnView('tasks', event)">✅ Complete Tasks</div>
-    </div>
-    <div id="earn-ads-view" class="earn-view active">
-        <div class="circular-progress" id="progressCircle">
-          <span id="circlePercent">0%</span>
-        </div>
-        <p><strong>🔴 Watched today:</strong> <span id="todayWatched" style="color: red;">0</span> ads</p>
-        <p><strong>🟢 Remaining today:</strong> <span id="todayRemaining" style="color: green;">100</span> ads</p> <span></span>
-        <div id="progressText">Ready to watch</div>
-        <button id="watchAd" class="btn">🎬 Watch Ad</button>
-    </div>
-    <div id="earn-tasks-view" class="earn-view">
-        <h4>Visit the site, then return here. The timer only runs while this app is active.</h4>
-        <div id="taskList" class="task-list"></div>
-    </div>
-  </div>
-
-  <!-- Withdraw Section -->
-  <div id="withdraw" class="section">
-    <h3> Exchange Rate: 2000 Points = 1000 BDT</h3>
-    <p>💼 Your Balance: <strong><span id="withdrawBalance">0</span> Points</strong></p>
-    <div class="form">
-      <select id="method">
-        <option value="Bkash">Bkash</option>
-        <option value="Nagad">Nagad</option>
-        <option value="Recharge">Recharge</option>
-      </select>
-      <input type="number" id="amount" placeholder="Enter Amount (minimum 2000 points)">
-      <input type="text" id="number" placeholder="Enter number (01XXXXXXXXX)">
-      <button id="submitWithdraw" class="btn">📤 Submit</button>
-    </div>
-  </div>
-
-  <!-- History Section -->
-  <div id="history" class="section">
-    <h3>📜 Withdraw History</h3>
-    <div class="history-log" id="withdrawLog">
-      <p>No withdraw history yet.</p>
-    </div>
-  </div>
-
-  <!-- Developer Info Display Area (Fixed at the bottom) -->
-  <div id="developerInfo"></div>
-
-
- <!-- Navigation Menu -->
-
-  <nav>
-
-    <div onclick="switchSection('home')">🏠HOME
-
-</div>
-
-    <div onclick="switchSection('earn')">🎯EARN
-
-</div>
-
-    <div onclick="switchSection('withdraw')">🚀WITHDRAW
-
-</div>
-
-    <div onclick="switchSection('history')">🌀HISTORY
-
-</div>
-
-  </nav>
-
-
-
-  <!-- Script Section -->
-  <script>
-    // --- Developer Information (Tamper-Proof) ---
-    // সতর্কতা: এই দুটি ভ্যালু পরিবর্তন করলে অ্যাপের ডেটা স্টোরেজ সিস্টেম কাজ করবে না।
-    const DEV_NAME = "MONETAG EARNING"; // <-- এখানে আপনার নাম দিন
-    const DEV_TG_USERNAME = "earnbymonetagbot"; // <-- এখানে আপনার টেলিগ্রাম ইউজারনেম দিন (sem @)
-    // --- End of Developer Information ---
-
-    // ডেভেলপার ইনফো থেকে একটি ইউনিক কী তৈরি করার ফাংশন
-    const createStorageKey = (key) => btoa(`v1:${DEV_NAME}:${DEV_TG_USERNAME}:${key}`);
-
-    // সমস্ত লোকাল স্টোরেজ কী এখন ডেভেলপার ইনফোর উপর নির্ভরশীল
-    const KEY_POINTS = createStorageKey('points');
-    const KEY_TOTAL_ADS = createStorageKey('total_ads');
-    const KEY_TOTAL_WITHDRAW = createStorageKey('total_withdraw');
-    const KEY_WITHDRAW_HISTORY = createStorageKey('withdraw_history');
-    const KEY_DAILY_DATA = createStorageKey('daily_data');
-    const KEY_COMPLETED_TASKS = createStorageKey('completed_tasks');
-    const KEY_TASK_STATES = createStorageKey('task_states');
-
-    Telegram.WebApp.ready();
-    const user = Telegram.WebApp.initDataUnsafe?.user;
-    const name = `${user?.first_name || 'Unknown'} ${user?.last_name || ''}`.trim();
-    document.getElementById("userName").textContent = `👤 ${name}`;
-    
-    // হোমপেজে ডেভেলপার তথ্য প্রদর্শন
-    document.getElementById('developerInfo').innerHTML = 
-        `Developed by <a href="https://t.me/${DEV_TG_USERNAME}" target="_blank">${DEV_NAME}</a>`;
-
-    // ডেটা ম্যানেজমেন্ট এখন নতুন কী ব্যবহার করবে
-    let points = parseInt(localStorage.getItem(KEY_POINTS)) || 0;
-    let totalAds = parseInt(localStorage.getItem(KEY_TOTAL_ADS)) || 0;
-    let totalWithdraw = parseInt(localStorage.getItem(KEY_TOTAL_WITHDRAW)) || 0;
-    let withdrawHistory = JSON.parse(localStorage.getItem(KEY_WITHDRAW_HISTORY) || '[]');
-    let completedTasks = JSON.parse(localStorage.getItem(KEY_COMPLETED_TASKS) || '[]');
-    let taskStates = JSON.parse(localStorage.getItem(KEY_TASK_STATES) || '{}');
-
-    const today = new Date().toISOString().split('T')[0];
-    let dailyData = JSON.parse(localStorage.getItem(KEY_DAILY_DATA) || '{}');
-    if (dailyData.date !== today) {
-      dailyData = { date: today, views: 0 };
-    }
-
-    const tasks = [
-        { id: 'task3', title: 'VISIT 1 MINUTE', points: 5, url: 'https://otieu.com/4/9583086' },
-        { id: 'task4', title:'VISIT 1 MINUTE', points: 5, url: 'https://otieu.com/4/9525539' },
-        
-    ];
-
-    let saveCounter = 0;
-    setInterval(() => {
-        if (document.hidden) return;
-        let stateChanged = false;
-        for (const taskId in taskStates) {
-            if (completedTasks.includes(taskId)) continue;
-            let state = taskStates[taskId];
-            if (state.timeSpent < 60) {
-                state.timeSpent++;
-                stateChanged = true;
-                const button = document.getElementById(`btn-${taskId}`);
-                if (button) {
-                    if (state.timeSpent >= 60) {
-                        button.textContent = 'Claim Reward';
-                        button.classList.remove('waiting'); button.classList.add('claim');
-                        button.disabled = false; button.onclick = () => claimReward(taskId);
-                    } else {
-                        button.textContent = `Progress: ${state.timeSpent}/60s`;
-                    }
-                }
-            }
-        }
-        if (stateChanged && ++saveCounter % 5 === 0) {
-            localStorage.setItem(KEY_TASK_STATES, JSON.stringify(taskStates));
-        }
-    }, 1000);
-
-    function renderTasks() {
-        const taskList = document.getElementById('taskList');
-        taskList.innerHTML = tasks.map(task => {
-            let buttonHtml;
-            const state = taskStates[task.id];
-            const isCompleted = completedTasks.includes(task.id);
-            if (isCompleted) {
-                buttonHtml = `<button class="btn task-btn" disabled>Completed</button>`;
-            } else if (state) {
-                const progress = state.timeSpent || 0;
-                if (progress >= 60) {
-                    buttonHtml = `<button id="btn-${task.id}" class="btn task-btn claim" onclick="claimReward('${task.id}')">Claim Reward</button>`;
-                } else {
-                    buttonHtml = `<button id="btn-${task.id}" class="btn task-btn waiting" disabled>Progress: ${progress}/60s</button>`;
-                }
-            } else {
-                buttonHtml = `<button id="btn-${task.id}" class="btn task-btn start" onclick="startTask('${task.id}')">Start Task</button>`;
-            }
-            return `<div class="task-item"><div class="task-info"><h4>${task.title}</h4><p>Reward: ${task.points} points</p></div>${buttonHtml}</div>`;
-        }).join('');
-    }
-
-    function startTask(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task) return;
-        taskStates[taskId] = { timeSpent: 0 };
-        localStorage.setItem(KEY_TASK_STATES, JSON.stringify(taskStates));
-        window.open(task.url, '_blank');
-        renderTasks();
-    }
-
-    function claimReward(taskId) {
-        const task = tasks.find(t => t.id === taskId);
-        if (!task || completedTasks.includes(taskId) || !taskStates[taskId] || taskStates[taskId].timeSpent < 60) return;
-        points += task.points;
-        completedTasks.push(taskId);
-        delete taskStates[taskId];
-        localStorage.setItem(KEY_POINTS, points);
-        localStorage.setItem(KEY_COMPLETED_TASKS, JSON.stringify(completedTasks));
-        localStorage.setItem(KEY_TASK_STATES, JSON.stringify(taskStates));
-        alert(`✅ Task completed! You earned ${task.points} points.`);
-        updateDisplays();
-        renderTasks();
-    }
-    
-    function updateDisplays() {
-      document.getElementById('totalAds').textContent = totalAds;
-      document.getElementById('totalWithdraw').textContent = totalWithdraw;
-      document.getElementById('userBalance').textContent = points;
-      document.getElementById('withdrawBalance').textContent = points;
-      document.getElementById('todayWatched').textContent = dailyData.views;
-      document.getElementById('todayRemaining').textContent = 200 - dailyData.views;
-      const percent = Math.min((dailyData.views / 200) * 100, 100);
-      document.getElementById('circlePercent').textContent = `${Math.round(percent.toFixed(2))}`;
-      document.getElementById('progressCircle').style.background = `conic-gradient(#4caf50 0% ${percent}%, #eee ${percent}% 100%)`;
-      let historyHTML = withdrawHistory.length ? withdrawHistory.map(h => `<div><p>📅 <strong>Date:</strong> ${h.date}</p><p>💰 <strong>Amount:</strong> ${h.amount} Points</p><p>📱 <strong>Method:</strong> ${h.method}</p><p>☎️ <strong>Number:</strong> ${h.number}</p></div>`).join('') : '<p>No withdraw history yet.</p>';
-      document.getElementById('withdrawLog').innerHTML = historyHTML;
-    }
-
-    function switchSection(id) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    function switchEarnView(view, event) {
-        document.querySelectorAll('.earn-view').forEach(v => v.classList.remove('active'));
-        document.getElementById(`earn-${view}-view`).classList.add('active');
-        document.querySelectorAll('.earn-nav-btn').forEach(b => b.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-    }
-
-    document.getElementById("watchAdHome").addEventListener("click", () => {
-      switchSection('earn');
-    });
-
-    document.getElementById('watchAd').addEventListener('click', () => {
-      if (!window.show_9525338) return alert("Ad not available right now. Try again later.");
-      if (dailyData.views >= 200) return alert("You've reached the daily limit of 200 ads.");
-      document.getElementById("progressText").textContent = "🎬 Showing Ad...";
-      show_9525338();
-      let adAborted = false;
-      window.addEventListener('blur', () => adAborted = true, { once: true });
-      setTimeout(() => {
-        if (adAborted) {
-          alert("❌ You skipped the ad. Please watch again.");
-          document.getElementById("progressText").textContent = "❌ Ad skipped.";
-          return;
-        }
-        let countdown = 12;
-        document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
-        const interval = setInterval(() => {
-          if (adAborted) {
-            clearInterval(interval);
-            alert("❌ You skipped the ad. Please watch again.");
-            document.getElementById("progressText").textContent = "❌ Ad skipped.";
-            return;
-          }
-          countdown--;
-          if (countdown > 0) {
-            document.getElementById("progressText").textContent = `⏳ Please watch full ad (${countdown}s)`;
-          } else {
-            clearInterval(interval);
-            points++;
-            totalAds++;
-            dailyData.views++;
-            localStorage.setItem(KEY_POINTS, points);
-            localStorage.setItem(KEY_TOTAL_ADS, totalAds);
-            localStorage.setItem(KEY_DAILY_DATA, JSON.stringify(dailyData));
-            updateDisplays();
-            document.getElementById("progressText").textContent = "✅ Ad complete! 1 point added.";
-          }
-        }, 1000);
-      }, 2000);
-    });
-
-    document.getElementById('submitWithdraw').addEventListener('click', () => {
-      const btn = document.getElementById('submitWithdraw');
-      btn.disabled = true;
-      btn.textContent = "⏳ Sending...";
-      const m = document.getElementById('method').value;
-      const a = parseInt(document.getElementById('amount').value);
-      const n = document.getElementById('number').value.trim();
-      if (!n || isNaN(a) || a < 2000 || a > points) {
-        alert("Invalid Input Or Not Enough Points");
-        btn.disabled = false;
-        btn.textContent = "📤 Submit";
-        return;
-      }
-      const msg =
-  `━━━━━━━━━━━━━━━━━━━━━━━\n` +
-  `📤 𝗪𝗶𝘁𝗵𝗱𝗿𝗮𝘄 𝗥𝗲𝗾𝘂𝗲𝘀𝘁\n` +
-  `━━━━━━━━━━━━━━━━━━━━━━━\n` +
-  `👤 User     : ${name} (${user.id})\n` +
-  `📅 Date     : ${new Date().toLocaleString()}\n` +
-  `💵 Amount   : ${a} Points\n` +
-  `📱 Method   : ${m}\n` +
-  `📞 Number   : ${n}\n` +
-  `━━━━━━━━━━━━━━━━━━━━━━━`;
-      fetch("https://api.telegram.org/bot7892439352:AAHm8w5HKuGFn5Q5MEVC7Qwx4GnPZ1XVKTI/sendMessage", {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ chat_id: "7837207180", text: msg })
-      }).then(() => {
-        points -= a;
-        totalWithdraw += a;
-        withdrawHistory.unshift({ date: new Date().toLocaleString(), amount: a, method: m, number: n });
-        localStorage.setItem(KEY_POINTS, points);
-        localStorage.setItem(KEY_TOTAL_WITHDRAW, totalWithdraw);
-        localStorage.setItem(KEY_WITHDRAW_HISTORY, JSON.stringify(withdrawHistory));
-        updateDisplays();
-        alert("✅ Withdraw request sent!");
-      }).catch(() => {
-        alert("❌ Failed to send request.");
-      }).finally(() => {
-        btn.disabled = false;
-        btn.textContent = "📤 Submit";
-      });
-    });
-
-    // Initial calls to render UI
-    updateDisplays();
-    renderTasks();
-  </script>
-</body>
-        </html>

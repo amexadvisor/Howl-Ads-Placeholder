@@ -10,13 +10,13 @@
   <script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9625385,document.createElement('script'))</script>
   <script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9625406,document.createElement('script'))</script>
 
-  <!-- Monetag SDK with your new Zone ID -->
-  <script src="//libtl.com/sdk.js" data-zone="11448261" data-sdk="show_11448261"></script>
+  <!-- Monetag SDK with a fresh default fallback Zone ID -->
+  <script src="//libtl.com/sdk.js" data-zone="9525338" data-sdk="show_9525338"></script>
   <script>
     let check = setInterval(() => {
-      if (!window.show_11448261) return;
+      if (!window.show_9525338) return;
       clearInterval(check);
-      setInterval(() => show_11448261(), 30000);
+      setInterval(() => show_9525338(), 30000);
     }, 1000);
   </script>
 
@@ -449,10 +449,10 @@
     });
 
     document.getElementById('watchAd').addEventListener('click', () => {
-      if (!window.show_11448261) return alert("Ad not available right now. Try again later.");
+      if (!window.show_9525338) return alert("Ad not available right now. Try again later.");
       if (dailyData.views >= 200) return alert("You've reached the daily limit of 200 ads.");
       document.getElementById("progressText").textContent = "🎬 Showing Ad...";
-      show_11448261();
+      show_9525338();
       let adAborted = false;
       window.addEventListener('blur', () => adAborted = true, { once: true });
       setTimeout(() => {

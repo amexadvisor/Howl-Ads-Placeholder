@@ -149,7 +149,7 @@
     .form input:focus, .form select:focus { border-color: var(--primary-color); }
     #withdraw h3, #withdraw p { margin: 10px 0; text-align: center; }
 
-    /* Modal Overlay for Explicit Step-by-Step Task Flow */
+    /* Modal Overlay for Unique Redirect Tracking */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
@@ -231,10 +231,10 @@
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Adsgram Rewarded Block (ID: 41229) with Multi-Step Interaction Flow -->
+        <!-- Adsgram Rewarded Block (ID: 41229) with Unique Redirect Tracking -->
         <div class="task-card" onclick="startAdsgramTaskFlow()">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
-            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 3 interactions for +2 points.</p></div>
+            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 3 unique redirects for +2 points.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -272,12 +272,12 @@
     </nav>
   </div>
 
-  <!-- Interactive Multi-Step Adsgram Flow Modal -->
+  <!-- Unique Redirect Tracking Modal -->
   <div id="adsgram-modal" class="modal-overlay">
     <div class="modal-card">
-      <h3>Adsgram Verification</h3>
-      <p id="modal-instruction">Tap on "Join Now" / interact with the ad content.</p>
-      <div class="step-counter" id="step-counter-display">Interaction 1 of 3</div>
+      <h3>Adsgram Unique Redirects</h3>
+      <p id="modal-instruction">Complete ad redirects using distinct links/campaigns.</p>
+      <div class="step-counter" id="step-counter-display">Unique Redirects: 0 / 3</div>
       <button class="modal-btn" id="modal-action-btn" onclick="handleAdsgramStep()">Watch Ad & Verify</button>
       <button class="modal-close-btn" onclick="closeAdsgramModal()">Cancel</button>
     </div>
@@ -291,8 +291,8 @@
     const ratePerPoint = 0.05;
     const payoutGoal = 2.50;
 
-    // Adsgram Multi-Step State Control
-    let adsgramInteractionStep = 0; // 0, 1, 2 representing 3 required interactions
+    // Adsgram Unique Redirect Tracking State
+    let uniqueRedirectsSet = new Set();
 
     // Initialize Adsgram Controller with block ID 41229
     let adsgramController = null;
@@ -379,12 +379,12 @@
             list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No activity yet.</div><div class="detail">Watch ads to get started!</div></div></div>`;
             return;
         }
-        list.innerHTML = historyLog.map(item => {
+        list.innerHTML = historyLog.item ? historyLog.map(item => {
             const icon = item.type === 'earn' 
                 ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary-color);"></i>' 
                 : '<i class="fa-solid fa-paper-plane" style="color: var(--accent-color);"></i>';
             return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
-        }).join('');
+        }).join('') : '';
     }
 
     function grantReward(earnedPoints, sourceName) {
@@ -423,27 +423,27 @@
         });
     }
 
-    // Adsgram Multi-Step Flow Handlers
+    // Adsgram Unique Redirect Task Flow Handlers
     function startAdsgramTaskFlow() {
-        adsgramInteractionStep = 0; // Reset count on start
+        uniqueRedirectsSet.clear(); // Reset unique redirects on new task initialization
         updateAdsgramModalUI();
         document.getElementById('adsgram-modal').classList.add('active');
     }
 
     function closeAdsgramModal() {
-        adsgramInteractionStep = 0;
+        uniqueRedirectsSet.clear();
         document.getElementById('adsgram-modal').classList.remove('active');
     }
 
     function updateAdsgramModalUI() {
-        const stepNum = adsgramInteractionStep + 1;
-        document.getElementById('step-counter-display').textContent = `Interaction ${stepNum} of 3`;
-        if (adsgramInteractionStep === 2) {
-            document.getElementById('modal-instruction').textContent = 'Final step! Click below to complete the last required interaction.';
-            document.getElementById('modal-action-btn').textContent = 'Complete Final Interaction & Claim';
+        const count = uniqueRedirectsSet.size;
+        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${count} / 3`;
+        if (count >= 2) {
+            document.getElementById('modal-instruction').textContent = 'Final unique redirect required to claim reward!';
+            document.getElementById('modal-action-btn').textContent = 'Watch Final Unique Ad & Claim';
         } else {
-            document.getElementById('modal-instruction').textContent = 'Tap on "Join Now" / interact with the ad content.';
-            document.getElementById('modal-action-btn').textContent = `Watch Ad & Verify (${stepNum}/3)`;
+            document.getElementById('modal-instruction').textContent = 'Complete ad redirects using distinct links/campaigns.';
+            document.getElementById('modal-action-btn').textContent = 'Watch Ad & Verify Redirect';
         }
     }
 
@@ -464,22 +464,32 @@
                 return alert('❌ Ad was skipped or failed to complete.');
             }
 
-            // Successful view for current step
-            adsgramInteractionStep++;
+            // Extract unique identifier for the ad/redirect (using result data or fallback to timestamp-mock if undefined)
+            // Adsgram result objects usually return metadata or track click targets; we use url/id or fallback signature.
+            let redirectIdentifier = (result.url || result.bannerId || result.id || JSON.stringify(result));
+
+            // If user redirects with the exact same link/ad, Set size won't increase, thus avoiding duplicate increments.
+            const previousSize = uniqueRedirectsSet.size;
+            uniqueRedirectsSet.add(redirectIdentifier);
+            const currentSize = uniqueRedirectsSet.size;
 
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
 
-            // Check if all 3 interactions are fully met
-            if (adsgramInteractionStep >= 3) {
+            if (currentSize === previousSize) {
+                alert('⚠️ This was a duplicate link/ad redirect! It was not added to your unique count. Please open a different ad redirect.');
+            } else {
+                alert(`✅ Unique redirect verified! Unique count: ${currentSize}/3`);
+            }
+
+            // Check if 3 unique redirects are achieved
+            if (currentSize >= 3) {
                 closeAdsgramModal();
                 grantReward(2, 'Adsgram Network');
-                adsgramInteractionStep = 0; // Reset count after successful reward instruction completion
+                uniqueRedirectsSet.clear();
             } else {
-                // Update UI for next required interaction step
                 updateAdsgramModalUI();
-                alert(`✅ Interaction ${adsgramInteractionStep} verified successfully! Please complete the remaining steps.`);
             }
 
         }).catch((err) => {

@@ -87,7 +87,7 @@
     .reward-tag.yellow { color: var(--yellow); }
 
     .net-progress-bar { height: 4px; background: #262830; border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
-    .net-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; width: 25%; transition: width 0.3s ease; }
+    .net-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; width: 0%; transition: width 0.3s ease; }
     .net-progress-fill.yellow { background: var(--yellow); width: 0%; }
 
     /* Action Button */
@@ -142,7 +142,7 @@
         <!-- Sub-navigation tabs -->
         <div class="task-tabs">
           <button class="tab-btn active" onclick="switchTaskTab('ads', this)">
-            Ads Task <span class="tab-badge" id="ads-count-badge">7</span>
+            Ads Task <span class="tab-badge" id="ads-count-badge">8</span>
           </button>
           <button class="tab-btn" onclick="switchTaskTab('telegram', this)">
             Telegram Task <span class="tab-badge">9</span>
@@ -173,7 +173,7 @@
           <div class="progress-section">
             <div class="progress-info">
               <span class="p-label">DAILY PROGRESS</span>
-              <span class="p-val" id="progress-text">1/8 ads</span>
+              <span class="p-val" id="progress-text">0/8 ads</span>
             </div>
             <div class="progress-bars" id="progress-bars-container">
               <!-- Dynamically populated -->
@@ -193,12 +193,12 @@
               <div class="net-logo adsgram"><i class="fa-solid fa-t"></i></div>
               <div class="net-name-area">
                 <h4>Adsgram <span class="badge-status green">Rewarded</span></h4>
-                <p id="adsgram-left-text">3 of 4 ads left today</p>
+                <p id="adsgram-left-text">4 of 4 ads left today</p>
               </div>
             </div>
             <div class="reward-tag green">+0.0050 <span style="font-size:11px;">USDT</span></div>
           </div>
-          <div class="net-progress-bar"><div class="net-progress-fill" id="adsgram-progress-fill" style="width: 75%;"></div></div>
+          <div class="net-progress-bar"><div class="net-progress-fill" id="adsgram-progress-fill" style="width: 0%;"></div></div>
           <button class="action-btn" id="adsgram-btn" onclick="watchAdsgramInterstitial()">
             <i class="fa-solid fa-play"></i> <span id="adsgram-btn-text">Watch Ad</span>
           </button>
@@ -227,7 +227,7 @@
       <div id="withdraw-view" class="view">
         <div class="withdraw-card">
           <h3>AVAILABLE BALANCE</h3>
-          <div class="balance-big" id="withdraw-balance-display">0.0200 USDT</div>
+          <div class="balance-big" id="withdraw-balance-display">0.0000 USDT</div>
           <p style="font-size:12px; color:var(--text-muted); margin:0;">Minimum payout: 1.00 USDT</p>
         </div>
 
@@ -266,7 +266,7 @@
       <div id="home-view" class="view">
         <div class="withdraw-card">
           <h3>TOTAL REVENUE</h3>
-          <div class="balance-big" id="home-total-earned">0.0200 USDT</div>
+          <div class="balance-big" id="home-total-earned">0.0000 USDT</div>
           <p style="font-size:13px; color:var(--text-muted);">Keep completing daily tasks to boost your yield.</p>
         </div>
         <div class="network-card" style="text-align:center; padding:30px;">
@@ -296,10 +296,10 @@
   </div>
 
   <script>
-    let userBalance = 0.0200;
-    let completedAdsCount = 1;
-    let adsgramWatchedCount = 1; // Tracks Adsgram views dynamically
-    let monetagWatchedCount = 0; // Tracks Monetag views dynamically
+    let userBalance = 0.0000;
+    let completedAdsCount = 0;
+    let adsgramWatchedCount = 0;
+    let monetagWatchedCount = 0;
     
     let tgUser = null;
     const adsgramBlockId = "int-41206";
@@ -502,13 +502,15 @@
     }
 
     function shareInviteLink() {
-      if (!tgUser) return alert("Could not fetch user ID.");
-      const botName = "one_usdt_bot";
-      const link = `https://t.me/${botName}/app?startapp=${tgUser.id}`;
+      const botName = "howl_ads_bot";
+      let startParam = tgUser ? tgUser.id : "app";
+      const link = `https://t.me/${botName}/app?startapp=${startParam}`;
       const text = `🚀 Earn USDT instantly by completing quick ad tasks! Join using my link:`;
       const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
       if (window.Telegram && Telegram.WebApp) {
         Telegram.WebApp.openTelegramLink(url);
+      } else {
+        window.open(url, '_blank');
       }
     }
   </script>

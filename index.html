@@ -87,12 +87,13 @@
     .reward-tag.yellow { color: var(--yellow); }
 
     .net-progress-bar { height: 4px; background: #262830; border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
-    .net-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; width: 75%; }
-    .net-progress-fill.yellow { background: var(--yellow); }
+    .net-progress-fill { height: 100%; background: var(--primary); border-radius: 2px; width: 25%; transition: width 0.3s ease; }
+    .net-progress-fill.yellow { background: var(--yellow); width: 0%; }
 
     /* Action Button */
     .action-btn { width: 100%; background: #15161a; border: 1px solid rgba(255,255,255,0.06); color: var(--text-main); padding: 13px; border-radius: 12px; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background 0.2s; }
     .action-btn:hover { background: #262830; }
+    .action-btn:disabled { opacity: 0.7; cursor: not-allowed; }
     .action-btn i { font-size: 12px; color: var(--text-muted); }
 
     /* Bottom Navigation Bar */
@@ -175,14 +176,7 @@
               <span class="p-val" id="progress-text">1/8 ads</span>
             </div>
             <div class="progress-bars" id="progress-bars-container">
-              <div class="progress-segment completed"></div>
-              <div class="progress-segment"></div>
-              <div class="progress-segment"></div>
-              <div class="progress-segment"></div>
-              <div class="progress-segment"></div>
-              <div class="progress-segment"></div>
-              <div class="progress-segment"></div>
-              <div class="progress-segment"></div>
+              <!-- Dynamically populated -->
             </div>
           </div>
         </div>
@@ -199,14 +193,14 @@
               <div class="net-logo adsgram"><i class="fa-solid fa-t"></i></div>
               <div class="net-name-area">
                 <h4>Adsgram <span class="badge-status green">Rewarded</span></h4>
-                <p>3 of 4 ads left today</p>
+                <p id="adsgram-left-text">3 of 4 ads left today</p>
               </div>
             </div>
             <div class="reward-tag green">+0.0050 <span style="font-size:11px;">USDT</span></div>
           </div>
-          <div class="net-progress-bar"><div class="net-progress-fill" style="width: 25%;"></div></div>
-          <button class="action-btn" onclick="watchAdsgramInterstitial()">
-            <i class="fa-solid fa-play"></i> Next in <span id="adsgram-timer">28s</span>
+          <div class="net-progress-bar"><div class="net-progress-fill" id="adsgram-progress-fill" style="width: 25%;"></div></div>
+          <button class="action-btn" id="adsgram-btn" onclick="watchAdsgramInterstitial()">
+            <i class="fa-solid fa-play"></i> <span id="adsgram-btn-text">Watch Ad</span>
           </button>
         </div>
 
@@ -217,14 +211,14 @@
               <div class="net-logo monetag"><i class="fa-solid fa-coins"></i></div>
               <div class="net-name-area">
                 <h4>Monetag <span class="badge-status yellow">Rewarded</span></h4>
-                <p>4 of 4 ads left today</p>
+                <p id="monetag-left-text">4 of 4 ads left today</p>
               </div>
             </div>
             <div class="reward-tag yellow">+0.0010 <span style="font-size:11px;">USDT</span></div>
           </div>
-          <div class="net-progress-bar"><div class="net-progress-fill yellow" style="width: 0%;"></div></div>
-          <button class="action-btn" onclick="triggerMonetagAd()">
-            <i class="fa-solid fa-play"></i> Next in <span id="monetag-timer">22s</span>
+          <div class="net-progress-bar"><div class="net-progress-fill yellow" id="monetag-progress-fill" style="width: 0%;"></div></div>
+          <button class="action-btn" id="monetag-btn" onclick="triggerMonetagAd()">
+            <i class="fa-solid fa-play"></i> <span id="monetag-btn-text">Watch Ad</span>
           </button>
         </div>
       </div>
@@ -283,7 +277,7 @@
       </div>
     </main>
 
-    <!-- Bottom Navigation Bar matching design -->
+    <!-- Bottom Navigation Bar -->
     <nav class="footer-nav">
       <button class="nav-item" onclick="switchView('home-view', this)">
         <i class="fa-solid fa-house"></i> Home
@@ -308,6 +302,10 @@
     const adsgramBlockId = "int-41206";
     let adController = null;
 
+    // Cooldown trackers (in seconds remaining)
+    let adsgramCooldown = 0;
+    let monetagCooldown = 0;
+
     document.addEventListener('DOMContentLoaded', () => {
       if (window.Telegram && Telegram.WebApp) {
         Telegram.WebApp.ready();
@@ -326,7 +324,20 @@
           console.error("Adsgram init error:", e);
         }
       }
+
       updateUI();
+
+      // Global live countdown timer interval (runs every second)
+      setInterval(() => {
+        if (adsgramCooldown > 0) {
+          adsgramCooldown--;
+          updateCooldownUI('adsgram');
+        }
+        if (monetagCooldown > 0) {
+          monetagCooldown--;
+          updateCooldownUI('monetag');
+        }
+      }, 1000);
     });
 
     function switchView(viewId, btnElement) {
@@ -349,9 +360,9 @@
       document.getElementById('withdraw-balance-display').textContent = userBalance.toFixed(4) + " USDT";
       document.getElementById('home-total-earned').textContent = userBalance.toFixed(4) + " USDT";
       document.getElementById('progress-text').textContent = completedAdsCount + "/8 ads";
-      document.getElementById('ads-count-badge').textContent = (9 - completedAdsCount);
+      document.getElementById('ads-count-badge').textContent = Math.max(0, 8 - completedAdsCount);
 
-      // Update progress bar blocks
+      // Update progress bar segments
       const container = document.getElementById('progress-bars-container');
       container.innerHTML = '';
       for (let i = 1; i <= 8; i++) {
@@ -361,7 +372,33 @@
       }
     }
 
+    function updateCooldownUI(network) {
+      if (network === 'adsgram') {
+        const btn = document.getElementById('adsgram-btn');
+        const txt = document.getElementById('adsgram-btn-text');
+        if (adsgramCooldown > 0) {
+          btn.disabled = true;
+          txt.textContent = `Next in ${adsgramCooldown}s`;
+        } else {
+          btn.disabled = false;
+          txt.textContent = `Watch Ad`;
+        }
+      } else if (network === 'monetag') {
+        const btn = document.getElementById('monetag-btn');
+        const txt = document.getElementById('monetag-btn-text');
+        if (monetagCooldown > 0) {
+          btn.disabled = true;
+          txt.textContent = `Next in ${monetagCooldown}s`;
+        } else {
+          btn.disabled = false;
+          txt.textContent = `Watch Ad`;
+        }
+      }
+    }
+
     async function watchAdsgramInterstitial() {
+      if (adsgramCooldown > 0) return;
+
       if (!adController) {
         if (window.Adsgram) {
           try {
@@ -382,10 +419,13 @@
 
         await adController.show();
 
-        // Grant Reward upon successful completion
+        // Grant Reward upon successful completion & trigger 30s live countdown cooldown
         userBalance += 0.0050;
         completedAdsCount = Math.min(8, completedAdsCount + 1);
         updateUI();
+
+        adsgramCooldown = 30;
+        updateCooldownUI('adsgram');
 
         if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
           Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -399,13 +439,20 @@
     }
 
     function triggerMonetagAd() {
+      if (monetagCooldown > 0) return;
+
       if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
         Telegram.WebApp.HapticFeedback.impactOccurred('medium');
       }
+      
       alert("Loading Monetag interstitial ad stream...");
       setTimeout(() => {
         userBalance += 0.0010;
         updateUI();
+
+        monetagCooldown = 30;
+        updateCooldownUI('monetag');
+
         alert("🎉 Monetag view completed! +0.0010 USDT added.");
       }, 1500);
     }

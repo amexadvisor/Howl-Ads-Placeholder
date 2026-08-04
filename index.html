@@ -6,9 +6,6 @@
   <meta name="monetag" content="67ef6bfd7f6fc61b2655ef81898058b9"/>
   <title>Easy Earning Bot</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('groleegni.net',9627422,document.createElement('script'))</script>
-<script>(function(d,z,s){s.src='https://'+d+'/400/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('vemtoutcheeg.com',9627413,document.createElement('script'))</script>
-<script>(function(d,z,s){s.src='https://'+d+'/401/'+z;try{(document.body||document.documentElement).appendChild(s)}catch(e){}})('gizokraijaw.net',9627417,document.createElement('script'))</script>
 
   <style>
     /* CSS কোড অপরিবর্তিত থাকবে */
@@ -61,27 +58,20 @@
     .modal-content h3 { margin-top: 0; font-size: 20px; }
     .modal-content p { color: var(--text-muted-color); margin-bottom: 25px; }
     .modal-actions { display: flex; gap: 10px; }
-.btn {
-  display: block;
-  margin: 10px auto; /* centers the button */
-  padding: 14px 30px;
-  font-size: 18px;
-  background: linear-gradient(135deg, #ff6a88, #ff99ac);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn:hover {
-  opacity: 0.9;
-}
-
-.btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
+    .btn {
+      display: block;
+      margin: 10px auto;
+      padding: 14px 30px;
+      font-size: 18px;
+      background: linear-gradient(135deg, #ff6a88, #ff99ac);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
     .form input, .form select {
       padding: 12px;
       font-size: 16px;
@@ -92,42 +82,34 @@
       margin-bottom: 10px;
       text-align: center;
     }
-#withdraw h3,
-#withdraw p {
-  margin: 10px 0;
-  text-align: center;   /* ✅ NEW: ensures text is centered */
-}
+    #withdraw h3, #withdraw p {
+      margin: 10px 0;
+      text-align: center;
+    }
   </style>
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- Load SDK -->
-<script src='//libtl.com/sdk.js' data-zone='9954272' data-sdk='show_9954272'></script>
+  
+  <!-- Monetag TMA SDK with new Zone ID -->
+  <script src='//libtl.com/sdk.js' data-zone='11499185' data-sdk='show_11499185'></script>
 
-<script>
-// Popup ad logic
-let checkPopup = setInterval(() => {
-  if (!window.show_9954272) return;
-  clearInterval(checkPopup);
-  setInterval(() => show_9954272(), 100000); // Every 100 seconds
-}, 1000);
-
-// In-App interstitial ad logic
-let checkInterstitial = setInterval(() => {
-  if (!window.show_9954272) return;
-  clearInterval(checkInterstitial);
-  show_9954272({
-    type: 'inApp',
-    inAppSettings: {
-      frequency: 4,
-      capping: 0.1,
-      interval: 30,
-      timeout: 5,
-      everyPage: false
-    }
-  });
-}, 1000);
-</script>
-
+  <script>
+    // Initialize In-App Interstitial Ad format automatically
+    let checkInAppAds = setInterval(() => {
+      if (typeof show_11499185 !== 'function') return;
+      clearInterval(checkInAppAds);
+      show_11499185({
+        type: 'inApp',
+        inAppSettings: {
+          frequency: 2,
+          capping: 0.1,
+          interval: 30,
+          timeout: 5,
+          everyPage: false
+        }
+      });
+    }, 1000);
+  </script>
 </head>
 <body>
   <div class="container">
@@ -158,6 +140,7 @@ let checkInterstitial = setInterval(() => {
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
       </div>
+
       <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
         <h2 class="section-title">Earning Tasks</h2>
@@ -171,34 +154,24 @@ let checkInterstitial = setInterval(() => {
             <div class="task-details"><h3>Rewarded Popup + 3 point</h3><p>View a popup ad for quick points.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
-      </div><!-- Withdraw Section -->
+      </div>
 
-  <div id="withdraw" class="view">    <h3 class="section-title">MAKE SURE YOUR ADDRESS IS 100% CORRECT</h3>
-
-    <p>💼 YOUR BALANCE: <strong><span id="balance2">$0.00</span></strong></p>
-
-    <div class="form">
-
-      <select id="method">
-
-        <option value="BINANCE UID">BINANCE UID</option>
-
-        <option value="BITGET UID">BITGET UID</option>
-
-        <option value="USDT BEP20">USDT BEP20</option>
-        <option value="USDT TRC20">USDT TRC20</option>
-
-      </select>
-
-      <input type="number" id="amount" placeholder="AMOUNT (MINIMUM 2$)">
-
-      <input type="text" id="number" placeholder="WALLET ADDRESS">
-
-      <button id="submitWithdraw" class="btn">📤 Submit</button>
-
-    </div>
-
-  </div>
+      <!-- Withdraw Section -->
+      <div id="withdraw" class="view">
+        <h3 class="section-title">MAKE SURE YOUR ADDRESS IS 100% CORRECT</h3>
+        <p>💼 YOUR BALANCE: <strong><span id="balance2">$0.00</span></strong></p>
+        <div class="form">
+          <select id="method">
+            <option value="BINANCE UID">BINANCE UID</option>
+            <option value="BITGET UID">BITGET UID</option>
+            <option value="USDT BEP20">USDT BEP20</option>
+            <option value="USDT TRC20">USDT TRC20</option>
+          </select>
+          <input type="number" id="amount" placeholder="AMOUNT (MINIMUM 2$)">
+          <input type="text" id="number" placeholder="WALLET ADDRESS">
+          <button id="submitWithdraw" class="btn">📤 Submit</button>
+        </div>
+      </div>
 
       <!-- HISTORY VIEW -->
       <div id="history-view" class="view">
@@ -208,29 +181,16 @@ let checkInterstitial = setInterval(() => {
     </main>
     <nav class="footer-nav">
       <button class="nav-button active" onclick="location.reload()">
-  <i class="icon fa-solid fa-house"></i> Home
-</button>
+        <i class="icon fa-solid fa-house"></i> Home
+      </button>
       <button class="nav-button" onclick="showView('tasks-view')"><i class="icon fa-solid fa-list-check"></i>Earn</button>
       <button class="nav-button" onclick="showView('withdraw')"><i class="icon fa-solid fa-wallet"></i>Withdraw</button>
       <button class="nav-button" onclick="showView('history-view')"><i class="icon fa-solid fa-clock-rotate-left"></i>History</button>
       <button class="nav-button" onclick="shareApp()"><i class="icon fa-solid fa-share-nodes"></i>Share</button>
     </nav>
   </div>
-  
-  <!-- WITHDRAWAL MODAL -->
-  <div class="modal-overlay" id="withdraw-modal">
-    <div class="modal-content">
-        <h3>Confirm Withdrawal</h3>
-        <p>You are about to request a withdrawal of your entire balance. Please confirm.</p>
-        <div class="modal-actions">
-            <button class="action-button secondary-button" onclick="closeWithdrawModal()">Cancel</button>
-            <button class="action-button primary-button" id="confirm-withdraw-btn" onclick="requestWithdraw()">Confirm</button>
-        </div>
-    </div>
-  </div>
 
-<script>
-    // --- State Variables ---
+  <script>
     let points = 0;
     let balance = 0.00;
     let historyLog = [];
@@ -238,7 +198,6 @@ let checkInterstitial = setInterval(() => {
     const pointsPerAd = 1;
     const ratePerPoint = 0.05;
 
-    // --- Core App Logic ---
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
     });
@@ -249,37 +208,20 @@ let checkInterstitial = setInterval(() => {
             Telegram.WebApp.expand();
             tgUser = Telegram.WebApp.initDataUnsafe.user;
         }
-        
         loadData();
         loadTelegramUser();
         showView('home-view');
-        renderLeaderboard();
-        initializeInAppAds();
     }
-    
-    function initializeInAppAds() {
-    if (typeof show_9954272 === 'function') {
-        setInterval(() => {
-            show_9954272({ type: 'inApp', inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
-        }, 30000);
-    } else {
-        setTimeout(initializeInAppAds, 3000);
-    }
-}
 
-    // --- View Management ---
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
-        
         document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.querySelector(`.nav-button[onclick="showView('${viewId}')"]`);
         if(activeBtn) activeBtn.classList.add('active');
-        
         if (viewId === 'history-view') renderHistory();
     }
     
-    // --- Data Persistence ---
     function loadData() {
         const savedData = localStorage.getItem('easyEarningBotV2');
         if (savedData) {
@@ -299,10 +241,8 @@ let checkInterstitial = setInterval(() => {
         document.getElementById('points-value').textContent = `${points.toFixed(3)}`;
         document.getElementById('balance-value').textContent = `$${balance.toFixed(3)}`;
         document.getElementById('balance2').textContent = `$${balance.toFixed(3)}`;
-    
     }
     
-    // --- User & Profile ---
     function loadTelegramUser() {
         if (tgUser) {
           const fullName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
@@ -316,7 +256,6 @@ let checkInterstitial = setInterval(() => {
         }
     }
 
-    // --- History Logic ---
     function addToHistory(type, detail) {
         historyLog.unshift({ type, detail, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
@@ -329,7 +268,6 @@ let checkInterstitial = setInterval(() => {
             list.innerHTML = `<div class="list-item"><div class="info"><div class="name">No activity yet.</div><div class="detail">Watch ads to get started!</div></div></div>`;
             return;
         }
-        
         list.innerHTML = historyLog.map(item => {
             const icon = item.type === 'earn' 
                 ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary-color);"></i>' 
@@ -338,137 +276,118 @@ let checkInterstitial = setInterval(() => {
         }).join('');
     }
 
-
-
-    // --- Earning Functions ---
-function grantReward(multiplier = 1) {
-    const earnedPoints = pointsPerAd * multiplier;
-    points += earnedPoints;
-    balance = points * ratePerPoint;
-    updateDisplay();
-    addToHistory('earn', `+${earnedPoints} Point(s) from Ad`);
-    saveData();
-    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-    alert(`Congratulations! You've earned +${earnedPoints} point. Your new balance is $${balance.toFixed(3)}.`);
-}
-
-function showRewardedInterstitial() {
-    if (typeof show_9954272 !== 'function') return alert('Ad provider is not ready.');
-
-    const adStartTime = Date.now();
-
-    show_9814057().then(() => {
-        const watchTime = (Date.now() - adStartTime) / 1000;
-        if (watchTime >= 15) {
-            grantReward(); // normal reward
-        } else {
-            alert("⚠️ Watch Full Ads (15 seconds) to earn points.");
-        }
-    }).catch(e => alert('Ad could not be shown.'));
-}
-function showRewardedPopup() {
-  if (typeof show_9954272 !== 'function') return alert('Ad provider is not ready.');
-  const start = Date.now();
-  let rewarded = false;
-
-  function onVisChange() {
-    if (document.visibilityState === 'visible' && !rewarded) {
-      document.removeEventListener('visibilitychange', onVisChange);
-      if (Date.now() - start < 60000) alert('⚠️ Please visit for (60s) to earn points.');
-      else grantReward(3);
+    function grantReward(multiplier = 1) {
+        const earnedPoints = pointsPerAd * multiplier;
+        points += earnedPoints;
+        balance = points * ratePerPoint;
+        updateDisplay();
+        addToHistory('earn', `+${earnedPoints} Point(s) from Ad`);
+        saveData();
+        Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        alert(`Congratulations! You've earned +${earnedPoints} point. Your new balance is $${balance.toFixed(3)}.`);
     }
-  }
 
-  document.addEventListener('visibilitychange', onVisChange);
-  show_9814057('pop').catch(() => {
-    document.removeEventListener('visibilitychange', onVisChange);
-    alert('Ad could not be shown.');
-  });
-}
+    // Rewarded Interstitial Ad Function
+    function showRewardedInterstitial() {
+        if (typeof show_11499185 !== 'function') return alert('Ad provider is not ready.');
+
+        show_11499185().then(() => {
+            grantReward(1); // Grants normal reward
+        }).catch(e => {
+            alert('Ad could not be shown or was skipped.');
+        });
+    }
+
+    // Rewarded Popup Ad Function
+    function showRewardedPopup() {
+        if (typeof show_11499185 !== 'function') return alert('Ad provider is not ready.');
+
+        show_11499185('pop').then(() => {
+            grantReward(3); // Grants 3x points reward
+        }).catch(e => {
+            alert('Ad could not be shown.');
+        });
+    }
     
-    // --- Withdrawal Logic ---
-
-document.getElementById('submitWithdraw').addEventListener('click', () => {
-  const btn = document.getElementById('submitWithdraw');
-  btn.disabled = true;
-  btn.textContent = "⏳ Sending...";
-  const method = document.getElementById('method').value;
-  const amount = parseFloat(document.getElementById('amount').value);
-  const number = document.getElementById('number').value.trim();
-  if (balance < 2.50) {
-    Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-    alert("Balance too low to withdraw (minimum $2.50 required).");
-    btn.disabled = false;
-    btn.textContent = "📤 Submit";
-    return;
-  }
-  if (!number) {
-    Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-    alert("Please enter your number.");
-    btn.disabled = false;
-    btn.textContent = "📤 Submit";
-    return;
-  }
-  if (isNaN(amount) || amount < 2.50) {
-    Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-    alert("Minimum withdrawal amount is $2.50.");
-    btn.disabled = false;
-    btn.textContent = "📤 Submit";
-    return;
-  }
-  if (amount > balance) {
-    Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-    alert("You don't have enough balance.");
-    btn.disabled = false;
-    btn.textContent = "📤 Submit";
-    return;
-  }
-  const date = new Date().toLocaleString();
-  const userInfo = tgUser ? `@${tgUser.username || tgUser.first_name} (ID: ${tgUser.id})` : 'Unknown User';
-  const msg = `💸 *Withdrawal Request*\n\n👤 *User:* ${userInfo}\n📅 *Date:* ${date}\n💰 *Amount:* $${amount.toFixed(2)}\n📱 *Method:* ${method}\n📞 *Number:* ${number}\n\n_Please process this request._`;
-  fetch("https://api.telegram.org/bot7281899679:AAHbYMtelNIyu-8Tq8HgBuvBmUO6WjvxuFM/sendMessage", {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: "@cryptoadspayment",
-      text: msg,
-      parse_mode: "Markdown"
-    })
-  }).then(response => {
-    if (!response.ok) return; // Skip if failed (no throw)
-    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-    alert("Your withdrawal request has been sent successfully!");
-    points -= amount * (1 / ratePerPoint);
-    balance -= amount;
-    let maskedNumber = number.length > 15
-  ? number.slice(0, 15) + '****' + number.slice(-4)
-  : number;
-    addToHistory('withdraw',
-  `📤 Request for withdrawal<br>` +
-  `💰 Amount: $${amount.toFixed(2)}<br>` +
-  `🏦 Method: ${method}<br>` +
-  `📱 Address: ${maskedNumber}`
-);
-    location.reload();
-   
-
-  }).catch(err => {
-    console.error("Network or fetch error:", err);
-  }).finally(() => {
-    btn.disabled = false;
-    btn.textContent = "📤 Submit";
-  });
-});
- 
-    // --- Share & Referral ---
+    document.getElementById('submitWithdraw').addEventListener('click', () => {
+      const btn = document.getElementById('submitWithdraw');
+      btn.disabled = true;
+      btn.textContent = "⏳ Sending...";
+      const method = document.getElementById('method').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const number = document.getElementById('number').value.trim();
+      
+      if (balance < 2.50) {
+        Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+        alert("Balance too low to withdraw (minimum $2.50 required).");
+        btn.disabled = false;
+        btn.textContent = "📤 Submit";
+        return;
+      }
+      if (!number) {
+        Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+        alert("Please enter your number.");
+        btn.disabled = false;
+        btn.textContent = "📤 Submit";
+        return;
+      }
+      if (isNaN(amount) || amount < 2.50) {
+        Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+        alert("Minimum withdrawal amount is $2.50.");
+        btn.disabled = false;
+        btn.textContent = "📤 Submit";
+        return;
+      }
+      if (amount > balance) {
+        Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+        alert("You don't have enough balance.");
+        btn.disabled = false;
+        btn.textContent = "📤 Submit";
+        return;
+      }
+      
+      const date = new Date().toLocaleString();
+      const userInfo = tgUser ? `@${tgUser.username || tgUser.first_name} (ID: ${tgUser.id})` : 'Unknown User';
+      const msg = `💸 *Withdrawal Request*\n\n👤 *User:* ${userInfo}\n📅 *Date:* ${date}\n💰 *Amount:* $${amount.toFixed(2)}\n📱 *Method:* ${method}\n📞 *Number:* ${number}\n\n_Please process this request._`;
+      
+      fetch("https://api.telegram.org/bot7281899679:AAHbYMtelNIyu-8Tq8HgBuvBmUO6WjvxuFM/sendMessage", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: "@cryptoadspayment",
+          text: msg,
+          parse_mode: "Markdown"
+        })
+      }).then(response => {
+        if (!response.ok) return;
+        Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        alert("Your withdrawal request has been sent successfully!");
+        points -= amount * (1 / ratePerPoint);
+        balance -= amount;
+        let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
+        addToHistory('withdraw',
+          `📤 Request for withdrawal<br>` +
+          `💰 Amount: $${amount.toFixed(2)}<br>` +
+          `🏦 Method: ${method}<br>` +
+          `📱 Address: ${maskedNumber}`
+        );
+        location.reload();
+      }).catch(err => {
+        console.error("Network or fetch error:", err);
+      }).finally(() => {
+        btn.disabled = false;
+        btn.textContent = "📤 Submit";
+      });
+    });
+     
     function shareApp() {
         if (!tgUser) return alert("Could not get user data from Telegram.");
-        const botUsername = "cryptoadspaybot"; // আপনার বটের ইউজারনেম
+        const botUsername = "cryptoadspaybot"; 
         const referralLink = `https://t.me/${botUsername}/ads?startapp=${tgUser.id}`;
         const text = `🎉 Join this amazing bot and start earning! Earn upto 20% from refferal withdraw bonus. Use my link to get a special bonus`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
         Telegram.WebApp.openTelegramLink(shareUrl);
     }
-</script>
+  </script>
 </body>
-  </html>
+</html>

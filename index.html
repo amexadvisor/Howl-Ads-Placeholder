@@ -199,21 +199,21 @@
       <div id="tasks-view" class="view">
         <h2 class="section-title">Earning Tasks</h2>
         
-        <!-- Monetag Ad Type 1: Interstitial -->
-        <div class="task-card" onclick="showRewardedInterstitial()">
+        <!-- Monetag Ad Type 1 -->
+        <div class="task-card" onclick="showMonetagAd1()">
             <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
             <div class="task-details"><h3>Monetag Interstitial</h3><p>Watch a full-screen ad to earn +1 point.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Monetag Ad Type 2: Popup -->
-        <div class="task-card" onclick="showRewardedPopup()">
+        <!-- Monetag Ad Type 2 -->
+        <div class="task-card" onclick="showMonetagAd2()">
             <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
             <div class="task-details"><h3>Monetag Popup Ad</h3><p>View pop ad stream for +3 points.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Adsgram Rewarded Block (ID: 41229) -->
+        <!-- Adsgram Rewarded Block (ID: 41229) with Strict Verification -->
         <div class="task-card" onclick="showAdsgramReward()">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
             <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Watch official platform ad for +2 points.</p></div>
@@ -367,8 +367,8 @@
         alert(`🎉 Awesome! Earned +${earnedPoints} point(s). Balance: $${balance.toFixed(3)}`);
     }
 
-    // Monetag Interstitial Ad
-    function showRewardedInterstitial() {
+    // Monetag Ad Type 1: Interstitial
+    function showMonetagAd1() {
         if (typeof show_9954272 !== 'function') {
             return alert('Ad provider is loading. Please wait a moment.');
         }
@@ -379,8 +379,8 @@
         });
     }
 
-    // Monetag Popup Ad
-    function showRewardedPopup() {
+    // Monetag Ad Type 2: Popup
+    function showMonetagAd2() {
         if (typeof show_9954272 !== 'function') {
             return alert('Ad provider is loading. Please wait a moment.');
         }
@@ -391,7 +391,7 @@
         });
     }
 
-    // Adsgram Rewarded Ad Integration (Block ID: 41229)
+    // Adsgram Rewarded Ad Integration with strict completion/engagement check
     function showAdsgramReward() {
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
@@ -401,9 +401,24 @@
             }
         }
         
-        adsgramController.show().then(() => {
+        let adStartedTime = Date.now();
+
+        adsgramController.show().then((result) => {
+            // Check fulfillment security: Ensure ad wasn't closed instantly (< 4 seconds implies bypass/instant-close attempt)
+            let durationElapsed = Date.now() - adStartedTime;
+            if (durationElapsed < 4000) {
+                if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                return alert('⚠️ Ad was closed too quickly. Reward denied.');
+            }
+
+            // Strictly verify full completion if result object provides state flags
+            if (result && result.done === false) {
+                return alert('Adsgram ad was skipped. No reward given.');
+            }
+
             grantReward(2, 'Adsgram Network');
-        }).catch((result) => {
+        }).catch((err) => {
+            // Catch error or skipped states safely without handing out free coins
             alert('Adsgram ad was skipped or failed to show.');
         });
     }

@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <meta name="monetag" content="67ef6bfd7f6fc61b2655ef81898058b9"/>
   <title>Easy Earning Bot</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -72,25 +71,8 @@
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
-  <!-- Monetag TMA SDK with Zone ID -->
-  <script src='//libtl.com/sdk.js' data-zone='11499185' data-sdk='show_11499185'></script>
-
-  <script>
-    let checkInAppAds = setInterval(() => {
-      if (typeof show_11499185 !== 'function') return;
-      clearInterval(checkInAppAds);
-      show_11499185({
-        type: 'inApp',
-        inAppSettings: {
-          frequency: 2,
-          capping: 0.1,
-          interval: 30,
-          timeout: 5,
-          everyPage: false
-        }
-      });
-    }, 1000);
-  </script>
+  <!-- Adsgram Widget Script -->
+  <script src="https://sad.adsgram.cc/js/sad.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -112,7 +94,7 @@
         <h2 class="section-title">Quick Actions</h2>
         <div class="task-card" onclick="showView('tasks-view')">
             <div class="task-icon"><i class="fa-solid fa-list-check"></i></div>
-            <div class="task-details"><h3>Click Earn option to start earning!</h3><p>Connect US/UK VPN & watch ads.</p></div>
+            <div class="task-details"><h3>Click Earn option to start earning!</h3><p>Watch full-screen ads via Adsgram.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
         <div class="task-card" onclick="showView('withdraw')">
@@ -125,14 +107,14 @@
       <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
         <h2 class="section-title">Earning Tasks</h2>
-        <div style="background: rgba(255, 140, 0, 0.1); border: 1px solid var(--accent-color); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; text-align: center;">
-          ⚠️ <strong>VPN Required:</strong> Turn on **Super VPN** and connect to **US** or **UK** before clicking!
+        <div style="background: rgba(46, 217, 20, 0.1); border: 1px solid var(--primary-color); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; text-align: center;">
+          ⚡ <strong>Adsgram Ready:</strong> Complete the full-screen ad sequence to earn bundle points!
         </div>
-        <div class="task-card" onclick="verifyVPNAndShowAd()">
+        <div class="task-card" onclick="watchAdsgramBundle()">
             <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
             <div class="task-details">
-              <h3>Watch & Earn</h3>
-              <p>Check Region & Watch Ad (Limit: 10 / 12h)</p>
+              <h3>Watch Full-Screen Ads</h3>
+              <p>Complete the Ad Story Bundle (Earn 3 Points)</p>
             </div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
@@ -183,9 +165,16 @@
     let adsWatchedCount = 0;
     let resetBlockTime = 0;
 
+    // Configured with your Adsgram Block ID: int-41206
+    const adsgramBlockId = "int-41206";
+    let adController = null;
+
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
         loadCooldownData();
+        if (window.Adsgram) {
+            adController = window.Adsgram.init({ blockId: adsgramBlockId });
+        }
     });
 
     function initApp() {
@@ -209,7 +198,7 @@
     }
     
     function loadData() {
-        const savedData = localStorage.getItem('easyEarningBotV5');
+        const savedData = localStorage.getItem('easyEarningBotAdsgramV1');
         if (savedData) {
             const data = JSON.parse(savedData);
             points = data.points || 0;
@@ -220,11 +209,11 @@
     }
 
     function saveData() {
-        localStorage.setItem('easyEarningBotV5', JSON.stringify({ points, balance, historyLog }));
+        localStorage.setItem('easyEarningBotAdsgramV1', JSON.stringify({ points, balance, historyLog }));
     }
 
     function loadCooldownData() {
-        const cdData = localStorage.getItem('adCooldownDataV3');
+        const cdData = localStorage.getItem('adsgramCooldownV1');
         if (cdData) {
             const parsed = JSON.parse(cdData);
             lastAdTime = parsed.lastAdTime || 0;
@@ -239,7 +228,7 @@
     }
 
     function saveCooldownData() {
-        localStorage.setItem('adCooldownDataV3', JSON.stringify({ lastAdTime, adsWatchedCount, resetBlockTime }));
+        localStorage.setItem('adsgramCooldownV1', JSON.stringify({ lastAdTime, adsWatchedCount, resetBlockTime }));
     }
 
     function updateDisplay() {
@@ -281,79 +270,61 @@
         }).join('');
     }
 
-    function grantReward() {
-        const earnedPoints = 1; 
+    function grantRewardsBatch(count) {
+        const earnedPoints = count; 
         points += earnedPoints;
         balance = points * ratePerPoint;
         updateDisplay();
-        addToHistory('earn', `+${earnedPoints} Point (VPN Verified)`);
+        addToHistory('earn', `+${earnedPoints} Points (Adsgram Full-Screen Completed)`);
         saveData();
         Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-        alert(`Congratulations! Reward added. Your new balance is $${balance.toFixed(3)}.`);
+        alert(`Congratulations! You completed the full-screen ad bundle. Your new balance is $${balance.toFixed(3)}.`);
     }
 
-    // Advanced Ad Rendering Check + VPN/Timezone Verification
-    async function verifyVPNAndShowAd() {
+    // Trigger Adsgram full-screen ad story
+    async function watchAdsgramBundle() {
         const now = Date.now();
 
-        // 1. Check 12-hour limit block
         if (now < resetBlockTime) {
             const remainingHours = Math.ceil((resetBlockTime - now) / (1000 * 60 * 60));
             return alert(`⏳ Daily limit reached! Please wait ${remainingHours} hours before watching more ads.`);
         }
 
-        // 2. Check 30-second cooldown between ads
         const elapsedSinceLastAd = (now - lastAdTime) / 1000;
         if (elapsedSinceLastAd < 30) {
             const timeLeft = Math.ceil(30 - elapsedSinceLastAd);
-            return alert(`⏳ Cooldown active! Please wait ${timeLeft} seconds before watching the next ad.`);
+            return alert(`⏳ Cooldown active! Please wait ${timeLeft} seconds before starting the next session.`);
         }
 
         Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-        
+
+        if (!adController) {
+            if (window.Adsgram) {
+                adController = window.Adsgram.init({ blockId: adsgramBlockId });
+            } else {
+                return alert("Adsgram SDK not loaded yet.");
+            }
+        }
+
         try {
-            // 3. Timezone Check
-            const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            if (userTimeZone.includes('Addis_Ababa') || userTimeZone.includes('Nairobi')) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-                return alert(`❌ Timezone Mismatch!\n\nPlease update your phone timezone to match your US/UK VPN location.`);
+            // This calls the full-screen Adsgram story sequence automatically handled by block int-41206
+            await adController.show();
+
+            // Success callback after completing the full sequence
+            lastAdTime = Date.now();
+            adsWatchedCount += 3;
+
+            if (adsWatchedCount >= 12) {
+                resetBlockTime = Date.now() + (12 * 60 * 60 * 1000); 
+                adsWatchedCount = 0;
             }
 
-            // 4. IP Geolocation Check
-            const response = await fetch('https://ipapi.co/json/');
-            const data = await response.json();
-            const countryCode = data.country_code; 
-
-            if (countryCode !== 'US' && countryCode !== 'GB') {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-                return alert(`❌ VPN Required!\n\nYour IP is detected as (${countryCode || 'Unknown'}). Please connect to a **US** or **UK** server.`);
-            }
-
-            // 5. Trigger Monetag Ad & Verify Element Appearance
-            if (typeof show_11499185 !== 'function') return alert('Ad provider is not ready.');
-
-            show_11499185().then(() => {
-                // Give a short moment for the ad wrapper to inject into the DOM
-                setTimeout(() => {
-                    lastAdTime = Date.now();
-                    adsWatchedCount++;
-
-                    if (adsWatchedCount >= 10) {
-                        resetBlockTime = Date.now() + (12 * 60 * 60 * 1000); // 12 hours lock
-                        adsWatchedCount = 0;
-                    }
-
-                    saveCooldownData();
-                    grantReward();
-                }, 1000);
-
-            }).catch(e => {
-                alert('Ad could not be shown, was skipped, or failed to render.');
-            });
+            saveCooldownData();
+            grantRewardsBatch(3);
 
         } catch (error) {
-            console.error("Verification Error:", error);
-            alert("Could not verify network region. Please ensure your VPN is active.");
+            console.log("Ad skipped or error encountered:", error);
+            alert("Ad was skipped or failed to load. You must watch the full-screen sequence completely to claim your reward.");
         }
     }
 

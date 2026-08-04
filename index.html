@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
-    /* CSS কোড অপরিবর্তিত থাকবে */
     :root {--primary-color: #2ed914; --primary-hover: #3bff21; --secondary-color: #2a2a2e; --background-color: #1c1c1f; --text-color: #f0f0f0; --text-muted-color: #a0a0a0; --accent-color: #ff8c00; --card-bg: #252528;}
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {margin: 0; padding: 0; background-color: var(--background-color); color: var(--text-color); font-family: 'Segoe UI', 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}
@@ -35,11 +34,9 @@
     .task-arrow { margin-left: auto; font-size: 18px; color: var(--text-muted-color); }
     .list-item {display: flex; align-items: center; background: var(--card-bg); padding: 12px 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid rgba(255, 255, 255, 0.05);}
     .list-item .rank { font-size: 16px; font-weight: 700; color: var(--text-muted-color); width: 30px; }
-    .list-item .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--secondary-color); margin-right: 15px; object-fit: cover; }
     .list-item .info { flex-grow: 1; }
     .list-item .info .name { font-weight: 600; font-size: 15px; }
     .list-item .info .detail { font-size: 13px; color: var(--text-muted-color); }
-    .list-item .score { font-size: 16px; font-weight: 700; color: var(--accent-color); }
     .history-icon { color: var(--primary-color); margin-right: 15px; font-size: 18px; }
     .footer-nav {position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 400px; margin: 0 auto; display: flex; justify-content: space-around; background: var(--secondary-color); padding: 10px 0; border-top: 1px solid rgba(255, 255, 255, 0.1);}
     .nav-button {display: flex; flex-direction: column; align-items: center; color: var(--text-muted-color); background: none; border: none; font-size: 12px; transition: color 0.2s ease, transform 0.2s ease; cursor: pointer; padding: 5px 10px;}
@@ -48,16 +45,10 @@
     .nav-button.active { color: var(--primary-color); transform: scale(1.1); }
     .action-button {width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 16px; font-weight: 700; margin-top: 15px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;}
     .primary-button { background: var(--primary-color); color: #000; }
-    .primary-button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(46, 217, 20, 0.3); }
-    .secondary-button { background: var(--secondary-color); color: var(--primary-color); }
-    .secondary-button:hover { background: #3a3a3e; }
     .modal-overlay {position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s;}
     .modal-overlay.active { display: flex; }
     .modal-content {background: var(--card-bg); padding: 25px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; animation: slideIn 0.3s;}
     @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal-content h3 { margin-top: 0; font-size: 20px; }
-    .modal-content p { color: var(--text-muted-color); margin-bottom: 25px; }
-    .modal-actions { display: flex; gap: 10px; }
     .btn {
       display: block;
       margin: 10px auto;
@@ -82,19 +73,15 @@
       margin-bottom: 10px;
       text-align: center;
     }
-    #withdraw h3, #withdraw p {
-      margin: 10px 0;
-      text-align: center;
-    }
+    #withdraw h3, #withdraw p { margin: 10px 0; text-align: center; }
   </style>
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
-  <!-- Monetag TMA SDK with new Zone ID -->
+  <!-- Monetag TMA SDK with Zone ID -->
   <script src='//libtl.com/sdk.js' data-zone='11499185' data-sdk='show_11499185'></script>
 
   <script>
-    // Initialize In-App Interstitial Ad format automatically
     let checkInAppAds = setInterval(() => {
       if (typeof show_11499185 !== 'function') return;
       clearInterval(checkInAppAds);
@@ -146,12 +133,10 @@
         <h2 class="section-title">Earning Tasks</h2>
         <div class="task-card" onclick="showRewardedInterstitial()">
             <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
-            <div class="task-details"><h3>Watch & Earn + 1 point</h3><p>Watch a full-screen ad to earn rewards.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-        </div>
-        <div class="task-card" onclick="showRewardedPopup()">
-            <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
-            <div class="task-details"><h3>Rewarded Popup + 3 point</h3><p>View a popup ad for quick points.</p></div>
+            <div class="task-details">
+              <h3>Watch & Earn</h3>
+              <p id="cooldown-status">Watch ads to earn rewards (Limit: 10 / 12h)</p>
+            </div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -167,7 +152,7 @@
             <option value="USDT BEP20">USDT BEP20</option>
             <option value="USDT TRC20">USDT TRC20</option>
           </select>
-          <input type="number" id="amount" placeholder="AMOUNT (MINIMUM 2$)">
+          <input type="number" id="amount" placeholder="AMOUNT (MINIMUM 2.50$)">
           <input type="text" id="number" placeholder="WALLET ADDRESS">
           <button id="submitWithdraw" class="btn">📤 Submit</button>
         </div>
@@ -195,11 +180,18 @@
     let balance = 0.00;
     let historyLog = [];
     let tgUser = null;
-    const pointsPerAd = 1;
-    const ratePerPoint = 0.05;
+    
+    // Adjusted rates and safe margins to match a $0.00267 payout per ad (~$0.008 per 3-ad batch)
+    const ratePerPoint = 0.00267; 
+    
+    // Cooldown and Limit tracking variables
+    let lastAdTime = 0;
+    let adsWatchedCount = 0;
+    let resetBlockTime = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
+        loadCooldownData();
     });
 
     function initApp() {
@@ -223,7 +215,7 @@
     }
     
     function loadData() {
-        const savedData = localStorage.getItem('easyEarningBotV2');
+        const savedData = localStorage.getItem('easyEarningBotV3');
         if (savedData) {
             const data = JSON.parse(savedData);
             points = data.points || 0;
@@ -234,7 +226,27 @@
     }
 
     function saveData() {
-        localStorage.setItem('easyEarningBotV2', JSON.stringify({ points, balance, historyLog }));
+        localStorage.setItem('easyEarningBotV3', JSON.stringify({ points, balance, historyLog }));
+    }
+
+    function loadCooldownData() {
+        const cdData = localStorage.getItem('adCooldownData');
+        if (cdData) {
+            const parsed = JSON.parse(cdData);
+            lastAdTime = parsed.lastAdTime || 0;
+            adsWatchedCount = parsed.adsWatchedCount || 0;
+            resetBlockTime = parsed.resetBlockTime || 0;
+            
+            // Check if 12 hour block has expired
+            if (Date.now() > resetBlockTime) {
+                adsWatchedCount = 0;
+                resetBlockTime = 0;
+            }
+        }
+    }
+
+    function saveCooldownData() {
+        localStorage.setItem('adCooldownData', JSON.stringify({ lastAdTime, adsWatchedCount, resetBlockTime }));
     }
 
     function updateDisplay() {
@@ -276,39 +288,53 @@
         }).join('');
     }
 
-    function grantReward(multiplier = 1) {
-        const earnedPoints = pointsPerAd * multiplier;
+    function grantReward() {
+        const earnedPoints = 1; 
         points += earnedPoints;
         balance = points * ratePerPoint;
         updateDisplay();
-        addToHistory('earn', `+${earnedPoints} Point(s) from Ad`);
+        addToHistory('earn', `+${earnedPoints} Point from Ad Batch`);
         saveData();
         Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-        alert(`Congratulations! You've earned +${earnedPoints} point. Your new balance is $${balance.toFixed(3)}.`);
+        alert(`Congratulations! Reward added. Your new balance is $${balance.toFixed(3)}.`);
     }
 
-    // Rewarded Interstitial Ad Function
+    // Secure Rewarded Interstitial with 30s Cooldown and 12-hour (10 Ad) limit
     function showRewardedInterstitial() {
+        const now = Date.now();
+
+        // Check 12-hour limit block
+        if (now < resetBlockTime) {
+            const remainingHours = Math.ceil((resetBlockTime - now) / (1000 * 60 * 60));
+            return alert(`⏳ Daily limit reached! Please wait ${remainingHours} hours before watching more ads.`);
+        }
+
+        // Check 30-second cooldown between individual ad clicks
+        const elapsedSinceLastAd = (now - lastAdTime) / 1000;
+        if (elapsedSinceLastAd < 30) {
+            const timeLeft = Math.ceil(30 - elapsedSinceLastAd);
+            return alert(`⏳ Cooldown active! Please wait ${timeLeft} seconds before watching the next ad.`);
+        }
+
         if (typeof show_11499185 !== 'function') return alert('Ad provider is not ready.');
 
         show_11499185().then(() => {
-            grantReward(1); // Grants normal reward
+            lastAdTime = Date.now();
+            adsWatchedCount++;
+
+            // If user hits 10 ads, lock them out for 12 hours
+            if (adsWatchedCount >= 10) {
+                resetBlockTime = Date.now() + (12 * 60 * 60 * 1000); // 12 hours
+                adsWatchedCount = 0;
+            }
+
+            saveCooldownData();
+            grantReward();
         }).catch(e => {
             alert('Ad could not be shown or was skipped.');
         });
     }
 
-    // Rewarded Popup Ad Function
-    function showRewardedPopup() {
-        if (typeof show_11499185 !== 'function') return alert('Ad provider is not ready.');
-
-        show_11499185('pop').then(() => {
-            grantReward(3); // Grants 3x points reward
-        }).catch(e => {
-            alert('Ad could not be shown.');
-        });
-    }
-    
     document.getElementById('submitWithdraw').addEventListener('click', () => {
       const btn = document.getElementById('submitWithdraw');
       btn.disabled = true;
@@ -384,7 +410,7 @@
         if (!tgUser) return alert("Could not get user data from Telegram.");
         const botUsername = "cryptoadspaybot"; 
         const referralLink = `https://t.me/${botUsername}/ads?startapp=${tgUser.id}`;
-        const text = `🎉 Join this amazing bot and start earning! Earn upto 20% from refferal withdraw bonus. Use my link to get a special bonus`;
+        const text = `🎉 Join this amazing bot and start earning! Use my link to get a special bonus`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
         Telegram.WebApp.openTelegramLink(shareUrl);
     }

@@ -71,7 +71,7 @@
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
-  <!-- Adsgram Widget Script -->
+  <!-- Adsgram Widget Script with fallback handling -->
   <script src="https://sad.adsgram.cc/js/sad.min.js"></script>
 </head>
 <body>
@@ -165,17 +165,24 @@
     let adsWatchedCount = 0;
     let resetBlockTime = 0;
 
-    // Configured with your Adsgram Block ID: int-41206
     const adsgramBlockId = "int-41206";
     let adController = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
         loadCooldownData();
-        if (window.Adsgram) {
-            adController = window.Adsgram.init({ blockId: adsgramBlockId });
-        }
+        initAdsgramController();
     });
+
+    function initAdsgramController() {
+        if (window.Adsgram) {
+            try {
+                adController = window.Adsgram.init({ blockId: adsgramBlockId });
+            } catch (e) {
+                console.error("Adsgram init error:", e);
+            }
+        }
+    }
 
     function initApp() {
         if (window.Telegram && Telegram.WebApp) {
@@ -281,7 +288,7 @@
         alert(`Congratulations! You completed the full-screen ad bundle. Your new balance is $${balance.toFixed(3)}.`);
     }
 
-    // Trigger Adsgram full-screen ad story
+    // Trigger Adsgram full-screen ad story with dynamic script recovery
     async function watchAdsgramBundle() {
         const now = Date.now();
 
@@ -298,19 +305,40 @@
 
         Telegram.WebApp.HapticFeedback.impactOccurred('medium');
 
+        // Dynamic check & fallback loader if SDK hasn't initialized
         if (!adController) {
             if (window.Adsgram) {
-                adController = window.Adsgram.init({ blockId: adsgramBlockId });
-            } else {
-                return alert("Adsgram SDK not loaded yet.");
+                try {
+                    adController = window.Adsgram.init({ blockId: adsgramBlockId });
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+            
+            if (!adController) {
+                // Force load script dynamically if blocked initially
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = "https://sad.adsgram.cc/js/sad.min.js";
+                    script.onload = () => {
+                        if (window.Adsgram) {
+                            adController = window.Adsgram.init({ blockId: adsgramBlockId });
+                        }
+                        resolve();
+                    };
+                    script.onerror = () => resolve();
+                    document.head.appendChild(script);
+                });
             }
         }
 
+        if (!adController) {
+            return alert("Adsgram SDK failed to load. Please check your internet connection or reload the mini app.");
+        }
+
         try {
-            // This calls the full-screen Adsgram story sequence automatically handled by block int-41206
             await adController.show();
 
-            // Success callback after completing the full sequence
             lastAdTime = Date.now();
             adsWatchedCount += 3;
 
@@ -373,7 +401,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          chat_id: "@cryptoadspayment",
+          chat_id: "@howl_ads_bot",
           text: msg,
           parse_mode: "Markdown"
         })
@@ -401,7 +429,7 @@
      
     function shareApp() {
         if (!tgUser) return alert("Could not get user data from Telegram.");
-        const botUsername = "cryptoadspaybot"; 
+        const botUsername = "howl_ads_bot"; 
         const referralLink = `https://t.me/${botUsername}/ads?startapp=${tgUser.id}`;
         const text = `🎉 Join this amazing bot and start earning! Use my link to get a special bonus`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;

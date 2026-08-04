@@ -198,20 +198,24 @@
       <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
         <h2 class="section-title">Earning Tasks</h2>
-        <div class="task-card" onclick="showRewardedInterstitial()">
-            <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
-            <div class="task-details"><h3>Monetag Interstitial</h3><p>Watch a full-screen ad to earn +1 point.</p></div>
+        
+        <!-- Adsgram Rewarded Ad 1 (Replaced old interstitial slot) -->
+        <div class="task-card" onclick="showAdsgramReward1()">
+            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-video"></i></div>
+            <div class="task-details"><h3>Adsgram Rewarded 1</h3><p>Watch video reward ad for +1 point.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
+
         <div class="task-card" onclick="showRewardedPopup()">
             <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
             <div class="task-details"><h3>Monetag Popup Ad</h3><p>View pop ad stream for +3 points.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
-        <!-- Adsgram Task Button -->
-        <div class="task-card" onclick="showAdsgramAd()">
+
+        <!-- Adsgram Rewarded Ad 2 -->
+        <div class="task-card" onclick="showAdsgramReward2()">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
-            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Watch official platform ad for +2 points.</p></div>
+            <div class="task-details"><h3>Adsgram Rewarded 2</h3><p>Watch official platform ad for +2 points.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -254,14 +258,16 @@
     let balance = 0.00;
     let historyLog = [];
     let tgUser = null;
-    const pointsPerAd = 1;
     const ratePerPoint = 0.05;
     const payoutGoal = 2.50;
 
-    // Initialize Adsgram Controller with block ID int-41206
-    let adsgramController = null;
+    // Initialize Adsgram Controllers for block IDs int-41229 and int-41206
+    let adsgramController1 = null;
+    let adsgramController2 = null;
+
     if (typeof Adsgram !== 'undefined') {
-        adsgramController = Adsgram.init({ blockId: "int-41206" });
+        adsgramController1 = Adsgram.init({ blockId: "int-41229" });
+        adsgramController2 = Adsgram.init({ blockId: "int-41206" });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -363,15 +369,20 @@
         alert(`🎉 Awesome! Earned +${earnedPoints} point(s). Balance: $${balance.toFixed(3)}`);
     }
 
-    // Monetag Interstitial Ad
-    function showRewardedInterstitial() {
-        if (typeof show_9954272 !== 'function') {
-            return alert('Ad provider is loading. Please wait a moment.');
+    // Adsgram Rewarded Ad 1 (Block ID: int-41229)
+    function showAdsgramReward1() {
+        if (!adsgramController1) {
+            if (typeof Adsgram !== 'undefined') {
+                adsgramController1 = Adsgram.init({ blockId: "int-41229" });
+            } else {
+                return alert('Adsgram SDK not loaded properly.');
+            }
         }
-        show_9954272().then(() => {
-            grantReward(1, 'Monetag Interstitial');
-        }).catch(e => {
-            alert('Ad closed or unavailable.');
+        
+        adsgramController1.show().then(() => {
+            grantReward(1, 'Adsgram Rewarded 1');
+        }).catch((result) => {
+            alert('Adsgram ad was skipped or failed to show.');
         });
     }
 
@@ -387,18 +398,18 @@
         });
     }
 
-    // Adsgram Rewarded Ad Integration
-    function showAdsgramAd() {
-        if (!adsgramController) {
+    // Adsgram Rewarded Ad 2 (Block ID: int-41206)
+    function showAdsgramReward2() {
+        if (!adsgramController2) {
             if (typeof Adsgram !== 'undefined') {
-                adsgramController = Adsgram.init({ blockId: "int-41206" });
+                adsgramController2 = Adsgram.init({ blockId: "int-41206" });
             } else {
                 return alert('Adsgram SDK not loaded properly.');
             }
         }
         
-        adsgramController.show().then(() => {
-            grantReward(2, 'Adsgram Network');
+        adsgramController2.show().then(() => {
+            grantReward(2, 'Adsgram Rewarded 2');
         }).catch((result) => {
             alert('Adsgram ad was skipped or failed to show.');
         });

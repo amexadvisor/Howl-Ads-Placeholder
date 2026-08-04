@@ -258,10 +258,10 @@
     const ratePerPoint = 0.05;
     const payoutGoal = 2.50;
 
-    // Initialize Adsgram Controller (Replace 'YOUR_ADSGRAM_BLOCK_ID' with your real block ID if needed)
+    // Initialize Adsgram Controller with block ID int-41206
     let adsgramController = null;
     if (typeof Adsgram !== 'undefined') {
-        adsgramController = Adsgram.init({ blockId: "YOUR_ADSGRAM_BLOCK_ID" });
+        adsgramController = Adsgram.init({ blockId: "int-41206" });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -391,7 +391,7 @@
     function showAdsgramAd() {
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
-                adsgramController = Adsgram.init({ blockId: "YOUR_ADSGRAM_BLOCK_ID" });
+                adsgramController = Adsgram.init({ blockId: "int-41206" });
             } else {
                 return alert('Adsgram SDK not loaded properly.');
             }
@@ -466,7 +466,7 @@
 
     function shareApp() {
         if (!tgUser) return alert("Could not get user data.");
-        const botUsername = "cryptoadspaybot"; 
+        const botUsername = "howl_ads_bot"; 
         const referralLink = `https://t.me/${botUsername}/ads?startapp=${tgUser.id}`;
         const text = `🎉 Join this bot and earn crypto instantly! Use my link to get a bonus.`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;

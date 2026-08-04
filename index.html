@@ -213,7 +213,7 @@
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Adsgram Rewarded Block (ID: 41229) with Strict Verification -->
+        <!-- Adsgram Rewarded Block (ID: 41229) with Strict Interaction Count Guard -->
         <div class="task-card" onclick="showAdsgramReward()">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
             <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Watch official platform ad for +2 points.</p></div>
@@ -391,7 +391,7 @@
         });
     }
 
-    // Adsgram Rewarded Ad Integration with Absolute Interception Guard
+    // Adsgram Rewarded Ad Integration with strict 3-interaction threshold requirement
     function showAdsgramReward() {
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
@@ -401,32 +401,48 @@
             }
         }
         
-        let adStartedTime = Date.now();
+        let interactionCount = 0;
+        let adActive = true;
+
+        // Monitor document interactions/taps while the ad frame container is visible
+        const interactionTracker = (e) => {
+            if (adActive) {
+                interactionCount++;
+            }
+        };
+
+        document.addEventListener('click', interactionTracker, true);
+        document.addEventListener('touchstart', interactionTracker, true);
 
         adsgramController.show().then((result) => {
-            let durationElapsed = Date.now() - adStartedTime;
+            adActive = false;
+            document.removeEventListener('click', interactionTracker, true);
+            document.removeEventListener('touchstart', interactionTracker, true);
 
-            // Enforce hard time rule (minimum 12 seconds actual elapsed time)
-            if (durationElapsed < 12000) {
+            // Require exactly or at least 3 interactions (taps on join / ad contents)
+            if (interactionCount < 3) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                return alert('⚠️ Ad skipped too fast. No reward given.');
+                return alert('⚠️ Please tap on "Join Now" or interact with the ad contents at least 3 times before closing to get your reward.');
             }
 
-            // Adsgram sometimes returns resolved promises on automatic closes. 
-            // We must explicitly evaluate if result exists and contains a valid positive reward flag.
-            if (!result || result.error || result.done === false) {
+            // Verify successful render state from Adsgram
+            if (!result || result.error) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                return alert('❌ Ad was not fully completed. Reward canceled.');
+                return alert('❌ Ad container closed unexpectedly. Reward canceled.');
             }
 
-            // Additional verification to bypass accidental empty resolutions
+            // All checks and interaction target met
             grantReward(2, 'Adsgram Network');
             
         }).catch((err) => {
+            adActive = false;
+            document.removeEventListener('click', interactionTracker, true);
+            document.removeEventListener('touchstart', interactionTracker, true);
+            
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }

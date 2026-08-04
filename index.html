@@ -391,7 +391,7 @@
         });
     }
 
-    // Adsgram Rewarded Ad Integration with strict 3-interaction threshold requirement
+    // Adsgram Rewarded Ad Integration with strict 3-interaction threshold requirement & immediate counter reset
     function showAdsgramReward() {
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
@@ -419,8 +419,12 @@
             document.removeEventListener('click', interactionTracker, true);
             document.removeEventListener('touchstart', interactionTracker, true);
 
+            // Capture the current interaction count and reset immediately before evaluating/notifying
+            const finalCount = interactionCount;
+            interactionCount = 0;
+
             // Require exactly or at least 3 interactions (taps on join / ad contents)
-            if (interactionCount < 3) {
+            if (finalCount < 3) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
@@ -442,6 +446,9 @@
             adActive = false;
             document.removeEventListener('click', interactionTracker, true);
             document.removeEventListener('touchstart', interactionTracker, true);
+            
+            // Reset count on failure/catch path as well
+            interactionCount = 0;
             
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');

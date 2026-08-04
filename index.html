@@ -391,7 +391,7 @@
         });
     }
 
-    // Adsgram Rewarded Ad Integration with strict 3-interaction threshold requirement & immediate counter reset
+    // Adsgram Rewarded Ad Integration with strict check BEFORE any success notification/reward
     function showAdsgramReward() {
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
@@ -423,7 +423,7 @@
             const finalCount = interactionCount;
             interactionCount = 0;
 
-            // Require exactly or at least 3 interactions (taps on join / ad contents)
+            // Strict check: if interactions are less than 3, trigger error feedback, alert, and bail out WITHOUT giving any reward
             if (finalCount < 3) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
@@ -439,7 +439,7 @@
                 return alert('❌ Ad container closed unexpectedly. Reward canceled.');
             }
 
-            // All checks and interaction target met
+            // All checks and interaction target met successfully
             grantReward(2, 'Adsgram Network');
             
         }).catch((err) => {

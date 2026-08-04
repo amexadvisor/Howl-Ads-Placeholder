@@ -43,12 +43,6 @@
     .nav-button .icon { font-size: 22px; margin-bottom: 4px; }
     .nav-button:hover { color: var(--text-color); }
     .nav-button.active { color: var(--primary-color); transform: scale(1.1); }
-    .action-button {width: 100%; padding: 15px; border-radius: 12px; border: none; font-size: 16px; font-weight: 700; margin-top: 15px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;}
-    .primary-button { background: var(--primary-color); color: #000; }
-    .modal-overlay {position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s;}
-    .modal-overlay.active { display: flex; }
-    .modal-content {background: var(--card-bg); padding: 25px; border-radius: 16px; width: 90%; max-width: 320px; text-align: center; animation: slideIn 0.3s;}
-    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .btn {
       display: block;
       margin: 10px auto;
@@ -118,7 +112,7 @@
         <h2 class="section-title">Quick Actions</h2>
         <div class="task-card" onclick="showView('tasks-view')">
             <div class="task-icon"><i class="fa-solid fa-list-check"></i></div>
-            <div class="task-details"><h3>Click Earn option to start earning!</h3><p>Watch ads and complete tasks to earn points.</p></div>
+            <div class="task-details"><h3>Click Earn option to start earning!</h3><p>Connect US/UK VPN & watch ads.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
         <div class="task-card" onclick="showView('withdraw')">
@@ -131,11 +125,14 @@
       <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
         <h2 class="section-title">Earning Tasks</h2>
-        <div class="task-card" onclick="showRewardedInterstitial()">
+        <div style="background: rgba(255, 140, 0, 0.1); border: 1px solid var(--accent-color); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; text-align: center;">
+          ⚠️ <strong>VPN Required:</strong> Turn on **Super VPN** and connect to **US** or **UK** before clicking!
+        </div>
+        <div class="task-card" onclick="verifyVPNAndShowAd()">
             <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
             <div class="task-details">
               <h3>Watch & Earn</h3>
-              <p id="cooldown-status">Watch ads to earn rewards (Limit: 10 / 12h)</p>
+              <p>Check Region & Watch Ad (Limit: 10 / 12h)</p>
             </div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
@@ -181,10 +178,7 @@
     let historyLog = [];
     let tgUser = null;
     
-    // Adjusted rates and safe margins to match a $0.00267 payout per ad (~$0.008 per 3-ad batch)
     const ratePerPoint = 0.00267; 
-    
-    // Cooldown and Limit tracking variables
     let lastAdTime = 0;
     let adsWatchedCount = 0;
     let resetBlockTime = 0;
@@ -215,7 +209,7 @@
     }
     
     function loadData() {
-        const savedData = localStorage.getItem('easyEarningBotV3');
+        const savedData = localStorage.getItem('easyEarningBotV4');
         if (savedData) {
             const data = JSON.parse(savedData);
             points = data.points || 0;
@@ -226,18 +220,17 @@
     }
 
     function saveData() {
-        localStorage.setItem('easyEarningBotV3', JSON.stringify({ points, balance, historyLog }));
+        localStorage.setItem('easyEarningBotV4', JSON.stringify({ points, balance, historyLog }));
     }
 
     function loadCooldownData() {
-        const cdData = localStorage.getItem('adCooldownData');
+        const cdData = localStorage.getItem('adCooldownDataV2');
         if (cdData) {
             const parsed = JSON.parse(cdData);
             lastAdTime = parsed.lastAdTime || 0;
             adsWatchedCount = parsed.adsWatchedCount || 0;
             resetBlockTime = parsed.resetBlockTime || 0;
             
-            // Check if 12 hour block has expired
             if (Date.now() > resetBlockTime) {
                 adsWatchedCount = 0;
                 resetBlockTime = 0;
@@ -246,7 +239,7 @@
     }
 
     function saveCooldownData() {
-        localStorage.setItem('adCooldownData', JSON.stringify({ lastAdTime, adsWatchedCount, resetBlockTime }));
+        localStorage.setItem('adCooldownDataV2', JSON.stringify({ lastAdTime, adsWatchedCount, resetBlockTime }));
     }
 
     function updateDisplay() {
@@ -293,14 +286,14 @@
         points += earnedPoints;
         balance = points * ratePerPoint;
         updateDisplay();
-        addToHistory('earn', `+${earnedPoints} Point from Ad Batch`);
+        addToHistory('earn', `+${earnedPoints} Point (VPN Verified)`);
         saveData();
         Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         alert(`Congratulations! Reward added. Your new balance is $${balance.toFixed(3)}.`);
     }
 
-    // Secure Rewarded Interstitial with 30s Cooldown and 12-hour (10 Ad) limit
-    function showRewardedInterstitial() {
+    // Function to check IP location (US or UK) before showing the ad
+    async function verifyVPNAndShowAd() {
         const now = Date.now();
 
         // Check 12-hour limit block
@@ -309,30 +302,51 @@
             return alert(`⏳ Daily limit reached! Please wait ${remainingHours} hours before watching more ads.`);
         }
 
-        // Check 30-second cooldown between individual ad clicks
+        // Check 30-second cooldown between ads
         const elapsedSinceLastAd = (now - lastAdTime) / 1000;
         if (elapsedSinceLastAd < 30) {
             const timeLeft = Math.ceil(30 - elapsedSinceLastAd);
             return alert(`⏳ Cooldown active! Please wait ${timeLeft} seconds before watching the next ad.`);
         }
 
-        if (typeof show_11499185 !== 'function') return alert('Ad provider is not ready.');
+        // Show loading status to user while checking IP
+        Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        
+        try {
+            // Using a free IP lookup API to test user's current connection region
+            const response = await fetch('https://ipapi.co/json/');
+            const data = await response.json();
+            const countryCode = data.country_code; // e.g. "US", "GB", "ET"
 
-        show_11499185().then(() => {
-            lastAdTime = Date.now();
-            adsWatchedCount++;
-
-            // If user hits 10 ads, lock them out for 12 hours
-            if (adsWatchedCount >= 10) {
-                resetBlockTime = Date.now() + (12 * 60 * 60 * 1000); // 12 hours
-                adsWatchedCount = 0;
+            // Allow only United States (US) or United Kingdom (GB)
+            if (countryCode !== 'US' && countryCode !== 'GB') {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                return alert(`❌ VPN Required!\n\nYour current region is detected as (${countryCode || 'Unknown'}). Please turn on Super VPN, connect to a **US** or **UK** server, and try again.`);
             }
 
-            saveCooldownData();
-            grantReward();
-        }).catch(e => {
-            alert('Ad could not be shown or was skipped.');
-        });
+            // Region verified successfully as US/UK, now trigger ad
+            if (typeof show_11499185 !== 'function') return alert('Ad provider is not ready.');
+
+            show_11499185().then(() => {
+                lastAdTime = Date.now();
+                adsWatchedCount++;
+
+                if (adsWatchedCount >= 10) {
+                    resetBlockTime = Date.now() + (12 * 60 * 60 * 1000); // 12 hours lock
+                    adsWatchedCount = 0;
+                }
+
+                saveCooldownData();
+                grantReward();
+            }).catch(e => {
+                alert('Ad could not be shown or was skipped.');
+            });
+
+        } catch (error) {
+            // Fallback if IP network lookup fails
+            console.error("IP Check Error:", error);
+            alert("Could not verify network region. Please ensure your VPN is active and stable.");
+        }
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {

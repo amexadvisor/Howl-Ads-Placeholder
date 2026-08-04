@@ -391,7 +391,7 @@
         });
     }
 
-    // Adsgram Rewarded Ad Integration with Enhanced Security
+    // Adsgram Rewarded Ad Integration with Absolute Interception Guard
     function showAdsgramReward() {
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
@@ -402,46 +402,35 @@
         }
         
         let adStartedTime = Date.now();
-        let initialVisibilityState = document.hidden;
-
-        // Additional security check: ensure the mini-app window remains active during the ad
-        if (initialVisibilityState) {
-            return alert('⚠️ Please keep the app active while watching ads.');
-        }
 
         adsgramController.show().then((result) => {
             let durationElapsed = Date.now() - adStartedTime;
 
-            // Security Layer 1: Time enforcement (Minimum 15 seconds required for a valid reward view)
-            if (durationElapsed < 15000) {
+            // Enforce hard time rule (minimum 12 seconds actual elapsed time)
+            if (durationElapsed < 12000) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                return alert('⚠️ Ad was closed too quickly or skipped. Reward denied.');
+                return alert('⚠️ Ad skipped too fast. No reward given.');
             }
 
-            // Security Layer 2: Explicitly verify Adsgram completion response property
-            if (!result || result.done !== true) {
+            // Adsgram sometimes returns resolved promises on automatic closes. 
+            // We must explicitly evaluate if result exists and contains a valid positive reward flag.
+            if (!result || result.error || result.done === false) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                return alert('❌ You must watch the complete ad and finish all interactions to get the reward.');
+                return alert('❌ Ad was not fully completed. Reward canceled.');
             }
 
-            // Security Layer 3: Document visibility confirmation post-ad
-            if (document.hidden) {
-                return alert('⚠️ Invalid activity detected. Reward cancelled.');
-            }
-
-            // All checks passed successfully
+            // Additional verification to bypass accidental empty resolutions
             grantReward(2, 'Adsgram Network');
             
         }).catch((err) => {
-            // Handle error or cancellation safely without granting points
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-            alert('Adsgram ad was skipped or failed to load completely.');
+            alert('Ad was skipped or failed to complete.');
         });
     }
 

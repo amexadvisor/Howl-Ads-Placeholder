@@ -276,7 +276,7 @@
   <div id="adsgram-modal" class="modal-overlay">
     <div class="modal-card">
       <h3>Adsgram Unique Redirects</h3>
-      <p id="modal-instruction">Complete ad redirects using distinct links/campaigns.</p>
+      <p id="modal-instruction">Complete 3 unique ad redirects to claim reward.</p>
       <div class="step-counter" id="step-counter-display">Unique Redirects: 0 / 3</div>
       <button class="modal-btn" id="modal-action-btn" onclick="handleAdsgramStep()">Watch Ad & Verify</button>
       <button class="modal-close-btn" onclick="closeAdsgramModal()">Cancel</button>
@@ -293,6 +293,7 @@
 
     // Adsgram Unique Redirect Tracking State
     let uniqueRedirectsSet = new Set();
+    let totalWatchedAdsCount = 0;
 
     // Initialize Adsgram Controller with block ID 41229
     let adsgramController = null;
@@ -425,20 +426,22 @@
 
     // Adsgram Unique Redirect Task Flow Handlers
     function startAdsgramTaskFlow() {
-        uniqueRedirectsSet.clear(); // Reset unique redirects on new task initialization
+        uniqueRedirectsSet.clear(); 
+        totalWatchedAdsCount = 0;
         updateAdsgramModalUI();
         document.getElementById('adsgram-modal').classList.add('active');
     }
 
     function closeAdsgramModal() {
         uniqueRedirectsSet.clear();
+        totalWatchedAdsCount = 0;
         document.getElementById('adsgram-modal').classList.remove('active');
     }
 
     function updateAdsgramModalUI() {
-        const count = uniqueRedirectsSet.size;
-        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${count} / 3`;
-        if (count >= 2) {
+        const verifiedCount = uniqueRedirectsSet.size;
+        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${verifiedCount} / 3 (Total Ads Watched: ${totalWatchedAdsCount})`;
+        if (verifiedCount >= 2) {
             document.getElementById('modal-instruction').textContent = 'Final unique redirect required to claim reward!';
             document.getElementById('modal-action-btn').textContent = 'Watch Final Unique Ad & Claim';
         } else {
@@ -464,11 +467,11 @@
                 return alert('❌ Ad was skipped or failed to complete.');
             }
 
-            // Extract unique identifier for the ad/redirect (using result data or fallback to timestamp-mock if undefined)
-            // Adsgram result objects usually return metadata or track click targets; we use url/id or fallback signature.
-            let redirectIdentifier = (result.url || result.bannerId || result.id || JSON.stringify(result));
+            totalWatchedAdsCount++;
 
-            // If user redirects with the exact same link/ad, Set size won't increase, thus avoiding duplicate increments.
+            // Extract unique identifier for the ad/redirect
+            let redirectIdentifier = (result.url || result.bannerId || result.id || (Math.random() + '-' + Date.now()));
+
             const previousSize = uniqueRedirectsSet.size;
             uniqueRedirectsSet.add(redirectIdentifier);
             const currentSize = uniqueRedirectsSet.size;
@@ -477,10 +480,11 @@
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
 
+            // If same link is used, unique count doesn't increase, forcing them to watch again without progressing the 1/3 completion count.
             if (currentSize === previousSize) {
-                alert('⚠️ This was a duplicate link/ad redirect! It was not added to your unique count. Please open a different ad redirect.');
+                alert(`⚠️ Duplicate link detected! You watched an ad with the same link again. Total ads watched: ${totalWatchedAdsCount}. Please watch an ad with a different link to count towards your 3 unique redirects.`);
             } else {
-                alert(`✅ Unique redirect verified! Unique count: ${currentSize}/3`);
+                alert(`✅ Unique redirect verified! Unique count: ${currentSize}/3 (Total ads watched so far: ${totalWatchedAdsCount})`);
             }
 
             // Check if 3 unique redirects are achieved
@@ -488,6 +492,7 @@
                 closeAdsgramModal();
                 grantReward(2, 'Adsgram Network');
                 uniqueRedirectsSet.clear();
+                totalWatchedAdsCount = 0;
             } else {
                 updateAdsgramModalUI();
             }

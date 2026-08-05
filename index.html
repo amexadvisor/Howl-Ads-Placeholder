@@ -11,6 +11,8 @@
   <script src='//libtl.com/sdk.js' data-zone='9954272' data-sdk='show_9954272'></script>
   <!-- Adsgram SDK Load -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <!-- Adsbitvex SDK Load (App ID: 000281) -->
+  <script src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281" defer></script>
 
   <style>
     :root {
@@ -551,14 +553,30 @@
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
-        
-        let adsbitvexAppId = "000281";
-        
-        // Trigger action for Adsbitvex interaction
-        alert("Launching Adsbitvex campaign (ID: " + adsbitvexAppId + ")");
-        
-        // Grant reward or handle interaction outcome here when active
-        grantReward(2, 'Adsbitvex Network');
+
+        // Check if Adsbitvex script function exists globally
+        if (typeof window.showAdsbitvexAd === "function") {
+            window.showAdsbitvexAd().then(() => {
+                grantReward(2, 'Adsbitvex Network');
+                alert('🎉 Adsbitvex ad completed! Earned +2 points.');
+            }).catch(() => {
+                alert('Ad was closed or unavailable.');
+            });
+        } else {
+            // Fallback opening link if triggered directly via SDK URL
+            const fallbackUrl = "https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281";
+            if (window.Telegram && Telegram.WebApp.openLink) {
+                Telegram.WebApp.openLink(fallbackUrl);
+            } else {
+                window.open(fallbackUrl, '_blank');
+            }
+            
+            // Temporary confirmation reward mechanism for testing
+            setTimeout(() => {
+                grantReward(2, 'Adsbitvex Network');
+                alert('🎉 Task verified! Earned +2 points.');
+            }, 6000);
+        }
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {

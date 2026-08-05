@@ -45,7 +45,7 @@
     #splash-screen {
       position: absolute; inset: 0; background: #040508; z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.5s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
     }
     #splash-screen.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -68,38 +68,35 @@
     .ring-2 { width: 280px; height: 280px; border-style: solid; border-width: 1px; border-color: rgba(99, 102, 241, 0.2); animation-direction: reverse; animation-duration: 24s; }
     @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-    /* Floating Coin Particles Animation */
+    /* Floating Coin Particles Animation (Slower & Upwards) */
     .floating-coin {
       position: absolute;
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--gold), #d97706);
       border: 2px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
-      font-weight: 800;
-      color: #fff;
       z-index: 3;
       pointer-events: none;
-      animation: floatCoinUp 3.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+      animation: floatCoinUp 4.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
       opacity: 0;
     }
     .floating-coin img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     
-    .coin-1 { left: calc(50% - 70px); animation-delay: 0s; }
-    .coin-2 { left: calc(50% - 10px); animation-delay: 0.8s; }
-    .coin-3 { left: calc(50% + 50px); animation-delay: 1.6s; }
-    .coin-4 { left: calc(50% - 40px); animation-delay: 2.4s; }
+    .coin-1 { left: calc(50% - 80px); animation-delay: 0s; }
+    .coin-2 { left: calc(50% - 20px); animation-delay: 1.2s; }
+    .coin-3 { left: calc(50% + 40px); animation-delay: 2.4s; }
+    .coin-4 { left: calc(50% - 50px); animation-delay: 3.6s; }
 
     @keyframes floatCoinUp {
-      0% { transform: translateY(70px) scale(0.4); opacity: 0; }
+      0% { transform: translateY(90px) scale(0.4); opacity: 0; }
       20% { opacity: 1; }
       80% { opacity: 1; }
-      100% { transform: translateY(-130px) scale(1.2); opacity: 0; }
+      100% { transform: translateY(-160px) scale(1.3); opacity: 0; }
     }
 
     /* Center Logo Hologram Box */
@@ -112,7 +109,7 @@
     .splash-radar {
       position: absolute; inset: -15px; border-radius: 50%;
       background: conic-gradient(from 0deg at 50% 50%, rgba(16, 185, 129, 0) 0%, rgba(16, 185, 129, 0.3) 80%, rgba(16, 185, 129, 0.8) 100%);
-      animation: spinRadar 3.5s linear infinite; filter: blur(4px);
+      animation: spinRadar 4s linear infinite; filter: blur(4px);
     }
     @keyframes spinRadar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -140,7 +137,7 @@
     .splash-loader-bar { 
       position: absolute; top: 0; left: 0; height: 100%; width: 0%; 
       background: linear-gradient(90deg, var(--accent), var(--primary)); 
-      animation: loadBarTech 3.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; 
+      animation: loadBarTech 4.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; 
       box-shadow: 0 0 15px var(--primary); 
     }
     @keyframes loadBarTech { 
@@ -159,6 +156,19 @@
       border-left: 1px solid rgba(255,255,255,0.04);
       border-right: 1px solid rgba(255,255,255,0.04);
     }
+
+    /* Live Animated Dashboard Background */
+    .live-dashboard-bg {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .live-grid {
+      position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+      background-image: 
+        linear-gradient(rgba(16, 185, 129, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+      background-size: 35px 35px; animation: liveGridMove 18s linear infinite;
+    }
+    @keyframes liveGridMove { 0% { transform: translateY(0); } 100% { transform: translateY(35px); } }
 
     .ambient-glow {
       position: absolute; width: 180px; height: 180px; border-radius: 50%;
@@ -296,7 +306,7 @@
     .list-item .info .name { font-weight: 700; font-size: 13px; color: #fff; }
     .list-item .info .detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-    /* Footer Nav */
+    /* Animated Footer Nav Buttons */
     .footer-nav {
       position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 410px; margin: 0 auto; 
       display: flex; justify-content: space-around; background: rgba(12, 14, 22, 0.85); 
@@ -305,13 +315,39 @@
       box-shadow: 0 -15px 35px rgba(0,0,0,0.6);
     }
     .nav-button {
+      position: relative;
       display: flex; flex-direction: column; align-items: center; color: var(--text-muted); 
-      background: none; border: none; font-size: 10px; font-weight: 700; transition: all 0.25s ease; cursor: pointer; padding: 6px 10px; border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); 
+      font-size: 10px; font-weight: 700; cursor: pointer; padding: 8px 12px; border-radius: 14px;
+      overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .nav-button .icon { font-size: 18px; margin-bottom: 4px; transition: transform 0.25s ease; }
-    .nav-button:hover { color: var(--text-main); }
-    .nav-button.active { color: var(--primary); background: rgba(16, 185, 129, 0.08); }
-    .nav-button.active .icon { transform: translateY(-2px); text-shadow: 0 0 10px var(--primary-glow); }
+    .nav-button::before {
+      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+      transition: 0.5s;
+    }
+    .nav-button:hover::before { left: 100%; }
+    .nav-button .icon { font-size: 18px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    
+    .nav-button:hover {
+      color: var(--text-main);
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.08);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2);
+    }
+    .nav-button:active { transform: translateY(1px) scale(0.95); }
+
+    .nav-button.active {
+      color: var(--primary);
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .nav-button.active .icon {
+      transform: translateY(-3px) scale(1.1);
+      text-shadow: 0 0 12px var(--primary-glow);
+    }
 
     /* Buttons & Inputs */
     .btn {
@@ -342,13 +378,13 @@
 </head>
 <body>
 
-  <!-- Ultimate Tech Opening Splash Screen Animation with Floating Coins -->
+  <!-- Ultimate Tech Opening Splash Screen Animation with Slower Floating Coins -->
   <div id="splash-screen">
     <div class="splash-grid"></div>
     <div class="tech-ring ring-1"></div>
     <div class="tech-ring ring-2"></div>
 
-    <!-- Floating Coins Animation Elements -->
+    <!-- Floating Howl Coins Animation Elements -->
     <div class="floating-coin coin-1"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
     <div class="floating-coin coin-2"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
     <div class="floating-coin coin-3"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
@@ -373,8 +409,12 @@
   </div>
 
   <div class="container">
-    <div class="ambient-glow orb-1"></div>
-    <div class="ambient-glow orb-2"></div>
+    <!-- Live Animated Background Elements for Dashboard -->
+    <div class="live-dashboard-bg">
+      <div class="live-grid"></div>
+      <div class="ambient-glow orb-1"></div>
+      <div class="ambient-glow orb-2"></div>
+    </div>
 
     <main id="main-content">
       <!-- HOME VIEW -->
@@ -541,18 +581,18 @@
         let percentTracker = 0;
         const percentEl = document.getElementById('loaderPercent');
         const progressInterval = setInterval(() => {
-            percentTracker += Math.floor(Math.random() * 8) + 4;
+            percentTracker += Math.floor(Math.random() * 6) + 3;
             if (percentTracker >= 100) {
                 percentTracker = 100;
                 clearInterval(progressInterval);
             }
             if (percentEl) percentEl.textContent = `${percentTracker}%`;
-        }, 220);
+        }, 280);
 
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash) splash.classList.add('fade-out');
-        }, 3200);
+        }, 4200);
     });
 
     function initApp() {

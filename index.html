@@ -11,8 +11,6 @@
   <script src='//libtl.com/sdk.js' data-zone='9954272' data-sdk='show_9954272'></script>
   <!-- Adsgram SDK Load -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-  <!-- Telega.io SDK Load -->
-  <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
 
   <style>
     :root {
@@ -236,14 +234,7 @@
         <!-- Adsgram Rewarded Block (ID: 41229) with Unique Redirect Tracking -->
         <div class="task-card" onclick="startAdsgramTaskFlow()">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
-            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 1 unique redirect for $0.005 reward.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-        </div>
-
-        <!-- Telega.io Task (Active $0.005 Block) -->
-        <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 0.005, 'telegaBtn1')">
-            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details"><h3>Telega Ad ($0.005)</h3><p>Watch ad to earn $0.005.</p></div>
+            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 3 unique redirects for +2 points.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -284,10 +275,10 @@
   <!-- Unique Redirect Tracking Modal -->
   <div id="adsgram-modal" class="modal-overlay">
     <div class="modal-card">
-      <h3>Adsgram Reward Task</h3>
-      <p id="modal-instruction">First, watch the ad completely. Then tap "Join Now" to claim your $0.005 reward.</p>
-      <div class="step-counter" id="step-counter-display">Status: Ad Not Watched</div>
-      <button class="modal-btn" id="modal-action-btn" onclick="handleAdsgramStep()">Watch Ad</button>
+      <h3>Adsgram Unique Redirects</h3>
+      <p id="modal-instruction">Complete 3 unique ad redirects to claim reward.</p>
+      <div class="step-counter" id="step-counter-display">Unique Redirects: 0 / 3</div>
+      <button class="modal-btn" id="modal-action-btn" onclick="handleAdsgramStep()">Watch Ad & Verify</button>
       <button class="modal-close-btn" onclick="closeAdsgramModal()">Cancel</button>
     </div>
   </div>
@@ -300,23 +291,14 @@
     const ratePerPoint = 0.05;
     const payoutGoal = 2.50;
 
-    // Adsgram Unique Redirect Tracking State & Limits
-    let hasWatchedAd = false;
-    const DAILY_MAX_ADS = 20;
-    const REWARD_PER_BATCH = 0.005; // $0.005 for finishing ad and tapping Join Now
+    // Adsgram Unique Redirect Tracking State
+    let uniqueRedirectsSet = new Set();
+    let totalWatchedAdsCount = 0;
 
     // Initialize Adsgram Controller with block ID 41229
     let adsgramController = null;
     if (typeof Adsgram !== 'undefined') {
         adsgramController = Adsgram.init({ blockId: "41229" });
-    }
-
-    // Initialize Telega.io Ads Controller
-    let telegaAds = null;
-    if (typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
-        telegaAds = window.TelegaIn.AdsController.create_miniapp({
-            token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
-        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -327,9 +309,7 @@
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
-            if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-                tgUser = Telegram.WebApp.initDataUnsafe.user;
-            }
+            tgUser = Telegram.WebApp.initDataUnsafe.user;
         }
         loadData();
         loadTelegramUser();
@@ -362,24 +342,6 @@
         localStorage.setItem('easyEarningBotV2', JSON.stringify({ points, balance, historyLog }));
     }
 
-    // Daily ad tracking helper function
-    function getDailyAdData() {
-        const today = new Date().toISOString().slice(0, 10);
-        let tracker = JSON.parse(localStorage.getItem('adsgram_daily_tracker')) || { date: today, count: 0 };
-        if (tracker.date !== today) {
-            tracker = { date: today, count: 0 };
-            localStorage.setItem('adsgram_daily_tracker', JSON.stringify(tracker));
-        }
-        return tracker;
-    }
-
-    function incrementDailyAdCount() {
-        const today = new Date().toISOString().slice(0, 10);
-        let tracker = getDailyAdData();
-        tracker.count += 1;
-        localStorage.setItem('adsgram_daily_tracker', JSON.stringify(tracker));
-    }
-
     function updateDisplay() {
         document.getElementById('points-value').textContent = `${points.toFixed(3)}`;
         document.getElementById('balance-value').textContent = `$${balance.toFixed(3)}`;
@@ -393,7 +355,7 @@
     
     function loadTelegramUser() {
         if (tgUser) {
-            const fullName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+          const fullName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
             document.getElementById('username').textContent = fullName || 'Telegram User';
             const profilePicDiv = document.getElementById('profile-pic');
             if (tgUser.photo_url) {
@@ -418,28 +380,24 @@
             list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No activity yet.</div><div class="detail">Watch ads to get started!</div></div></div>`;
             return;
         }
-        list.innerHTML = historyLog.map(item => {
+        list.innerHTML = historyLog.item ? historyLog.map(item => {
             const icon = item.type === 'earn' 
                 ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary-color);"></i>' 
                 : '<i class="fa-solid fa-paper-plane" style="color: var(--accent-color);"></i>';
             return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
-        }).join('');
+        }).join('') : '';
     }
 
-    function grantReward(earnedPoints, sourceName, customCashReward = null) {
-        if (customCashReward) {
-            balance += customCashReward;
-            points = balance / ratePerPoint;
-        } else {
-            points += earnedPoints;
-            balance = points * ratePerPoint;
-        }
+    function grantReward(earnedPoints, sourceName) {
+        points += earnedPoints;
+        balance = points * ratePerPoint;
         updateDisplay();
-        addToHistory('earn', customCashReward ? `+$${customCashReward.toFixed(4)} from ${sourceName}` : `+${earnedPoints} Point(s) from ${sourceName}`);
+        addToHistory('earn', `+${earnedPoints} Point(s) from ${sourceName}`);
         saveData();
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
+        alert(`🎉 Awesome! Earned +${earnedPoints} point(s). Balance: $${balance.toFixed(3)}`);
     }
 
     // Monetag Ad Type 1: Interstitial
@@ -449,7 +407,6 @@
         }
         show_9954272().then(() => {
             grantReward(1, 'Monetag Interstitial');
-            alert('🎉 Awesome! Earned +1 point.');
         }).catch(e => {
             alert('Ad closed or unavailable.');
         });
@@ -462,58 +419,38 @@
         }
         show_9954272('pop').then(() => {
             grantReward(3, 'Monetag Popup');
-            alert('🎉 Awesome! Earned +3 points.');
         }).catch(e => {
             alert('Popup ad unavailable.');
         });
     }
 
-    // Adsgram Task Flow Handlers
+    // Adsgram Unique Redirect Task Flow Handlers
     function startAdsgramTaskFlow() {
-        const dailyData = getDailyAdData();
-        if (dailyData.count >= DAILY_MAX_ADS) {
-            return alert(`🚫 Daily limit reached! You have watched ${DAILY_MAX_ADS}/${DAILY_MAX_ADS} ads today. Please come back tomorrow.`);
-        }
-
-        hasWatchedAd = false; 
+        uniqueRedirectsSet.clear(); 
+        totalWatchedAdsCount = 0;
         updateAdsgramModalUI();
         document.getElementById('adsgram-modal').classList.add('active');
     }
 
     function closeAdsgramModal() {
-        hasWatchedAd = false;
+        uniqueRedirectsSet.clear();
+        totalWatchedAdsCount = 0;
         document.getElementById('adsgram-modal').classList.remove('active');
     }
 
     function updateAdsgramModalUI() {
-        const dailyData = getDailyAdData();
-        document.getElementById('step-counter-display').textContent = `Status: ${hasWatchedAd ? 'Ad Finished ✅' : 'Ad Not Watched'} | Daily: ${dailyData.count}/${DAILY_MAX_ADS}`;
-        
-        if (hasWatchedAd) {
-            document.getElementById('modal-instruction').textContent = 'Ad finished! Tap "Join Now" below to claim your $0.005 reward.';
-            document.getElementById('modal-action-btn').textContent = 'Join Now';
+        const verifiedCount = uniqueRedirectsSet.size;
+        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${verifiedCount} / 3 (Total Ads Watched: ${totalWatchedAdsCount})`;
+        if (verifiedCount >= 2) {
+            document.getElementById('modal-instruction').textContent = 'Final unique redirect required to claim reward!';
+            document.getElementById('modal-action-btn').textContent = 'Watch Final Unique Ad & Claim';
         } else {
-            document.getElementById('modal-instruction').textContent = 'First, watch the ad completely. Then tap "Join Now" to claim your $0.005 reward.';
-            document.getElementById('modal-action-btn').textContent = 'Watch Ad';
+            document.getElementById('modal-instruction').textContent = 'Complete ad redirects using distinct links/campaigns.';
+            document.getElementById('modal-action-btn').textContent = 'Watch Ad & Verify Redirect';
         }
     }
 
     function handleAdsgramStep() {
-        const dailyData = getDailyAdData();
-        if (dailyData.count >= DAILY_MAX_ADS) {
-            closeAdsgramModal();
-            return alert(`🚫 Daily limit of ${DAILY_MAX_ADS} ads reached for today.`);
-        }
-
-        // If user already watched the ad completely, tapping "Join Now" grants the reward
-        if (hasWatchedAd) {
-            closeAdsgramModal();
-            grantReward(0, 'Adsgram Network ($0.005)', REWARD_PER_BATCH);
-            alert(`🎉 Success! You earned $${REWARD_PER_BATCH.toFixed(3)}. Enjoy your reward!`);
-            hasWatchedAd = false;
-            return;
-        }
-
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
                 adsgramController = Adsgram.init({ blockId: "41229" });
@@ -527,114 +464,45 @@
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                hasWatchedAd = false;
-                updateAdsgramModalUI();
-                return alert('❌ Ad was skipped or failed to complete. Please watch the ad completely.');
+                return alert('❌ Ad was skipped or failed to complete.');
             }
 
-            // Only set to true AFTER the ad finishes successfully and returns a resolved promise
-            hasWatchedAd = true;
-            incrementDailyAdCount();
+            totalWatchedAdsCount++;
+
+            // Extract unique identifier for the ad/redirect
+            let redirectIdentifier = (result.url || result.bannerId || result.id || (Math.random() + '-' + Date.now()));
+
+            const previousSize = uniqueRedirectsSet.size;
+            uniqueRedirectsSet.add(redirectIdentifier);
+            const currentSize = uniqueRedirectsSet.size;
 
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
 
-            updateAdsgramModalUI();
-            alert('✅ Ad completed successfully! Now tap "Join Now" to claim your reward.');
+            // If same link is used, unique count doesn't increase, forcing them to watch again without progressing the 1/3 completion count.
+            if (currentSize === previousSize) {
+                alert(`⚠️ Duplicate link detected! You watched an ad with the same link again. Total ads watched: ${totalWatchedAdsCount}. Please watch an ad with a different link to count towards your 3 unique redirects.`);
+            } else {
+                alert(`✅ Unique redirect verified! Unique count: ${currentSize}/3 (Total ads watched so far: ${totalWatchedAdsCount})`);
+            }
+
+            // Check if 3 unique redirects are achieved
+            if (currentSize >= 3) {
+                closeAdsgramModal();
+                grantReward(2, 'Adsgram Network');
+                uniqueRedirectsSet.clear();
+                totalWatchedAdsCount = 0;
+            } else {
+                updateAdsgramModalUI();
+            }
 
         }).catch((err) => {
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-            hasWatchedAd = false;
-            updateAdsgramModalUI();
-            alert('⚠️ Ad was closed early or failed. Please tap "Watch Ad" and finish it completely to unlock the Join Now reward.');
+            alert('Ad view was canceled or failed.');
         });
-    }
-
-    // Telega.io Task Handler (Updated for stability with timeouts and loading states)
-    function startTelegaTask(uuid, cashReward, buttonId) {
-        const btn = document.getElementById(buttonId);
-        
-        // Prevent double clicking while loading
-        if (btn.classList.contains('loading')) return;
-        btn.classList.add('loading');
-        
-        const desc = btn.querySelector('.task-details p');
-        const originalText = desc ? desc.textContent : `Watch ad to earn $${cashReward}.`;
-        if (desc) desc.textContent = "Loading Ad...";
-
-        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-        }
-
-        // Re-initialize controller if missing
-        if (!telegaAds && typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
-            telegaAds = window.TelegaIn.AdsController.create_miniapp({
-                token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
-            });
-        }
-
-        if (telegaAds) {
-            try {
-                let isResolved = false;
-                const safetyTimeout = setTimeout(() => {
-                    if (!isResolved) {
-                        isResolved = true;
-                        resetTelegaButton(btn, cashReward, originalText);
-                        alert("⚠️ Ad inventory is currently empty or failed to load. Please try another ad block.");
-                    }
-                }, 10000);
-
-                const adResult = telegaAds.ad_show({
-                    adBlockUuid: uuid
-                });
-
-                if (adResult && typeof adResult.then === 'function') {
-                    adResult.then(() => {
-                        if (isResolved) return;
-                        isResolved = true;
-                        clearTimeout(safetyTimeout);
-
-                        grantReward(0, `Telega.io ($${cashReward})`, cashReward);
-                        resetTelegaButton(btn, cashReward, `Watch ad to earn $${cashReward}.`);
-                        alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
-                    }).catch(e => {
-                        if (isResolved) return;
-                        isResolved = true;
-                        clearTimeout(safetyTimeout);
-
-                        console.error("Telega ad error:", e);
-                        resetTelegaButton(btn, cashReward, originalText);
-                        alert("Ad was closed or no ads available right now.");
-                    });
-                } else {
-                    if (isResolved) return;
-                    isResolved = true;
-                    clearTimeout(safetyTimeout);
-
-                    grantReward(0, `Telega.io ($${cashReward})`, cashReward);
-                    resetTelegaButton(btn, cashReward, originalText);
-                    alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
-                }
-            } catch (e) {
-                console.error("Telega execution error:", e);
-                resetTelegaButton(btn, cashReward, originalText);
-                alert("Ad failed to initialize. Please check your connection.");
-            }
-        } else {
-            resetTelegaButton(btn, cashReward, originalText);
-            alert("Telega.io SDK is not loaded yet. Check your internet connection.");
-        }
-    }
-
-    function resetTelegaButton(btn, cashReward, defaultText) {
-        if (btn) {
-            btn.classList.remove('loading');
-            const desc = btn.querySelector('.task-details p');
-            if(desc) desc.textContent = defaultText || `Watch ad to earn $${cashReward}.`;
-        }
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {
@@ -681,8 +549,8 @@
             if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             alert("Withdrawal request sent successfully!");
             
+            points -= amount * (1 / ratePerPoint);
             balance -= amount;
-            points = balance / ratePerPoint;
             
             let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
             addToHistory('withdraw', `📤 Request for withdrawal<br>💰 Amount: $${amount.toFixed(2)}<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
@@ -711,4 +579,4 @@
     }
 </script>
 </body>
-  </html>
+</html>

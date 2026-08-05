@@ -234,7 +234,7 @@
         <!-- Adsgram Rewarded Block (ID: 41229) with Unique Redirect Tracking -->
         <div class="task-card" onclick="startAdsgramTaskFlow()">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
-            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 3 unique redirects for +2 points.</p></div>
+            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 3 unique redirects for $0.005 reward.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -291,9 +291,11 @@
     const ratePerPoint = 0.05;
     const payoutGoal = 2.50;
 
-    // Adsgram Unique Redirect Tracking State
+    // Adsgram Unique Redirect Tracking State & Limits
     let uniqueRedirectsSet = new Set();
     let totalWatchedAdsCount = 0;
+    const DAILY_MAX_ADS = 20;
+    const REWARD_PER_BATCH = 0.005; // $0.005 (half a cent) for 3 unique ads
 
     // Initialize Adsgram Controller with block ID 41229
     let adsgramController = null;
@@ -342,6 +344,24 @@
         localStorage.setItem('easyEarningBotV2', JSON.stringify({ points, balance, historyLog }));
     }
 
+    // Daily ad tracking helper function
+    function getDailyAdData() {
+        const today = new Date().toISOString().slice(0, 10);
+        let tracker = JSON.parse(localStorage.getItem('adsgram_daily_tracker')) || { date: today, count: 0 };
+        if (tracker.date !== today) {
+            tracker = { date: today, count: 0 };
+            localStorage.setItem('adsgram_daily_tracker', JSON.stringify(tracker));
+        }
+        return tracker;
+    }
+
+    function incrementDailyAdCount() {
+        const today = new Date().toISOString().slice(0, 10);
+        let tracker = getDailyAdData();
+        tracker.count += 1;
+        localStorage.setItem('adsgram_daily_tracker', JSON.stringify(tracker));
+    }
+
     function updateDisplay() {
         document.getElementById('points-value').textContent = `${points.toFixed(3)}`;
         document.getElementById('balance-value').textContent = `$${balance.toFixed(3)}`;
@@ -380,24 +400,28 @@
             list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No activity yet.</div><div class="detail">Watch ads to get started!</div></div></div>`;
             return;
         }
-        list.innerHTML = historyLog.item ? historyLog.map(item => {
+        list.innerHTML = historyLog.map(item => {
             const icon = item.type === 'earn' 
                 ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary-color);"></i>' 
                 : '<i class="fa-solid fa-paper-plane" style="color: var(--accent-color);"></i>';
             return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
-        }).join('') : '';
+        }).join('');
     }
 
-    function grantReward(earnedPoints, sourceName) {
-        points += earnedPoints;
-        balance = points * ratePerPoint;
+    function grantReward(earnedPoints, sourceName, customCashReward = null) {
+        if (customCashReward) {
+            balance += customCashReward;
+            points = balance / ratePerPoint;
+        } else {
+            points += earnedPoints;
+            balance = points * ratePerPoint;
+        }
         updateDisplay();
-        addToHistory('earn', `+${earnedPoints} Point(s) from ${sourceName}`);
+        addToHistory('earn', customCashReward ? `+$${customCashReward.toFixed(3)} from ${sourceName}` : `+${earnedPoints} Point(s) from ${sourceName}`);
         saveData();
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
-        alert(`🎉 Awesome! Earned +${earnedPoints} point(s). Balance: $${balance.toFixed(3)}`);
     }
 
     // Monetag Ad Type 1: Interstitial
@@ -407,6 +431,7 @@
         }
         show_9954272().then(() => {
             grantReward(1, 'Monetag Interstitial');
+            alert('🎉 Awesome! Earned +1 point.');
         }).catch(e => {
             alert('Ad closed or unavailable.');
         });
@@ -419,6 +444,7 @@
         }
         show_9954272('pop').then(() => {
             grantReward(3, 'Monetag Popup');
+            alert('🎉 Awesome! Earned +3 points.');
         }).catch(e => {
             alert('Popup ad unavailable.');
         });
@@ -426,6 +452,11 @@
 
     // Adsgram Unique Redirect Task Flow Handlers
     function startAdsgramTaskFlow() {
+        const dailyData = getDailyAdData();
+        if (dailyData.count >= DAILY_MAX_ADS) {
+            return alert(`🚫 Daily limit reached! You have watched ${DAILY_MAX_ADS}/${DAILY_MAX_ADS} ads today. Please come back tomorrow.`);
+        }
+
         uniqueRedirectsSet.clear(); 
         totalWatchedAdsCount = 0;
         updateAdsgramModalUI();
@@ -440,17 +471,24 @@
 
     function updateAdsgramModalUI() {
         const verifiedCount = uniqueRedirectsSet.size;
-        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${verifiedCount} / 3 (Total Ads Watched: ${totalWatchedAdsCount})`;
+        const dailyData = getDailyAdData();
+        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${verifiedCount} / 3 | Daily: ${dailyData.count}/${DAILY_MAX_ADS}`;
         if (verifiedCount >= 2) {
-            document.getElementById('modal-instruction').textContent = 'Final unique redirect required to claim reward!';
+            document.getElementById('modal-instruction').textContent = 'Final unique redirect required to claim $0.005 reward!';
             document.getElementById('modal-action-btn').textContent = 'Watch Final Unique Ad & Claim';
         } else {
-            document.getElementById('modal-instruction').textContent = 'Complete ad redirects using distinct links/campaigns.';
+            document.getElementById('modal-instruction').textContent = 'Complete 3 unique ad redirects in a batch.';
             document.getElementById('modal-action-btn').textContent = 'Watch Ad & Verify Redirect';
         }
     }
 
     function handleAdsgramStep() {
+        const dailyData = getDailyAdData();
+        if (dailyData.count >= DAILY_MAX_ADS) {
+            closeAdsgramModal();
+            return alert(`🚫 Daily limit of ${DAILY_MAX_ADS} ads reached for today.`);
+        }
+
         if (!adsgramController) {
             if (typeof Adsgram !== 'undefined') {
                 adsgramController = Adsgram.init({ blockId: "41229" });
@@ -468,6 +506,7 @@
             }
 
             totalWatchedAdsCount++;
+            incrementDailyAdCount();
 
             // Extract unique identifier for the ad/redirect
             let redirectIdentifier = (result.url || result.bannerId || result.id || (Math.random() + '-' + Date.now()));
@@ -480,17 +519,17 @@
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
 
-            // If same link is used, unique count doesn't increase, forcing them to watch again without progressing the 1/3 completion count.
             if (currentSize === previousSize) {
-                alert(`⚠️ Duplicate link detected! You watched an ad with the same link again. Total ads watched: ${totalWatchedAdsCount}. Please watch an ad with a different link to count towards your 3 unique redirects.`);
+                alert(`⚠️ Duplicate link detected! Please watch an ad with a different link to count towards your 3 unique redirects.`);
             } else {
-                alert(`✅ Unique redirect verified! Unique count: ${currentSize}/3 (Total ads watched so far: ${totalWatchedAdsCount})`);
+                alert(`✅ Unique redirect verified! Unique count: ${currentSize}/3`);
             }
 
-            // Check if 3 unique redirects are achieved
+            // Check if 3 unique redirects are achieved for the batch
             if (currentSize >= 3) {
                 closeAdsgramModal();
-                grantReward(2, 'Adsgram Network');
+                grantReward(0, 'Adsgram Network ($0.005 Batch)', REWARD_PER_BATCH);
+                alert(`🎉 Batch complete! You earned $${REWARD_PER_BATCH.toFixed(3)}.`);
                 uniqueRedirectsSet.clear();
                 totalWatchedAdsCount = 0;
             } else {
@@ -549,8 +588,8 @@
             if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             alert("Withdrawal request sent successfully!");
             
-            points -= amount * (1 / ratePerPoint);
             balance -= amount;
+            points = balance / ratePerPoint;
             
             let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
             addToHistory('withdraw', `📤 Request for withdrawal<br>💰 Amount: $${amount.toFixed(2)}<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);

@@ -285,8 +285,8 @@
   <div id="adsgram-modal" class="modal-overlay">
     <div class="modal-card">
       <h3>Adsgram Reward Task</h3>
-      <p id="modal-instruction">Watch the ad and tap Join Now to claim your $0.005 reward.</p>
-      <div class="step-counter" id="step-counter-display">Unique Redirects: 0 / 1</div>
+      <p id="modal-instruction">First, watch the ad completely. Then tap "Join Now" to claim your $0.005 reward.</p>
+      <div class="step-counter" id="step-counter-display">Status: Ad Not Watched</div>
       <button class="modal-btn" id="modal-action-btn" onclick="handleAdsgramStep()">Watch Ad</button>
       <button class="modal-close-btn" onclick="closeAdsgramModal()">Cancel</button>
     </div>
@@ -301,10 +301,9 @@
     const payoutGoal = 2.50;
 
     // Adsgram Unique Redirect Tracking State & Limits
-    let uniqueRedirectsSet = new Set();
-    let totalWatchedAdsCount = 0;
+    let hasWatchedAd = false;
     const DAILY_MAX_ADS = 20;
-    const REWARD_PER_BATCH = 0.005; // $0.005 (half a cent) for 1 unique ad + Join Now
+    const REWARD_PER_BATCH = 0.005; // $0.005 for finishing ad and tapping Join Now
 
     // Initialize Adsgram Controller with block ID 41229
     let adsgramController = null;
@@ -469,35 +468,32 @@
         });
     }
 
-    // Adsgram Unique Redirect Task Flow Handlers
+    // Adsgram Task Flow Handlers
     function startAdsgramTaskFlow() {
         const dailyData = getDailyAdData();
         if (dailyData.count >= DAILY_MAX_ADS) {
             return alert(`🚫 Daily limit reached! You have watched ${DAILY_MAX_ADS}/${DAILY_MAX_ADS} ads today. Please come back tomorrow.`);
         }
 
-        uniqueRedirectsSet.clear(); 
-        totalWatchedAdsCount = 0;
+        hasWatchedAd = false; 
         updateAdsgramModalUI();
         document.getElementById('adsgram-modal').classList.add('active');
     }
 
     function closeAdsgramModal() {
-        uniqueRedirectsSet.clear();
-        totalWatchedAdsCount = 0;
+        hasWatchedAd = false;
         document.getElementById('adsgram-modal').classList.remove('active');
     }
 
     function updateAdsgramModalUI() {
-        const verifiedCount = uniqueRedirectsSet.size;
         const dailyData = getDailyAdData();
-        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${verifiedCount} / 1 | Daily: ${dailyData.count}/${DAILY_MAX_ADS}`;
+        document.getElementById('step-counter-display').textContent = `Status: ${hasWatchedAd ? 'Ad Finished ✅' : 'Ad Not Watched'} | Daily: ${dailyData.count}/${DAILY_MAX_ADS}`;
         
-        if (verifiedCount >= 1) {
-            document.getElementById('modal-instruction').textContent = 'Ad watched! Tap "Join Now" below to claim your $0.005 reward.';
+        if (hasWatchedAd) {
+            document.getElementById('modal-instruction').textContent = 'Ad finished! Tap "Join Now" below to claim your $0.005 reward.';
             document.getElementById('modal-action-btn').textContent = 'Join Now';
         } else {
-            document.getElementById('modal-instruction').textContent = 'Watch the ad and tap Join Now to claim your $0.005 reward.';
+            document.getElementById('modal-instruction').textContent = 'First, watch the ad completely. Then tap "Join Now" to claim your $0.005 reward.';
             document.getElementById('modal-action-btn').textContent = 'Watch Ad';
         }
     }
@@ -509,13 +505,12 @@
             return alert(`🚫 Daily limit of ${DAILY_MAX_ADS} ads reached for today.`);
         }
 
-        // If user already has 1 redirect, tapping "Join Now" grants the reward
-        if (uniqueRedirectsSet.size >= 1) {
+        // If user already watched the ad completely, tapping "Join Now" grants the reward
+        if (hasWatchedAd) {
             closeAdsgramModal();
             grantReward(0, 'Adsgram Network ($0.005)', REWARD_PER_BATCH);
             alert(`🎉 Success! You earned $${REWARD_PER_BATCH.toFixed(3)}. Enjoy your reward!`);
-            uniqueRedirectsSet.clear();
-            totalWatchedAdsCount = 0;
+            hasWatchedAd = false;
             return;
         }
 
@@ -532,32 +527,29 @@
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                return alert('❌ Ad was skipped or failed to complete.');
+                hasWatchedAd = false;
+                updateAdsgramModalUI();
+                return alert('❌ Ad was skipped or failed to complete. Please watch the ad completely.');
             }
 
-            totalWatchedAdsCount++;
+            // Only set to true AFTER the ad finishes successfully and returns a resolved promise
+            hasWatchedAd = true;
             incrementDailyAdCount();
-
-            let redirectIdentifier = `ad_step_1_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-            uniqueRedirectsSet.add(redirectIdentifier);
 
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
 
             updateAdsgramModalUI();
-            alert('✅ Ad watched successfully! Now tap "Join Now" to claim your reward.');
+            alert('✅ Ad completed successfully! Now tap "Join Now" to claim your reward.');
 
         }).catch((err) => {
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-            alert('Ad view was canceled or failed. Please tap "Join Now" for next time if you completed it, or try watching again.');
-            
-            // Fallback instruction check if user taps Join Now without redirect count registering
-            if (uniqueRedirectsSet.size === 0) {
-                alert('⚠️ Please tap to watch the ad first before joining!');
-            }
+            hasWatchedAd = false;
+            updateAdsgramModalUI();
+            alert('⚠️ Ad was closed early or failed. Please tap "Watch Ad" and finish it completely to unlock the Join Now reward.');
         });
     }
 
@@ -719,4 +711,4 @@
     }
 </script>
 </body>
-</html>
+  </html>

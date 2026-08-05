@@ -574,19 +574,23 @@
         });
     }
 
-    // Telega.io Task Handler (Supports multiple ad blocks)
+    // Telega.io Task Handler (Updated for better stability with timeouts and loading states)
     function startTelegaTask(uuid, cashReward, buttonId) {
         const btn = document.getElementById(buttonId);
-        if (btn) {
-            btn.style.pointerEvents = "none";
-            const desc = btn.querySelector('.task-details p');
-            if(desc) desc.textContent = "Launching Ad...";
-        }
+        
+        // Prevent double clicking while loading
+        if (btn.classList.contains('loading')) return;
+        btn.classList.add('loading');
+        
+        const desc = btn.querySelector('.task-details p');
+        const originalText = desc ? desc.textContent : `Watch ad to earn $${cashReward}.`;
+        if (desc) desc.textContent = "Loading Ad...";
 
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
 
+        // Re-initialize controller if missing
         if (!telegaAds && typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
             telegaAds = window.TelegaIn.AdsController.create_miniapp({
                 token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
@@ -595,49 +599,63 @@
 
         if (telegaAds) {
             try {
+                // Safety timeout in case the SDK hangs or fails to trigger a callback
+                let isResolved = false;
+                const safetyTimeout = setTimeout(() => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        resetTelegaButton(btn, cashReward, originalText);
+                        alert("⚠️ Ad inventory is currently empty or failed to load. Please try another ad block.");
+                    }
+                }, 10000); // 10 seconds timeout
+
                 const adResult = telegaAds.ad_show({
                     adBlockUuid: uuid
                 });
 
                 if (adResult && typeof adResult.then === 'function') {
                     adResult.then(() => {
+                        if (isResolved) return;
+                        isResolved = true;
+                        clearTimeout(safetyTimeout);
+
                         grantReward(0, `Telega.io ($${cashReward})`, cashReward);
-                        if (btn) {
-                            const desc = btn.querySelector('.task-details p');
-                            if(desc) desc.textContent = "Completed ✅";
-                        }
+                        resetTelegaButton(btn, cashReward, `Watch ad to earn $${cashReward}.`);
                         alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
-                        setTimeout(() => resetTelegaButton(btn, cashReward), 3000);
                     }).catch(e => {
+                        if (isResolved) return;
+                        isResolved = true;
+                        clearTimeout(safetyTimeout);
+
                         console.error("Telega ad error:", e);
-                        resetTelegaButton(btn, cashReward);
-                        alert("Ad was closed or failed to load.");
+                        resetTelegaButton(btn, cashReward, originalText);
+                        alert("Ad was closed or no ads available right now.");
                     });
                 } else {
+                    if (isResolved) return;
+                    isResolved = true;
+                    clearTimeout(safetyTimeout);
+
                     grantReward(0, `Telega.io ($${cashReward})`, cashReward);
-                    if (btn) {
-                        const desc = btn.querySelector('.task-details p');
-                        if(desc) desc.textContent = "Completed ✅";
-                    }
+                    resetTelegaButton(btn, cashReward, originalText);
                     alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
-                    setTimeout(() => resetTelegaButton(btn, cashReward), 3000);
                 }
             } catch (e) {
-                console.error("Telega ad error:", e);
-                resetTelegaButton(btn, cashReward);
-                alert("Ad failed to display. Please try again.");
+                console.error("Telega execution error:", e);
+                resetTelegaButton(btn, cashReward, originalText);
+                alert("Ad failed to initialize. Please check your connection.");
             }
         } else {
-            resetTelegaButton(btn, cashReward);
-            alert("Telega.io SDK is still loading. Please try again in a moment.");
+            resetTelegaButton(btn, cashReward, originalText);
+            alert("Telega.io SDK is not loaded yet. Check your internet connection.");
         }
     }
 
-    function resetTelegaButton(btn, cashReward) {
+    function resetTelegaButton(btn, cashReward, defaultText) {
         if (btn) {
-            btn.style.pointerEvents = "auto";
+            btn.classList.remove('loading');
             const desc = btn.querySelector('.task-details p');
-            if(desc) desc.textContent = `Watch ad to earn $${cashReward}.`;
+            if(desc) desc.textContent = defaultText || `Watch ad to earn $${cashReward}.`;
         }
     }
 

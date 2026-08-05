@@ -41,11 +41,11 @@
         radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
     }
 
-    /* Ultimate Tech Splash Screen Animation */
+    /* Ultimate Tech Splash Screen Animation (Slower Duration) */
     #splash-screen {
       position: absolute; inset: 0; background: #040508; z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.2s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
     }
     #splash-screen.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
@@ -55,30 +55,64 @@
       position: absolute; inset: 0; background-image: 
         linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
-      background-size: 30px 30px; animation: gridMove 20s linear infinite; opacity: 0.6;
+      background-size: 30px 30px; animation: gridMove 25s linear infinite; opacity: 0.6;
     }
     @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 30px 30px; } }
 
     /* Tech Particle Rings */
     .tech-ring {
       position: absolute; border-radius: 50%; border: 1px dashed rgba(16, 185, 129, 0.3);
-      animation: rotateRing 12s linear infinite; pointer-events: none;
+      animation: rotateRing 18s linear infinite; pointer-events: none;
     }
     .ring-1 { width: 220px; height: 220px; border-color: rgba(16, 185, 129, 0.4); }
-    .ring-2 { width: 280px; height: 280px; border-style: solid; border-width: 1px; border-color: rgba(99, 102, 241, 0.2); animation-direction: reverse; animation-duration: 18s; }
+    .ring-2 { width: 280px; height: 280px; border-style: solid; border-width: 1px; border-color: rgba(99, 102, 241, 0.2); animation-direction: reverse; animation-duration: 24s; }
     @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Floating Coin Particles Animation */
+    .floating-coin {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #d97706);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+      z-index: 3;
+      pointer-events: none;
+      animation: floatCoinUp 3.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+      opacity: 0;
+    }
+    .floating-coin img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    
+    .coin-1 { left: calc(50% - 70px); animation-delay: 0s; }
+    .coin-2 { left: calc(50% - 10px); animation-delay: 0.8s; }
+    .coin-3 { left: calc(50% + 50px); animation-delay: 1.6s; }
+    .coin-4 { left: calc(50% - 40px); animation-delay: 2.4s; }
+
+    @keyframes floatCoinUp {
+      0% { transform: translateY(70px) scale(0.4); opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translateY(-130px) scale(1.2); opacity: 0; }
+    }
 
     /* Center Logo Hologram Box */
     .splash-logo-container {
       position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;
-      margin-bottom: 28px; animation: floatLogo 3s ease-in-out infinite alternate;
+      margin-bottom: 28px; animation: floatLogo 4s ease-in-out infinite alternate;
     }
     @keyframes floatLogo { 0% { transform: translateY(0px) scale(0.98); } 100% { transform: translateY(-8px) scale(1.02); } }
 
     .splash-radar {
       position: absolute; inset: -15px; border-radius: 50%;
       background: conic-gradient(from 0deg at 50% 50%, rgba(16, 185, 129, 0) 0%, rgba(16, 185, 129, 0.3) 80%, rgba(16, 185, 129, 0.8) 100%);
-      animation: spinRadar 2.5s linear infinite; filter: blur(4px);
+      animation: spinRadar 3.5s linear infinite; filter: blur(4px);
     }
     @keyframes spinRadar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
@@ -95,19 +129,18 @@
     .splash-title { 
       font-size: 24px; font-weight: 800; letter-spacing: 3px; color: #fff; 
       text-shadow: 0 0 20px var(--primary-glow); margin: 0 0 6px 0;
-      animation: glitchText 2s infinite;
     }
     .splash-subtitle {
       font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; color: var(--primary);
     }
 
-    /* Advanced Tech Progress Bar */
+    /* Advanced Tech Progress Bar (Slower Duration) */
     .splash-loader-container { width: 220px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .splash-loader { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); }
     .splash-loader-bar { 
       position: absolute; top: 0; left: 0; height: 100%; width: 0%; 
       background: linear-gradient(90deg, var(--accent), var(--primary)); 
-      animation: loadBarTech 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; 
+      animation: loadBarTech 3.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; 
       box-shadow: 0 0 15px var(--primary); 
     }
     @keyframes loadBarTech { 
@@ -165,10 +198,9 @@
       background: linear-gradient(135deg, var(--primary), var(--accent)); 
       display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #fff;
       box-shadow: 0 4px 15px var(--primary-glow); border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0;
-      cursor: pointer; position: relative;
+      position: relative;
     }
     .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .user-avatar input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
     
     .user-info .username { font-size: 17px; font-weight: 700; margin: 0; color: #fff; letter-spacing: 0.2px; }
     .user-info .badge-container { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
@@ -310,11 +342,17 @@
 </head>
 <body>
 
-  <!-- Ultimate Tech Opening Splash Screen Animation -->
+  <!-- Ultimate Tech Opening Splash Screen Animation with Floating Coins -->
   <div id="splash-screen">
     <div class="splash-grid"></div>
     <div class="tech-ring ring-1"></div>
     <div class="tech-ring ring-2"></div>
+
+    <!-- Floating Coins Animation Elements -->
+    <div class="floating-coin coin-1"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
+    <div class="floating-coin coin-2"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
+    <div class="floating-coin coin-3"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
+    <div class="floating-coin coin-4"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
 
     <div class="splash-logo-container">
       <div class="splash-radar"></div>
@@ -342,9 +380,8 @@
       <!-- HOME VIEW -->
       <div id="home-view" class="view active">
         <div class="user-header-card">
-          <div class="user-avatar" id="profile-pic" title="Tap to change avatar">
+          <div class="user-avatar" id="profile-pic">
             <img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="Avatar">
-            <input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)">
           </div>
           <div class="user-info">
             <h2 class="username" id="username">Loading...</h2>
@@ -480,7 +517,6 @@
     let lastResetDate = new Date().toDateString();
     let historyLog = [];
     let tgUser = null;
-    let customAvatarUrl = "https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg";
     const payoutGoal = 25000;
 
     let adsgramLastRun = 0;
@@ -505,18 +541,18 @@
         let percentTracker = 0;
         const percentEl = document.getElementById('loaderPercent');
         const progressInterval = setInterval(() => {
-            percentTracker += Math.floor(Math.random() * 12) + 8;
+            percentTracker += Math.floor(Math.random() * 8) + 4;
             if (percentTracker >= 100) {
                 percentTracker = 100;
                 clearInterval(progressInterval);
             }
             if (percentEl) percentEl.textContent = `${percentTracker}%`;
-        }, 140);
+        }, 220);
 
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash) splash.classList.add('fade-out');
-        }, 1800);
+        }, 3200);
     });
 
     function initApp() {
@@ -552,7 +588,6 @@
             adsgramCountToday = data.adsgramCountToday || 0;
             lastResetDate = data.lastResetDate || new Date().toDateString();
             historyLog = data.historyLog || [];
-            customAvatarUrl = data.customAvatarUrl || "https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg";
         }
 
         const currentDate = new Date().toDateString();
@@ -565,7 +600,7 @@
     }
 
     function saveData() {
-        localStorage.setItem('howlRewardsBotV6', JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog, customAvatarUrl }));
+        localStorage.setItem('howlRewardsBotV6', JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog }));
     }
 
     function checkStoredCooldowns() {
@@ -644,33 +679,17 @@
     
     function loadTelegramUser() {
         const profilePicDiv = document.getElementById('profile-pic');
-        if (customAvatarUrl) {
-            profilePicDiv.innerHTML = `<img src="${customAvatarUrl}" alt="Avatar"><input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)">`;
-        } else if (tgUser) {
+        if (tgUser) {
             const fullName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
             document.getElementById('username').textContent = fullName || 'Telegram User';
             if (tgUser.photo_url) {
-                profilePicDiv.innerHTML = `<img src="${tgUser.photo_url}" alt="Avatar"><input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)">`;
+                profilePicDiv.innerHTML = `<img src="${tgUser.photo_url}" alt="Avatar">`;
             } else {
-                profilePicDiv.innerHTML = `<span>${(tgUser.first_name || 'U').charAt(0)}</span><input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)">`;
+                profilePicDiv.innerHTML = `<span>${(tgUser.first_name || 'U').charAt(0)}</span>`;
             }
         } else {
             document.getElementById('username').textContent = 'Web Operator';
-            profilePicDiv.innerHTML = `<img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="Avatar"><input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)">`;
-        }
-    }
-
-    function handleAvatarUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                customAvatarUrl = e.target.result;
-                loadTelegramUser();
-                saveData();
-                alert('✨ Avatar updated successfully!');
-            };
-            reader.readAsDataURL(file);
+            profilePicDiv.innerHTML = `<img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="Avatar">`;
         }
     }
 

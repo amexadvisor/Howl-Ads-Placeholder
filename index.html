@@ -236,7 +236,7 @@
         <!-- Adsgram Rewarded Block (ID: 41229) with Unique Redirect Tracking -->
         <div class="task-card" onclick="startAdsgramTaskFlow()">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
-            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 3 unique redirects for $0.005 reward.</p></div>
+            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Complete 1 unique redirect for $0.005 reward.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
@@ -284,10 +284,10 @@
   <!-- Unique Redirect Tracking Modal -->
   <div id="adsgram-modal" class="modal-overlay">
     <div class="modal-card">
-      <h3>Adsgram Unique Redirects</h3>
-      <p id="modal-instruction">Complete 3 unique ad redirects to claim reward.</p>
-      <div class="step-counter" id="step-counter-display">Unique Redirects: 0 / 3</div>
-      <button class="modal-btn" id="modal-action-btn" onclick="handleAdsgramStep()">Watch Ad & Verify</button>
+      <h3>Adsgram Reward Task</h3>
+      <p id="modal-instruction">Watch the ad and tap Join Now to claim your $0.005 reward.</p>
+      <div class="step-counter" id="step-counter-display">Unique Redirects: 0 / 1</div>
+      <button class="modal-btn" id="modal-action-btn" onclick="handleAdsgramStep()">Watch Ad</button>
       <button class="modal-close-btn" onclick="closeAdsgramModal()">Cancel</button>
     </div>
   </div>
@@ -304,7 +304,7 @@
     let uniqueRedirectsSet = new Set();
     let totalWatchedAdsCount = 0;
     const DAILY_MAX_ADS = 20;
-    const REWARD_PER_BATCH = 0.005; // $0.005 (half a cent) for 3 unique ads
+    const REWARD_PER_BATCH = 0.005; // $0.005 (half a cent) for 1 unique ad + Join Now
 
     // Initialize Adsgram Controller with block ID 41229
     let adsgramController = null;
@@ -491,13 +491,14 @@
     function updateAdsgramModalUI() {
         const verifiedCount = uniqueRedirectsSet.size;
         const dailyData = getDailyAdData();
-        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${verifiedCount} / 3 | Daily: ${dailyData.count}/${DAILY_MAX_ADS}`;
-        if (verifiedCount >= 2) {
-            document.getElementById('modal-instruction').textContent = 'Final unique redirect required to claim $0.005 reward!';
-            document.getElementById('modal-action-btn').textContent = 'Watch Final Unique Ad & Claim';
+        document.getElementById('step-counter-display').textContent = `Unique Redirects: ${verifiedCount} / 1 | Daily: ${dailyData.count}/${DAILY_MAX_ADS}`;
+        
+        if (verifiedCount >= 1) {
+            document.getElementById('modal-instruction').textContent = 'Ad watched! Tap "Join Now" below to claim your $0.005 reward.';
+            document.getElementById('modal-action-btn').textContent = 'Join Now';
         } else {
-            document.getElementById('modal-instruction').textContent = 'Complete 3 unique ad redirects in a batch.';
-            document.getElementById('modal-action-btn').textContent = 'Watch Ad & Verify Redirect';
+            document.getElementById('modal-instruction').textContent = 'Watch the ad and tap Join Now to claim your $0.005 reward.';
+            document.getElementById('modal-action-btn').textContent = 'Watch Ad';
         }
     }
 
@@ -506,6 +507,16 @@
         if (dailyData.count >= DAILY_MAX_ADS) {
             closeAdsgramModal();
             return alert(`🚫 Daily limit of ${DAILY_MAX_ADS} ads reached for today.`);
+        }
+
+        // If user already has 1 redirect, tapping "Join Now" grants the reward
+        if (uniqueRedirectsSet.size >= 1) {
+            closeAdsgramModal();
+            grantReward(0, 'Adsgram Network ($0.005)', REWARD_PER_BATCH);
+            alert(`🎉 Success! You earned $${REWARD_PER_BATCH.toFixed(3)}. Enjoy your reward!`);
+            uniqueRedirectsSet.clear();
+            totalWatchedAdsCount = 0;
+            return;
         }
 
         if (!adsgramController) {
@@ -527,32 +538,26 @@
             totalWatchedAdsCount++;
             incrementDailyAdCount();
 
-            let redirectIdentifier = `ad_step_${uniqueRedirectsSet.size + 1}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-
+            let redirectIdentifier = `ad_step_1_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
             uniqueRedirectsSet.add(redirectIdentifier);
-            const currentSize = uniqueRedirectsSet.size;
 
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
 
-            alert(`✅ Ad watched successfully! Unique count: ${currentSize}/3`);
-
-            if (currentSize >= 3) {
-                closeAdsgramModal();
-                grantReward(0, 'Adsgram Network ($0.005 Batch)', REWARD_PER_BATCH);
-                alert(`🎉 Batch complete! You earned $${REWARD_PER_BATCH.toFixed(3)}.`);
-                uniqueRedirectsSet.clear();
-                totalWatchedAdsCount = 0;
-            } else {
-                updateAdsgramModalUI();
-            }
+            updateAdsgramModalUI();
+            alert('✅ Ad watched successfully! Now tap "Join Now" to claim your reward.');
 
         }).catch((err) => {
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-            alert('Ad view was canceled or failed.');
+            alert('Ad view was canceled or failed. Please tap "Join Now" for next time if you completed it, or try watching again.');
+            
+            // Fallback instruction check if user taps Join Now without redirect count registering
+            if (uniqueRedirectsSet.size === 0) {
+                alert('⚠️ Please tap to watch the ad first before joining!');
+            }
         });
     }
 
@@ -581,7 +586,6 @@
 
         if (telegaAds) {
             try {
-                // Safety timeout in case the SDK hangs or fails to trigger a callback
                 let isResolved = false;
                 const safetyTimeout = setTimeout(() => {
                     if (!isResolved) {
@@ -589,7 +593,7 @@
                         resetTelegaButton(btn, cashReward, originalText);
                         alert("⚠️ Ad inventory is currently empty or failed to load. Please try another ad block.");
                     }
-                }, 10000); // 10 seconds timeout
+                }, 10000);
 
                 const adResult = telegaAds.ad_show({
                     adBlockUuid: uuid

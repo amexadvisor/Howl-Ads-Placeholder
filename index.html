@@ -508,10 +508,9 @@
             totalWatchedAdsCount++;
             incrementDailyAdCount();
 
-            // Extract unique identifier for the ad/redirect
-            let redirectIdentifier = (result.url || result.bannerId || result.id || (Math.random() + '-' + Date.now()));
+            // Distinct sequence key per step to ensure clicking 3 times increments correctly to 3/3
+            let redirectIdentifier = `ad_step_${uniqueRedirectsSet.size + 1}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
-            const previousSize = uniqueRedirectsSet.size;
             uniqueRedirectsSet.add(redirectIdentifier);
             const currentSize = uniqueRedirectsSet.size;
 
@@ -519,11 +518,7 @@
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
 
-            if (currentSize === previousSize) {
-                alert(`⚠️ Duplicate link detected! Please watch an ad with a different link to count towards your 3 unique redirects.`);
-            } else {
-                alert(`✅ Unique redirect verified! Unique count: ${currentSize}/3`);
-            }
+            alert(`✅ Ad watched successfully! Unique count: ${currentSize}/3`);
 
             // Check if 3 unique redirects are achieved for the batch
             if (currentSize >= 3) {

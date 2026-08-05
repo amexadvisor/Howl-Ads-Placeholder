@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,25 +41,82 @@
         radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
     }
 
-    /* Opening Splash Screen Animation */
+    /* Ultimate Tech Splash Screen Animation */
     #splash-screen {
-      position: absolute; inset: 0; background: var(--bg-dark); z-index: 9999;
+      position: absolute; inset: 0; background: #040508; z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
     }
-    #splash-screen.fade-out { opacity: 0; visibility: hidden; }
+    #splash-screen.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    /* Cyberpunk Grid Background Lines */
+    .splash-grid {
+      position: absolute; inset: 0; background-image: 
+        linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+      background-size: 30px 30px; animation: gridMove 20s linear infinite; opacity: 0.6;
+    }
+    @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 30px 30px; } }
+
+    /* Tech Particle Rings */
+    .tech-ring {
+      position: absolute; border-radius: 50%; border: 1px dashed rgba(16, 185, 129, 0.3);
+      animation: rotateRing 12s linear infinite; pointer-events: none;
+    }
+    .ring-1 { width: 220px; height: 220px; border-color: rgba(16, 185, 129, 0.4); }
+    .ring-2 { width: 280px; height: 280px; border-style: solid; border-width: 1px; border-color: rgba(99, 102, 241, 0.2); animation-direction: reverse; animation-duration: 18s; }
+    @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* Center Logo Hologram Box */
+    .splash-logo-container {
+      position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px; animation: floatLogo 3s ease-in-out infinite alternate;
+    }
+    @keyframes floatLogo { 0% { transform: translateY(0px) scale(0.98); } 100% { transform: translateY(-8px) scale(1.02); } }
+
+    .splash-radar {
+      position: absolute; inset: -15px; border-radius: 50%;
+      background: conic-gradient(from 0deg at 50% 50%, rgba(16, 185, 129, 0) 0%, rgba(16, 185, 129, 0.3) 80%, rgba(16, 185, 129, 0.8) 100%);
+      animation: spinRadar 2.5s linear infinite; filter: blur(4px);
+    }
+    @keyframes spinRadar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
     .splash-logo {
-      width: 84px; height: 84px; border-radius: 28px; background: linear-gradient(135deg, var(--primary), var(--accent));
+      position: relative; width: 96px; height: 96px; border-radius: 30px; 
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       display: flex; align-items: center; justify-content: center; overflow: hidden;
-      box-shadow: 0 0 30px var(--primary-glow); animation: pulseSplash 1.5s ease-in-out infinite alternate;
-      margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: 0 0 40px var(--primary-glow), inset 0 0 15px rgba(255,255,255,0.4);
+      border: 2px solid rgba(255,255,255,0.3); z-index: 2;
     }
     .splash-logo img { width: 100%; height: 100%; object-fit: cover; }
-    @keyframes pulseSplash { from { transform: scale(0.95); } to { transform: scale(1.05); } }
-    .splash-title { font-size: 22px; font-weight: 800; letter-spacing: 1px; color: #fff; margin-bottom: 24px; }
-    .splash-loader { width: 160px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; position: relative; }
-    .splash-loader-bar { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--primary); animation: loadBar 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; box-shadow: 0 0 10px var(--primary); }
-    @keyframes loadBar { 0% { width: 0%; } 50% { width: 70%; } 100% { width: 100%; } }
+
+    .splash-title-wrapper { text-align: center; z-index: 2; margin-bottom: 24px; }
+    .splash-title { 
+      font-size: 24px; font-weight: 800; letter-spacing: 3px; color: #fff; 
+      text-shadow: 0 0 20px var(--primary-glow); margin: 0 0 6px 0;
+      animation: glitchText 2s infinite;
+    }
+    .splash-subtitle {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; color: var(--primary);
+    }
+
+    /* Advanced Tech Progress Bar */
+    .splash-loader-container { width: 220px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .splash-loader { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+    .splash-loader-bar { 
+      position: absolute; top: 0; left: 0; height: 100%; width: 0%; 
+      background: linear-gradient(90deg, var(--accent), var(--primary)); 
+      animation: loadBarTech 1.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; 
+      box-shadow: 0 0 15px var(--primary); 
+    }
+    @keyframes loadBarTech { 
+      0% { width: 0%; } 
+      40% { width: 45%; } 
+      75% { width: 85%; } 
+      100% { width: 100%; } 
+    }
+    .splash-percentage { font-size: 10px; font-family: monospace; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
 
     .container {
       width: 100%; height: 100%; max-width: 410px; background: rgba(9, 10, 15, 0.85); 
@@ -254,13 +310,28 @@
 </head>
 <body>
 
-  <!-- Opening Splash Screen Animation -->
+  <!-- Ultimate Tech Opening Splash Screen Animation -->
   <div id="splash-screen">
-    <div class="splash-logo">
-      <img src="51499.jpg" alt="HOWL Emblem">
+    <div class="splash-grid"></div>
+    <div class="tech-ring ring-1"></div>
+    <div class="tech-ring ring-2"></div>
+
+    <div class="splash-logo-container">
+      <div class="splash-radar"></div>
+      <div class="splash-logo">
+        <img src="https://t.me/superbet_et/670" alt="HOWL Emblem">
+      </div>
     </div>
-    <div class="splash-title">HOWL REWARDS</div>
-    <div class="splash-loader"><div class="splash-loader-bar"></div></div>
+
+    <div class="splash-title-wrapper">
+      <h1 class="splash-title">HOWL PROTOCOL</h1>
+      <div class="splash-subtitle">INITIALIZING SECURE REWARDS...</div>
+    </div>
+
+    <div class="splash-loader-container">
+      <div class="splash-loader"><div class="splash-loader-bar" id="loaderBar"></div></div>
+      <div class="splash-percentage" id="loaderPercent">0%</div>
+    </div>
   </div>
 
   <div class="container">
@@ -286,7 +357,7 @@
 
         <div class="balance-card">
             <div class="currency-emblem">
-              <img src="51499.jpg" alt="HOWL Emblem">
+              <img src="https://t.me/superbet_et/670" alt="HOWL Emblem">
             </div>
             <p class="label">Total Balance</p>
             <h1 class="balance-value"><span id="balance-value">0</span> <span class="currency-tag">HOWL</span></h1>
@@ -300,7 +371,6 @@
             <span id="progress-percent">0%</span>
           </div>
           <div class="segmented-progress" id="segmented-progress">
-            <!-- 20 segments generated dynamically or via static markup -->
             <div class="segment" id="seg-0"></div><div class="segment" id="seg-1"></div><div class="segment" id="seg-2"></div><div class="segment" id="seg-3"></div>
             <div class="segment" id="seg-4"></div><div class="segment" id="seg-5"></div><div class="segment" id="seg-6"></div><div class="segment" id="seg-7"></div>
             <div class="segment" id="seg-8"></div><div class="segment" id="seg-9"></div><div class="segment" id="seg-10"></div><div class="segment" id="seg-11"></div>
@@ -411,7 +481,7 @@
     let historyLog = [];
     let tgUser = null;
     let customAvatarUrl = null;
-    const payoutGoal = 25000; // $2.50 minimum at 10,000 Howl = $1
+    const payoutGoal = 25000;
 
     let adsgramLastRun = 0;
     let telegaLastRun = 0;
@@ -432,10 +502,22 @@
         initApp();
         setInterval(updateCooldownTimers, 1000);
         
+        // Dynamic Splash Progress Counter Simulation
+        let percentTracker = 0;
+        const percentEl = document.getElementById('loaderPercent');
+        const progressInterval = setInterval(() => {
+            percentTracker += Math.floor(Math.random() * 12) + 8;
+            if (percentTracker >= 100) {
+                percentTracker = 100;
+                clearInterval(progressInterval);
+            }
+            if (percentEl) percentEl.textContent = `${percentTracker}%`;
+        }, 140);
+
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash) splash.classList.add('fade-out');
-        }, 1200);
+        }, 1800);
     });
 
     function initApp() {
@@ -474,7 +556,6 @@
             customAvatarUrl = data.customAvatarUrl || null;
         }
 
-        // Daily reset check
         const currentDate = new Date().toDateString();
         if (lastResetDate !== currentDate) {
             adsgramCountToday = 0;
@@ -499,7 +580,6 @@
     function updateCooldownTimers() {
         const now = Date.now();
 
-        // Adsgram Cooldown (5 Seconds)
         const adsgramDiff = Math.floor((now - adsgramLastRun) / 1000);
         const adsgramCard = document.getElementById('adsgramCard');
         const adsgramCD = document.getElementById('adsgramCD');
@@ -517,7 +597,6 @@
             adsgramArrow.style.display = 'flex';
         }
 
-        // Telega Cooldown (5 Minutes = 300 Seconds)
         const telegaDiff = Math.floor((now - telegaLastRun) / 1000);
         const telegaCard = document.getElementById('telegaBtn1');
         const telegaCD = document.getElementById('telegaBtn1CD');
@@ -552,7 +631,6 @@
         const progressPercent = Math.min(100, (adsgramCountToday / 20) * 100);
         document.getElementById('progress-percent').textContent = `${progressPercent.toFixed(0)}%`;
 
-        // Update 20 segmented blocks for Adsgram
         for (let i = 0; i < 20; i++) {
             const seg = document.getElementById(`seg-${i}`);
             if (seg) {
@@ -626,7 +704,6 @@
         }
     }
 
-    // Monetag Ad Type 1: Interstitial (2 HOWL)
     function showMonetagAd1() {
         if (typeof show_9954272 !== 'function') {
             return alert('Ad provider is initializing. Please wait a moment.');
@@ -639,7 +716,6 @@
         });
     }
 
-    // Monetag Ad Type 2: Popup (2 HOWL)
     function showMonetagAd2() {
         if (typeof show_9954272 !== 'function') {
             return alert('Ad provider is initializing. Please wait a moment.');
@@ -652,7 +728,6 @@
         });
     }
 
-    // Adsgram Task Flow (25 Howl, 20 limit, 5s cooldown)
     function startAdsgramTaskFlow() {
         if (adsgramCountToday >= 20) {
             return alert('🚫 Daily Adsgram limit reached (20/20 ads completed). Come back tomorrow!');
@@ -720,7 +795,6 @@
         });
     }
 
-    // Telega.io Task Handler (50 Howl, 5 min cooldown, unlimited)
     function startTelegaTask(uuid, rewardAmount, buttonId) {
         const now = Date.now();
         if (now - telegaLastRun < 300000) {

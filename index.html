@@ -241,7 +241,7 @@
         </div>
 
         <!-- Adsbitvex Campaign Task (ID: 000281) -->
-        <div class="task-card" onclick="startAdsbitvexTask()">
+        <div class="task-card" id="adsbitvexBtn" onclick="startAdsbitvexTask()">
             <div class="task-icon" style="color: #ff8c00; background: rgba(255,140,0,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
             <div class="task-details"><h3>Adsbitvex Ad Network</h3><p>Complete sponsored interaction (ID: 000281).</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
@@ -517,7 +517,6 @@
             totalWatchedAdsCount++;
             incrementDailyAdCount();
 
-            // Distinct sequence key per step to ensure clicking 3 times increments correctly to 3/3
             let redirectIdentifier = `ad_step_${uniqueRedirectsSet.size + 1}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
             uniqueRedirectsSet.add(redirectIdentifier);
@@ -529,7 +528,6 @@
 
             alert(`✅ Ad watched successfully! Unique count: ${currentSize}/3`);
 
-            // Check if 3 unique redirects are achieved for the batch
             if (currentSize >= 3) {
                 closeAdsgramModal();
                 grantReward(0, 'Adsgram Network ($0.005 Batch)', REWARD_PER_BATCH);
@@ -548,19 +546,35 @@
         });
     }
 
-    // Adsbitvex Campaign Task Handler (App ID: 000281)
+    // Adsbitvex Campaign Task Handler (App ID: 000281) with window.showadsbitvex()
     function startAdsbitvexTask() {
+        const btn = document.getElementById("adsbitvexBtn");
+        if (btn) {
+            btn.style.pointerEvents = "none";
+            const desc = btn.querySelector('.task-details p');
+            if(desc) desc.textContent = "Launching Ad...";
+        }
+
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
 
-        // Check if Adsbitvex script function exists globally
-        if (typeof window.showAdsbitvexAd === "function") {
-            window.showAdsbitvexAd().then(() => {
+        if (typeof window.showadsbitvex === "function") {
+            window.showadsbitvex().then(() => {
                 grantReward(2, 'Adsbitvex Network');
-                alert('🎉 Adsbitvex ad completed! Earned +2 points.');
-            }).catch(() => {
-                alert('Ad was closed or unavailable.');
+                if (btn) {
+                    const desc = btn.querySelector('.task-details p');
+                    if(desc) desc.textContent = "Completed ✅";
+                }
+                alert("🎉 Adsbitvex ad completed! Earned +2 points.");
+            }).catch(e => {
+                console.error("Ad error:", e);
+                if (btn) {
+                    btn.style.pointerEvents = "auto";
+                    const desc = btn.querySelector('.task-details p');
+                    if(desc) desc.textContent = "Complete sponsored interaction (ID: 000281).";
+                }
+                alert("Ad was closed or failed to load. Please try again.");
             });
         } else {
             // Fallback opening link if triggered directly via SDK URL
@@ -571,10 +585,13 @@
                 window.open(fallbackUrl, '_blank');
             }
             
-            // Temporary confirmation reward mechanism for testing
             setTimeout(() => {
                 grantReward(2, 'Adsbitvex Network');
-                alert('🎉 Task verified! Earned +2 points.');
+                if (btn) {
+                    const desc = btn.querySelector('.task-details p');
+                    if(desc) desc.textContent = "Completed ✅";
+                }
+                alert("🎉 Task verified! Earned +2 points.");
             }, 6000);
         }
     }

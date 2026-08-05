@@ -319,7 +319,7 @@
     <div class="splash-logo-container">
       <div class="splash-radar"></div>
       <div class="splash-logo">
-        <img src="https://t.me/superbet_et/670" alt="HOWL Emblem">
+        <img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL Emblem">
       </div>
     </div>
 
@@ -343,7 +343,7 @@
       <div id="home-view" class="view active">
         <div class="user-header-card">
           <div class="user-avatar" id="profile-pic" title="Tap to change avatar">
-            <span>HW</span>
+            <img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="Avatar">
             <input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)">
           </div>
           <div class="user-info">
@@ -357,7 +357,7 @@
 
         <div class="balance-card">
             <div class="currency-emblem">
-              <img src="https://t.me/superbet_et/670" alt="HOWL Emblem">
+              <img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL Emblem">
             </div>
             <p class="label">Total Balance</p>
             <h1 class="balance-value"><span id="balance-value">0</span> <span class="currency-tag">HOWL</span></h1>
@@ -480,7 +480,7 @@
     let lastResetDate = new Date().toDateString();
     let historyLog = [];
     let tgUser = null;
-    let customAvatarUrl = null;
+    let customAvatarUrl = "https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg";
     const payoutGoal = 25000;
 
     let adsgramLastRun = 0;
@@ -502,7 +502,6 @@
         initApp();
         setInterval(updateCooldownTimers, 1000);
         
-        // Dynamic Splash Progress Counter Simulation
         let percentTracker = 0;
         const percentEl = document.getElementById('loaderPercent');
         const progressInterval = setInterval(() => {
@@ -546,14 +545,14 @@
     }
     
     function loadData() {
-        const savedData = localStorage.getItem('howlRewardsBotV5');
+        const savedData = localStorage.getItem('howlRewardsBotV6');
         if (savedData) {
             const data = JSON.parse(savedData);
             balance = data.balance || 0;
             adsgramCountToday = data.adsgramCountToday || 0;
             lastResetDate = data.lastResetDate || new Date().toDateString();
             historyLog = data.historyLog || [];
-            customAvatarUrl = data.customAvatarUrl || null;
+            customAvatarUrl = data.customAvatarUrl || "https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg";
         }
 
         const currentDate = new Date().toDateString();
@@ -566,7 +565,7 @@
     }
 
     function saveData() {
-        localStorage.setItem('howlRewardsBotV5', JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog, customAvatarUrl }));
+        localStorage.setItem('howlRewardsBotV6', JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog, customAvatarUrl }));
     }
 
     function checkStoredCooldowns() {
@@ -657,6 +656,7 @@
             }
         } else {
             document.getElementById('username').textContent = 'Web Operator';
+            profilePicDiv.innerHTML = `<img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="Avatar"><input type="file" id="avatarUpload" accept="image/*" onchange="handleAvatarUpload(event)">`;
         }
     }
 

@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <meta name="monetag" content="67ef6bfd7f6fc61b2655ef81898058b9"/>
-  <title>Easy Earning Bot</title>
+  <title>Nexus Rewards | Elite Earning Platform</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Monetag SDK Load -->
   <script src='//libtl.com/sdk.js' data-zone='9954272' data-sdk='show_9954272'></script>
@@ -16,161 +17,238 @@
 
   <style>
     :root {
-      --primary-color: #2ed914; 
-      --primary-hover: #3bff21; 
-      --secondary-color: #222226; 
-      --background-color: #121215; 
-      --text-color: #f0f0f0; 
-      --text-muted-color: #9c9ca4; 
-      --accent-color: #ff8c00; 
-      --card-bg: #1c1c21;
-      --card-border: rgba(255, 255, 255, 0.07);
+      --primary: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.4);
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.4);
+      --gold: #f59e0b;
+      --bg-dark: #090a0f;
+      --card-bg: rgba(18, 20, 31, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-glow: rgba(16, 185, 129, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-      margin: 0; padding: 0; background-color: var(--background-color); color: var(--text-color); 
-      font-family: 'Segoe UI', 'Roboto', sans-serif; display: flex; justify-content: center; align-items: center; 
-      height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased;
-    }
-    .container {
-      width: 100%; height: 100%; max-width: 400px; background: var(--background-color); 
-      display: flex; flex-direction: column; overflow: hidden; position: relative;
-      box-shadow: 0 0 30px rgba(0,0,0,0.8);
-    }
-    main { flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
-    .view { display: none; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .view.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Modern Glassmorphic Header Profile Card */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-main); 
+      font-family: 'Plus Jakarta Sans', sans-serif; display: flex; justify-content: center; align-items: center; 
+      height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
+    }
+
+    .container {
+      width: 100%; height: 100%; max-width: 410px; background: rgba(9, 10, 15, 0.85); 
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      display: flex; flex-direction: column; overflow: hidden; position: relative;
+      box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.1);
+      border-left: 1px solid rgba(255,255,255,0.04);
+      border-right: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* Ambient Live Glowing Orbs in Background */
+    .ambient-glow {
+      position: absolute; width: 180px; height: 180px; border-radius: 50%;
+      filter: blur(60px); z-index: 0; pointer-events: none; opacity: 0.5;
+      animation: floatOrb 8s ease-in-out infinite alternate;
+    }
+    .orb-1 { top: -40px; left: -40px; background: var(--primary); }
+    .orb-2 { bottom: 60px; right: -40px; background: var(--accent); animation-delay: -4s; }
+
+    @keyframes floatOrb {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(20px) scale(1.15); }
+    }
+
+    main { flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; z-index: 1; position: relative; }
+    main::-webkit-scrollbar { width: 4px; }
+    main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    .view { display: none; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    .view.active { display: block; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Glassmorphic User Header */
     .user-header-card {
-      background: linear-gradient(135deg, rgba(28,28,33,0.9), rgba(38,38,46,0.7));
-      border-radius: 20px; padding: 18px; margin-bottom: 20px; display: flex; align-items: center; 
-      border: 1px solid var(--card-border); backdrop-filter: blur(10px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      background: var(--card-bg);
+      border-radius: 22px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; 
+      border: 1px solid var(--card-border); backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative; overflow: hidden;
+    }
+    .user-header-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);
+      box-shadow: 0 0 12px var(--primary);
     }
     .user-avatar {
-      width: 54px; height: 54px; border-radius: 50%; margin-right: 15px; overflow: hidden; 
-      background: linear-gradient(135deg, var(--primary-color), #00a651); 
-      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; color: #000;
-      box-shadow: 0 4px 12px rgba(46, 217, 20, 0.3); border: 2px solid rgba(255,255,255,0.1);
+      width: 52px; height: 52px; border-radius: 50%; margin-right: 14px; overflow: hidden; 
+      background: linear-gradient(135deg, var(--primary), var(--accent)); 
+      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #fff;
+      box-shadow: 0 4px 15px var(--primary-glow); border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0;
     }
     .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .user-info .username { font-size: 18px; font-weight: 700; margin: 0; color: #fff; letter-spacing: 0.3px; }
-    .user-info .title { font-size: 13px; color: var(--text-muted-color); margin: 3px 0 0; }
+    .user-info .username { font-size: 17px; font-weight: 700; margin: 0; color: #fff; letter-spacing: 0.2px; }
+    .user-info .badge-container { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .user-info .title { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .live-indicator {
+      display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700;
+      color: var(--primary); background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 10px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .live-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; animation: pulseDot 1.5s infinite; }
+    @keyframes pulseDot { 0% { transform: scale(0.95); boxShadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); boxShadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); boxShadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
-    /* Modern Sleek Balance Card */
+    /* Ultra Balance Card */
     .balance-card {
-      background: linear-gradient(135deg, #00b050 0%, #00682f 100%); 
-      border-radius: 20px; padding: 24px 20px; text-align: center; margin-bottom: 25px;
-      box-shadow: 0 10px 25px rgba(0, 176, 80, 0.25); position: relative; overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.15);
+      background: linear-gradient(135deg, #0d1f18 0%, #06110e 100%); 
+      border-radius: 24px; padding: 24px 20px; text-align: center; margin-bottom: 22px;
+      box-shadow: 0 15px 35px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(16, 185, 129, 0.2); 
+      position: relative; overflow: hidden;
+      border: 1px solid rgba(16, 185, 129, 0.25);
     }
-    .balance-card::before {
-      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none;
+    .balance-card::after {
+      content: ''; position: absolute; top: -50%; right: -50%; width: 150%; height: 150%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 60%); pointer-events: none;
     }
-    .balance-card .label { font-size: 14px; text-transform: uppercase; letter-spacing: 1.2px; opacity: 0.85; margin-bottom: 6px; font-weight: 600; }
-    .balance-card .balance-value { font-size: 38px; font-weight: 900; margin: 0; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    .balance-card .points-value { font-size: 15px; font-weight: 700; color: #ffe600; margin-top: 10px; display: inline-block; background: rgba(0,0,0,0.2); padding: 4px 12px; border-radius: 20px; }
+    .balance-card .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 8px; font-weight: 700; }
+    .balance-card .balance-value { font-size: 40px; font-weight: 800; margin: 0; letter-spacing: -0.5px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .balance-card .points-badge { 
+      font-size: 13px; font-weight: 700; color: var(--gold); margin-top: 12px; display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245, 158, 11, 0.12); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.25);
+    }
 
-    /* Progress Bar Styles */
+    /* Progress Widget */
     .progress-section {
-      background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 25px;
-      border: 1px solid var(--card-border); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 22px;
+      border: 1px solid var(--card-border); backdrop-filter: blur(12px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     }
-    .progress-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted-color); }
-    .progress-info span:last-child { color: var(--primary-color); }
-    .progress-bar-container { width: 100%; height: 10px; background: var(--secondary-color); border-radius: 5px; overflow: hidden; position: relative; }
-    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary-color), #00ff88); width: 0%; border-radius: 5px; transition: width 0.4s ease; box-shadow: 0 0 10px rgba(46,217,20,0.5); }
+    .progress-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .progress-info span:last-child { color: var(--primary); }
+    .progress-bar-container { width: 100%; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; position: relative; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #34d399); width: 0%; border-radius: 4px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 12px var(--primary-glow); }
 
-    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; padding-left: 10px; border-left: 4px solid var(--primary-color); color: #fff; letter-spacing: 0.3px; }
-    
-    /* Modern Task Cards */
+    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: #fff; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+    .section-title i { color: var(--primary); font-size: 14px; }
+
+    /* Gorgeous Task Cards */
     .task-card {
-      background: var(--card-bg); border-radius: 16px; padding: 16px 18px; margin-bottom: 12px; 
+      background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 12px; 
       display: flex; align-items: center; cursor: pointer; 
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease; 
-      border: 1px solid var(--card-border); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
+      border: 1px solid var(--card-border); backdrop-filter: blur(12px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2); position: relative; overflow: hidden;
     }
-    .task-card:hover { transform: translateY(-2px); background-color: #24242c; border-color: rgba(46,217,20,0.3); }
-    .task-card:active { transform: scale(0.98); }
+    .task-card:hover { transform: translateY(-3px); border-color: var(--card-border-glow); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15); }
+    .task-card:active { transform: scale(0.97); }
+    
+    .task-card.cooldown-active {
+      opacity: 0.7; cursor: not-allowed; border-color: rgba(255,255,255,0.04);
+    }
+    .task-card.cooldown-active:hover { transform: none; box-shadow: none; }
+
     .task-icon { 
-      font-size: 20px; color: var(--primary-color); background: rgba(46, 217, 20, 0.1); 
-      width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; 
-      margin-right: 15px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(46,217,20,0.2);
+      font-size: 20px; color: var(--primary); background: rgba(16, 185, 129, 0.12); 
+      width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; 
+      margin-right: 14px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.3);
+      transition: transform 0.3s ease;
     }
+    .task-card:hover .task-icon { transform: scale(1.08); }
     .task-details { flex-grow: 1; }
-    .task-details h3 { margin: 0; font-size: 15px; font-weight: 600; color: #fff; }
-    .task-details p { margin: 4px 0 0; font-size: 12px; color: var(--text-muted-color); }
-    .task-arrow { width: 28px; height: 28px; border-radius: 50%; background: var(--secondary-color); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-muted-color); margin-left: 10px; flex-shrink: 0; }
+    .task-details h3 { margin: 0; font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2px; }
+    .task-details p { margin: 4px 0 0; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    
+    .task-action-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-left: 10px; flex-shrink: 0; }
+    .task-arrow { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
+    .task-card:hover .task-arrow { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+    
+    .cooldown-badge {
+      font-size: 10px; font-weight: 700; color: var(--gold); background: rgba(245, 158, 11, 0.12);
+      padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3); display: none; white-space: nowrap;
+    }
 
     /* History & Lists */
     .list-item {
-      display: flex; align-items: center; background: var(--card-bg); padding: 14px 16px; 
-      border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--card-border);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex; align-items: center; background: var(--card-bg); padding: 14px; 
+      border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--card-border);
+      backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    .list-item .history-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(46,217,20,0.1); display: flex; align-items: center; justify-content: center; margin-right: 14px; font-size: 16px; }
+    .list-item .history-icon { width: 38px; height: 38px; border-radius: 12px; background: rgba(16,185,129,0.12); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 15px; color: var(--primary); flex-shrink: 0; }
     .list-item .info { flex-grow: 1; }
-    .list-item .info .name { font-weight: 600; font-size: 14px; color: #fff; }
-    .list-item .info .detail { font-size: 12px; color: var(--text-muted-color); margin-top: 2px; }
+    .list-item .info .name { font-weight: 700; font-size: 13px; color: #fff; }
+    .list-item .info .detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-    /* Modern Footer Navigation Bar */
+    /* Modern Glass Footer Nav */
     .footer-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 400px; margin: 0 auto; 
-      display: flex; justify-content: space-around; background: rgba(26, 26, 32, 0.95); 
-      backdrop-filter: blur(12px); padding: 10px 0 14px 0; border-top: 1px solid var(--card-border); z-index: 100;
-      box-shadow: 0 -10px 25px rgba(0,0,0,0.3);
+      position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 410px; margin: 0 auto; 
+      display: flex; justify-content: space-around; background: rgba(12, 14, 22, 0.85); 
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      padding: 10px 6px 16px 6px; border-top: 1px solid rgba(255,255,255,0.06); z-index: 100;
+      box-shadow: 0 -15px 35px rgba(0,0,0,0.6);
     }
     .nav-button {
-      display: flex; flex-direction: column; align-items: center; color: var(--text-muted-color); 
-      background: none; border: none; font-size: 11px; font-weight: 600; transition: all 0.2s ease; cursor: pointer; padding: 4px 12px;
+      display: flex; flex-direction: column; align-items: center; color: var(--text-muted); 
+      background: none; border: none; font-size: 10px; font-weight: 700; transition: all 0.25s ease; cursor: pointer; padding: 6px 10px; border-radius: 12px;
     }
-    .nav-button .icon { font-size: 20px; margin-bottom: 4px; transition: transform 0.2s ease; }
-    .nav-button:hover { color: var(--text-color); }
-    .nav-button.active { color: var(--primary-color); }
-    .nav-button.active .icon { transform: translateY(-2px); }
+    .nav-button .icon { font-size: 18px; margin-bottom: 4px; transition: transform 0.25s ease; }
+    .nav-button:hover { color: var(--text-main); }
+    .nav-button.active { color: var(--primary); background: rgba(16, 185, 129, 0.08); }
+    .nav-button.active .icon { transform: translateY(-2px); text-shadow: 0 0 10px var(--primary-glow); }
 
     /* Styled Buttons & Forms */
     .btn {
-      display: block; width: 100%; margin: 10px auto; padding: 15px; font-size: 16px; font-weight: 700;
-      background: linear-gradient(135deg, #ff6a88, #ff3366); color: white; border: none; border-radius: 14px; 
-      cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;
-      box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+      display: block; width: 100%; margin: 10px auto; padding: 15px; font-size: 15px; font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; border-radius: 16px; 
+      cursor: pointer; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); text-transform: uppercase; letter-spacing: 0.8px;
+      box-shadow: 0 6px 20px var(--primary-glow);
     }
-    .btn:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn:hover { opacity: 0.95; transform: translateY(-2px); box-shadow: 0 10px 25px var(--primary-glow); }
     .btn:active { transform: scale(0.98); }
-    .btn:disabled { background: #3a3a42; color: #777; cursor: not-allowed; box-shadow: none; }
+    .btn:disabled { background: rgba(255,255,255,0.08); color: var(--text-muted); cursor: not-allowed; box-shadow: none; border: 1px solid rgba(255,255,255,0.04); }
     
     .form input, .form select {
-      padding: 14px; font-size: 15px; border: 1px solid var(--card-border); border-radius: 12px; 
+      padding: 14px 16px; font-size: 14px; border: 1px solid var(--card-border); border-radius: 14px; 
       width: 100%; box-sizing: border-box; margin-bottom: 12px; background: var(--card-bg); 
-      color: var(--text-color); text-align: center; outline: none; transition: border-color 0.2s;
+      color: var(--text-main); text-align: center; outline: none; transition: all 0.25s ease;
+      backdrop-filter: blur(10px); font-weight: 600;
     }
-    .form input:focus, .form select:focus { border-color: var(--primary-color); }
-    #withdraw h3, #withdraw p { margin: 10px 0; text-align: center; }
+    .form input:focus, .form select:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+    
+    #withdraw { text-align: center; }
+    #withdraw h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+    #withdraw p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 600; }
+    #withdraw p strong { color: var(--primary); }
   </style>
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
   <div class="container">
+    <div class="ambient-glow orb-1"></div>
+    <div class="ambient-glow orb-2"></div>
+
     <main id="main-content">
       <!-- HOME VIEW -->
       <div id="home-view" class="view active">
         <div class="user-header-card">
-          <div class="user-avatar" id="profile-pic">EE</div>
+          <div class="user-avatar" id="profile-pic">NR</div>
           <div class="user-info">
             <h2 class="username" id="username">Loading...</h2>
-            <p class="title"><i class="fa-solid fa-shield-halved" style="color:var(--primary-color);"></i> Verified Earner</p>
+            <div class="badge-container">
+              <span class="title"><i class="fa-solid fa-shield-halved" style="color:var(--primary);"></i> Verified Earner</span>
+              <div class="live-indicator"><span class="live-dot"></span> LIVE</div>
+            </div>
           </div>
         </div>
 
         <div class="balance-card">
-            <p class="label">Total Balance</p>
+            <p class="label">Total Liquid Balance</p>
             <h1 class="balance-value" id="balance-value">$0.00</h1>
-            <div class="points-value"><i class="fa-solid fa-coins"></i> <span id="points-value">0</span> Points</div>
+            <div class="points-badge"><i class="fa-solid fa-coins"></i> <span id="points-value">0</span> Points</div>
         </div>
 
         <!-- Progress Widget to Payout Goal -->
@@ -184,56 +262,72 @@
           </div>
         </div>
 
-        <h2 class="section-title">Quick Actions</h2>
+        <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Quick Navigation</h2>
         <div class="task-card" onclick="showView('tasks-view')">
-            <div class="task-icon"><i class="fa-solid fa-bolt"></i></div>
-            <div class="task-details"><h3>Start Earning Now</h3><p>Watch monetized ads and complete tasks.</p></div>
+            <div class="task-icon"><i class="fa-solid fa-rocket"></i></div>
+            <div class="task-details"><h3>Launch Earning Hub</h3><p>Execute monetization tasks and collect rewards.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
         <div class="task-card" onclick="showView('withdraw')">
-            <div class="task-icon"><i class="fa-solid fa-wallet"></i></div>
-            <div class="task-details"><h3>Withdraw Funds</h3><p>Transfer your earnings securely.</p></div>
+            <div class="task-icon" style="color: var(--accent); background: rgba(99,102,241,0.12); box-shadow: inset 0 0 0 1px rgba(99,102,241,0.3);"><i class="fa-solid fa-wallet"></i></div>
+            <div class="task-details"><h3>Secure Withdrawal</h3><p>Transfer accumulated earnings to your wallet.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
       </div>
 
       <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
-        <h2 class="section-title">Earning Tasks</h2>
+        <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Active Monetization Modules</h2>
         
         <!-- Monetag Ad Type 1 -->
         <div class="task-card" onclick="showMonetagAd1()">
             <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
-            <div class="task-details"><h3>Monetag Interstitial</h3><p>Watch a full-screen ad to earn +1 point.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+            <div class="task-details"><h3>Monetag Interstitial</h3><p>Watch full-screen high yield ad for +1 point.</p></div>
+            <div class="task-action-meta">
+              <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+            </div>
         </div>
 
         <!-- Monetag Ad Type 2 -->
         <div class="task-card" onclick="showMonetagAd2()">
             <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
-            <div class="task-details"><h3>Monetag Popup Ad</h3><p>View pop ad stream for +3 points.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+            <div class="task-details"><h3>Monetag Popup Stream</h3><p>Engage with dynamic stream for +3 points.</p></div>
+            <div class="task-action-meta">
+              <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+            </div>
         </div>
 
-        <!-- Adsgram Rewarded Block (ID: 41229) with Automatic Redirect Detection -->
-        <div class="task-card" onclick="startAdsgramTaskFlow()">
-            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-tv"></i></div>
-            <div class="task-details"><h3>Adsgram Rewarded Ad</h3><p>Watch ad and interact with redirect for $0.005 reward.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+        <!-- Adsgram Rewarded Block (5 sec cooldown) -->
+        <div class="task-card" id="adsgramCard" onclick="startAdsgramTaskFlow()">
+            <div class="task-icon" style="color: #38bdf8; background: rgba(56,189,248,0.12); box-shadow: inset 0 0 0 1px rgba(56,189,248,0.3);"><i class="fa-solid fa-tv"></i></div>
+            <div class="task-details">
+              <h3>Adsgram Rewarded Ad</h3>
+              <p>Watch ad & redirect for $0.005 (5s cooldown)</p>
+            </div>
+            <div class="task-action-meta">
+              <span id="adsgramCD" class="cooldown-badge">5s</span>
+              <div class="task-arrow" id="adsgramArrow"><i class="fa-solid fa-play"></i></div>
+            </div>
         </div>
 
-        <!-- Telega.io Task (Active $0.005 Block) -->
+        <!-- Telega.io Task (5 min cooldown, unlimited) -->
         <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 0.005, 'telegaBtn1')">
-            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details"><h3>Telega Ad ($0.005)</h3><p>Watch ad to earn $0.005.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+            <div class="task-icon" style="color: #fb7185; background: rgba(251,113,133,0.12); box-shadow: inset 0 0 0 1px rgba(251,113,133,0.3);"><i class="fa-solid fa-bullhorn"></i></div>
+            <div class="task-details">
+              <h3>Telega Pro Ad ($0.005)</h3>
+              <p>Unlimited high-tier reward (5m cooldown)</p>
+            </div>
+            <div class="task-action-meta">
+              <span id="telegaBtn1CD" class="cooldown-badge">5:00</span>
+              <div class="task-arrow" id="telegaBtn1Arrow"><i class="fa-solid fa-play"></i></div>
+            </div>
         </div>
       </div>
 
       <!-- WITHDRAW VIEW -->
       <div id="withdraw" class="view">    
-        <h3 class="section-title">WITHDRAW FUNDS</h3>
-        <p>💼 AVAILABLE: <strong><span id="balance2">$0.00</span></strong></p>
+        <h3 class="section-title" style="justify-content: center;"><i class="fa-solid fa-vault"></i> WITHDRAW FUNDS</h3>
+        <p>💼 AVAILABLE LIQUIDITY: <strong><span id="balance2">$0.00</span></strong></p>
         <div class="form">
           <select id="method">
             <option value="BINANCE UID">BINANCE UID</option>
@@ -243,13 +337,13 @@
           </select>
           <input type="number" id="amount" placeholder="AMOUNT (MIN $2.50)">
           <input type="text" id="number" placeholder="WALLET ADDRESS / UID">
-          <button id="submitWithdraw" class="btn">📤 Submit Request</button>
+          <button id="submitWithdraw" class="btn">📤 Submit Payout Request</button>
         </div>
       </div>
 
       <!-- HISTORY VIEW -->
       <div id="history-view" class="view">
-        <h2 class="section-title">Recent Activity</h2>
+        <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         <div id="history-list"></div>
       </div>
     </main>
@@ -271,8 +365,12 @@
     const ratePerPoint = 0.05;
     const payoutGoal = 2.50;
 
-    const DAILY_MAX_ADS = 20;
+    const DAILY_MAX_ADS = 50;
     const REWARD_PER_BATCH = 0.005;
+
+    // Cooldown control stores in localStorage
+    let adsgramLastRun = 0;
+    let telegaLastRun = 0;
 
     // Initialize Adsgram Controller with block ID 41229
     let adsgramController = null;
@@ -290,6 +388,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
+        setInterval(updateCooldownTimers, 1000);
     });
 
     function initApp() {
@@ -303,6 +402,7 @@
         loadData();
         loadTelegramUser();
         showView('home-view');
+        checkStoredCooldowns();
     }
 
     function showView(viewId) {
@@ -317,7 +417,7 @@
     }
     
     function loadData() {
-        const savedData = localStorage.getItem('easyEarningBotV2');
+        const savedData = localStorage.getItem('nexusRewardsBotV3');
         if (savedData) {
             const data = JSON.parse(savedData);
             points = data.points || 0;
@@ -328,7 +428,57 @@
     }
 
     function saveData() {
-        localStorage.setItem('easyEarningBotV2', JSON.stringify({ points, balance, historyLog }));
+        localStorage.setItem('nexusRewardsBotV3', JSON.stringify({ points, balance, historyLog }));
+    }
+
+    function checkStoredCooldowns() {
+        const storedAdsgram = localStorage.getItem('nexus_adsgram_cd');
+        if (storedAdsgram) adsgramLastRun = parseInt(storedAdsgram);
+
+        const storedTelega = localStorage.getItem('nexus_telega_cd');
+        if (storedTelega) telegaLastRun = parseInt(storedTelega);
+    }
+
+    function updateCooldownTimers() {
+        const now = Date.now();
+
+        // 1. Adsgram Cooldown (5 Seconds)
+        const adsgramDiff = Math.floor((now - adsgramLastRun) / 1000);
+        const adsgramCard = document.getElementById('adsgramCard');
+        const adsgramCD = document.getElementById('adsgramCD');
+        const adsgramArrow = document.getElementById('adsgramArrow');
+
+        if (adsgramDiff < 5) {
+            const left = 5 - adsgramDiff;
+            adsgramCard.classList.add('cooldown-active');
+            adsgramCD.style.display = 'inline-block';
+            adsgramCD.textContent = `${left}s`;
+            adsgramArrow.style.display = 'none';
+        } else {
+            adsgramCard.classList.remove('cooldown-active');
+            adsgramCD.style.display = 'none';
+            adsgramArrow.style.display = 'flex';
+        }
+
+        // 2. Telega Cooldown (5 Minutes = 300 Seconds)
+        const telegaDiff = Math.floor((now - telegaLastRun) / 1000);
+        const telegaCard = document.getElementById('telegaBtn1');
+        const telegaCD = document.getElementById('telegaBtn1CD');
+        const telegaArrow = document.getElementById('telegaBtn1Arrow');
+
+        if (telegaDiff < 300) {
+            const leftSecs = 300 - telegaDiff;
+            const mins = Math.floor(leftSecs / 60);
+            const secs = leftSecs % 60;
+            telegaCard.classList.add('cooldown-active');
+            telegaCD.style.display = 'inline-block';
+            telegaCD.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            telegaArrow.style.display = 'none';
+        } else {
+            telegaCard.classList.remove('cooldown-active');
+            telegaCD.style.display = 'none';
+            telegaArrow.style.display = 'flex';
+        }
     }
 
     // Daily ad tracking helper function
@@ -370,7 +520,7 @@
                 profilePicDiv.textContent = (tgUser.first_name || 'U').charAt(0);
             }
         } else {
-            document.getElementById('username').textContent = 'Web User';
+            document.getElementById('username').textContent = 'Web Operator';
         }
     }
 
@@ -383,13 +533,13 @@
     function renderHistory() {
         const list = document.getElementById('history-list');
         if (historyLog.length === 0) {
-            list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No activity yet.</div><div class="detail">Watch ads to get started!</div></div></div>`;
+            list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No transaction history.</div><div class="detail">Complete ads to start earning rewards!</div></div></div>`;
             return;
         }
         list.innerHTML = historyLog.map(item => {
             const icon = item.type === 'earn' 
-                ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary-color);"></i>' 
-                : '<i class="fa-solid fa-paper-plane" style="color: var(--accent-color);"></i>';
+                ? '<i class="fa-solid fa-plus-circle"></i>' 
+                : '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
             return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
         }).join('');
     }
@@ -413,34 +563,40 @@
     // Monetag Ad Type 1: Interstitial
     function showMonetagAd1() {
         if (typeof show_9954272 !== 'function') {
-            return alert('Ad provider is loading. Please wait a moment.');
+            return alert('Ad provider is initializing. Please wait a moment.');
         }
         show_9954272().then(() => {
             grantReward(1, 'Monetag Interstitial');
-            alert('🎉 Awesome! Earned +1 point.');
+            alert('🎉 Success! Earned +1 point.');
         }).catch(e => {
-            alert('Ad closed or unavailable.');
+            alert('Ad closed or currently unavailable.');
         });
     }
 
     // Monetag Ad Type 2: Popup
     function showMonetagAd2() {
         if (typeof show_9954272 !== 'function') {
-            return alert('Ad provider is loading. Please wait a moment.');
+            return alert('Ad provider is initializing. Please wait a moment.');
         }
         show_9954272('pop').then(() => {
-            grantReward(3, 'Monetag Popup');
-            alert('🎉 Awesome! Earned +3 points.');
+            grantReward(3, 'Monetag Popup Stream');
+            alert('🎉 Success! Earned +3 points.');
         }).catch(e => {
-            alert('Popup ad unavailable.');
+            alert('Popup ad unavailable right now.');
         });
     }
 
-    // Adsgram Automated Redirect Detection Task Flow
+    // Adsgram Automated Redirect Detection Task Flow (5s cooldown)
     function startAdsgramTaskFlow() {
+        const now = Date.now();
+        if (now - adsgramLastRun < 5000) {
+            const left = Math.ceil((5000 - (now - adsgramLastRun)) / 1000);
+            return alert(`⏳ Cooldown active! Please wait ${left}s before launching the next Adsgram ad.`);
+        }
+
         const dailyData = getDailyAdData();
         if (dailyData.count >= DAILY_MAX_ADS) {
-            return alert(`🚫 Daily limit reached! You have watched ${DAILY_MAX_ADS}/${DAILY_MAX_ADS} ads today. Please come back tomorrow.`);
+            return alert(`🚫 Daily cap reached! You have completed ${DAILY_MAX_ADS}/${DAILY_MAX_ADS} ads today. Please return tomorrow.`);
         }
 
         if (!adsgramController) {
@@ -451,17 +607,11 @@
             }
         }
 
-        // Track state changes to detect if a redirect/external interaction occurred during ad display
         let redirectDetected = false;
 
-        const blurHandler = () => {
-            redirectDetected = true;
-        };
-
+        const blurHandler = () => { redirectDetected = true; };
         const visibilityHandler = () => {
-            if (document.hidden) {
-                redirectDetected = true;
-            }
+            if (document.hidden) redirectDetected = true;
         };
 
         window.addEventListener('blur', blurHandler);
@@ -471,22 +621,25 @@
             window.removeEventListener('blur', blurHandler);
             document.removeEventListener('visibilitychange', visibilityHandler);
 
+            // Record cooldown timestamp immediately upon completion
+            adsgramLastRun = Date.now();
+            localStorage.setItem('nexus_adsgram_cd', adsgramLastRun.toString());
+
             if (!result || result.error) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                return alert('❌ Ad was skipped or failed to complete. Please watch the ad completely.');
+                return alert('❌ Ad was skipped or failed. Please watch fully.');
             }
 
             incrementDailyAdCount();
 
-            // Automatic detection: Verify if user was redirected to an external link/mini-app
             if (redirectDetected) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 }
                 grantReward(0, 'Adsgram Network ($0.005)', REWARD_PER_BATCH);
-                alert(`🎉 Redirect detected! Success! You earned $${REWARD_PER_BATCH.toFixed(3)}.`);
+                alert(`🎉 Redirect confirmed! Reward $${REWARD_PER_BATCH.toFixed(3)} credited.`);
             } else {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
@@ -498,23 +651,33 @@
             window.removeEventListener('blur', blurHandler);
             document.removeEventListener('visibilitychange', visibilityHandler);
 
+            adsgramLastRun = Date.now();
+            localStorage.setItem('nexus_adsgram_cd', adsgramLastRun.toString());
+
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-            alert('⚠️ Ad was closed early or failed. Please watch the ad completely and tap on join now on next ads.');
+            alert('⚠️ Ad closed early. Please watch fully and tap on join now on next ads.');
         });
     }
 
-    // Telega.io Task Handler
+    // Telega.io Task Handler (5 min cooldown, unlimited)
     function startTelegaTask(uuid, cashReward, buttonId) {
+        const now = Date.now();
+        if (now - telegaLastRun < 300000) {
+            const leftSecs = Math.ceil((300000 - (now - telegaLastRun)) / 1000);
+            const mins = Math.floor(leftSecs / 60);
+            const secs = leftSecs % 60;
+            return alert(`⏳ Telega Cooldown active! Please wait ${mins}m ${secs}s before starting another Telega ad.`);
+        }
+
         const btn = document.getElementById(buttonId);
-        
         if (btn.classList.contains('loading')) return;
         btn.classList.add('loading');
         
         const desc = btn.querySelector('.task-details p');
-        const originalText = desc ? desc.textContent : `Watch ad to earn $${cashReward}.`;
-        if (desc) desc.textContent = "Loading Ad...";
+        const originalText = desc ? desc.textContent : `Unlimited high-tier reward`;
+        if (desc) desc.textContent = "Loading Ad Feed...";
 
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
@@ -532,14 +695,12 @@
                 const safetyTimeout = setTimeout(() => {
                     if (!isResolved) {
                         isResolved = true;
-                        resetTelegaButton(btn, cashReward, originalText);
-                        alert("⚠️ Ad inventory is currently empty or failed to load. Please try another ad block.");
+                        resetTelegaButton(btn, originalText);
+                        alert("⚠️ Ad inventory currently empty. Please try again shortly.");
                     }
                 }, 10000);
 
-                const adResult = telegaAds.ad_show({
-                    adBlockUuid: uuid
-                });
+                const adResult = telegaAds.ad_show({ adBlockUuid: uuid });
 
                 if (adResult && typeof adResult.then === 'function') {
                     adResult.then(() => {
@@ -547,50 +708,58 @@
                         isResolved = true;
                         clearTimeout(safetyTimeout);
 
+                        // Trigger 5-minute cooldown timestamp update
+                        telegaLastRun = Date.now();
+                        localStorage.setItem('nexus_telega_cd', telegaLastRun.toString());
+
                         grantReward(0, `Telega.io ($${cashReward})`, cashReward);
-                        resetTelegaButton(btn, cashReward, `Watch ad to earn $${cashReward}.`);
-                        alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
+                        resetTelegaButton(btn, originalText);
+                        alert(`🎉 Telega ad completed! Earned $${cashReward}.`);
                     }).catch(e => {
                         if (isResolved) return;
                         isResolved = true;
                         clearTimeout(safetyTimeout);
 
-                        console.error("Telega ad error:", e);
-                        resetTelegaButton(btn, cashReward, originalText);
-                        alert("Ad was closed or no ads available right now.");
+                        telegaLastRun = Date.now();
+                        localStorage.setItem('nexus_telega_cd', telegaLastRun.toString());
+
+                        resetTelegaButton(btn, originalText);
+                        alert("Ad closed or inventory exhausted.");
                     });
                 } else {
                     if (isResolved) return;
                     isResolved = true;
                     clearTimeout(safetyTimeout);
 
+                    telegaLastRun = Date.now();
+                    localStorage.setItem('nexus_telega_cd', telegaLastRun.toString());
+
                     grantReward(0, `Telega.io ($${cashReward})`, cashReward);
-                    resetTelegaButton(btn, cashReward, originalText);
-                    alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
+                    resetTelegaButton(btn, originalText);
+                    alert(`🎉 Telega ad completed! Earned $${cashReward}.`);
                 }
             } catch (e) {
-                console.error("Telega execution error:", e);
-                resetTelegaButton(btn, cashReward, originalText);
-                alert("Ad failed to initialize. Please check your connection.");
+                resetTelegaButton(btn, originalText);
+                alert("Ad execution failed. Check network connection.");
             }
         } else {
-            resetTelegaButton(btn, cashReward, originalText);
-            alert("Telega.io SDK is not loaded yet. Check your internet connection.");
+            resetTelegaButton(btn, originalText);
+            alert("Telega.io SDK loading. Please retry in a moment.");
         }
     }
 
-    function resetTelegaButton(btn, cashReward, defaultText) {
+    function resetTelegaButton(btn, defaultText) {
         if (btn) {
             btn.classList.remove('loading');
             const desc = btn.querySelector('.task-details p');
-            if(desc) desc.textContent = defaultText || `Watch ad to earn $${cashReward}.`;
+            if(desc) desc.textContent = defaultText || `Unlimited high-tier reward`;
         }
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {
         const btn = document.getElementById('submitWithdraw');
         btn.disabled = true;
-        btn.textContent = "⏳ Processing...";
+        btn.textContent = "⏳ Processing Request...";
         
         const method = document.getElementById('method').value;
         const amount = parseFloat(document.getElementById('amount').value);
@@ -598,29 +767,29 @@
         
         if (balance < 2.50) {
             if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            alert("Minimum withdrawal is $2.50.");
+            alert("Minimum payout threshold is $2.50.");
             btn.disabled = false;
-            btn.textContent = "📤 Submit Request";
+            btn.textContent = "📤 Submit Payout Request";
             return;
         }
         if (!number) {
             if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            alert("Please enter a valid wallet address.");
+            alert("Please provide a valid destination address or UID.");
             btn.disabled = false;
-            btn.textContent = "📤 Submit Request";
+            btn.textContent = "📤 Submit Payout Request";
             return;
         }
         if (isNaN(amount) || amount < 2.50 || amount > balance) {
             if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            alert("Invalid withdrawal amount.");
+            alert("Invalid payout amount specified.");
             btn.disabled = false;
-            btn.textContent = "📤 Submit Request";
+            btn.textContent = "📤 Submit Payout Request";
             return;
         }
 
         const date = new Date().toLocaleString();
-        const userInfo = tgUser ? `@${tgUser.username || tgUser.first_name} (ID: ${tgUser.id})` : 'Unknown User';
-        const msg = `💸 *Withdrawal Request*\n\n👤 *User:* ${userInfo}\n📅 *Date:* ${date}\n💰 *Amount:* $${amount.toFixed(2)}\n📱 *Method:* ${method}\n📞 *Address:* ${number}`;
+        const userInfo = tgUser ? `@${tgUser.username || tgUser.first_name} (ID: ${tgUser.id})` : 'Web Operator';
+        const msg = `💸 *Secure Payout Request*\n\n👤 *User:* ${userInfo}\n📅 *Date:* ${date}\n💰 *Amount:* $${amount.toFixed(2)}\n📱 *Method:* ${method}\n📞 *Address:* ${number}`;
         
         fetch("https://api.telegram.org/bot7281899679:AAHbYMtelNIyu-8Tq8HgBuvBmUO6WjvxuFM/sendMessage", {
             method: 'POST',
@@ -629,29 +798,29 @@
         }).then(response => {
             if (!response.ok) throw new Error();
             if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            alert("Withdrawal request sent successfully!");
+            alert("Withdrawal request dispatched successfully!");
             
             balance -= amount;
             points = balance / ratePerPoint;
             
             let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
-            addToHistory('withdraw', `📤 Request for withdrawal<br>💰 Amount: $${amount.toFixed(2)}<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
+            addToHistory('withdraw', `📤 Payout Request<br>💰 Amount: $${amount.toFixed(2)}<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
             
             updateDisplay();
             saveData();
         }).catch(() => {
-            alert("Network error. Try again later.");
+            alert("Network connection error. Try again later.");
         }).finally(() => {
             btn.disabled = false;
-            btn.textContent = "📤 Submit Request";
+            btn.textContent = "📤 Submit Payout Request";
         });
     });
 
     function shareApp() {
-        if (!tgUser) return alert("Could not get user data.");
         const botUsername = "howl_ads_bot"; 
-        const referralLink = `https://t.me/${botUsername}/ads?startapp=${tgUser.id}`;
-        const text = `🎉 Join this bot and earn crypto instantly! Use my link to get a bonus.`;
+        const userId = tgUser ? tgUser.id : '1001';
+        const referralLink = `https://t.me/${botUsername}/ads?startapp=${userId}`;
+        const text = `🚀 Join Nexus Rewards and earn instant crypto payouts. Launch now!`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
         if (window.Telegram && Telegram.WebApp.openTelegramLink) {
             Telegram.WebApp.openTelegramLink(shareUrl);

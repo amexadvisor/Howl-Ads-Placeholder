@@ -240,28 +240,10 @@
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Telega.io Tasks (4 Separate Blocks) -->
+        <!-- Telega.io Task (Active $0.005 Block) -->
         <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 0.005, 'telegaBtn1')">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
             <div class="task-details"><h3>Telega Ad ($0.005)</h3><p>Watch ad to earn $0.005.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-        </div>
-
-        <div class="task-card" id="telegaBtn2" onclick="startTelegaTask('2041b999-a00d-4fc4-b4fa-e682e381feca', 0.0025, 'telegaBtn2')">
-            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details"><h3>Telega Ad ($0.0025)</h3><p>Watch ad to earn $0.0025.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-        </div>
-
-        <div class="task-card" id="telegaBtn3" onclick="startTelegaTask('3e2ccab9-b77e-44e3-8d9b-d4d8250459af', 0.0015, 'telegaBtn3')">
-            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details"><h3>Telega Ad ($0.0015)</h3><p>Watch ad to earn $0.0015.</p></div>
-            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-        </div>
-
-        <div class="task-card" id="telegaBtn4" onclick="startTelegaTask('f1f357fa-4ebb-47d3-8782-1692066da244', 0.0005, 'telegaBtn4')">
-            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details"><h3>Telega Ad ($0.0005)</h3><p>Watch ad to earn $0.0005.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -574,7 +556,7 @@
         });
     }
 
-    // Telega.io Task Handler (Updated for better stability with timeouts and loading states)
+    // Telega.io Task Handler (Updated for stability with timeouts and loading states)
     function startTelegaTask(uuid, cashReward, buttonId) {
         const btn = document.getElementById(buttonId);
         

@@ -328,7 +328,9 @@
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
-            tgUser = Telegram.WebApp.initDataUnsafe.user;
+            if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+                tgUser = Telegram.WebApp.initDataUnsafe.user;
+            }
         }
         loadData();
         loadTelegramUser();
@@ -392,7 +394,7 @@
     
     function loadTelegramUser() {
         if (tgUser) {
-          const fullName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+            const fullName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
             document.getElementById('username').textContent = fullName || 'Telegram User';
             const profilePicDiv = document.getElementById('profile-pic');
             if (tgUser.photo_url) {
@@ -406,7 +408,7 @@
     }
 
     function addToHistory(type, detail) {
-        historyLog.unshift({ type, detail, timestamp: new Date().toISOString()</i> });
+        historyLog.unshift({ type, detail, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
     }
@@ -554,7 +556,7 @@
         });
     }
 
-    // Telega.io Task Handler (Fixed: Awaiting or checking return values so reward occurs ONLY after the ad triggers)
+    // Telega.io Task Handler
     function startTelegaTask() {
         const btn = document.getElementById("telegaBtn");
         if (btn) {
@@ -575,12 +577,10 @@
 
         if (telegaAds) {
             try {
-                // Check if ad_show returns a Promise or handles callbacks, otherwise wrap safely
                 const adResult = telegaAds.ad_show({
                     adBlockUuid: "ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f"
                 });
 
-                // If ad_show returns a Promise, handle success / error properly
                 if (adResult && typeof adResult.then === 'function') {
                     adResult.then(() => {
                         grantReward(2, 'Telega.io Network');
@@ -595,7 +595,6 @@
                         alert("Ad was closed or failed to load.");
                     });
                 } else {
-                    // Synchronous invocation safeguard
                     grantReward(2, 'Telega.io Network');
                     if (btn) {
                         const desc = btn.querySelector('.task-details p');

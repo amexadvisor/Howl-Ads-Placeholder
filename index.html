@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -241,10 +240,28 @@
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Telega.io Task -->
-        <div class="task-card" id="telegaBtn" onclick="startTelegaTask()">
+        <!-- Telega.io Tasks (4 Separate Blocks) -->
+        <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 0.005, 'telegaBtn1')">
             <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details"><h3>Telega.io Ad Network</h3><p>Complete sponsored interaction.</p></div>
+            <div class="task-details"><h3>Telega Ad ($0.005)</h3><p>Watch ad to earn $0.005.</p></div>
+            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+        </div>
+
+        <div class="task-card" id="telegaBtn2" onclick="startTelegaTask('2041b999-a00d-4fc4-b4fa-e682e381feca', 0.0025, 'telegaBtn2')">
+            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
+            <div class="task-details"><h3>Telega Ad ($0.0025)</h3><p>Watch ad to earn $0.0025.</p></div>
+            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+        </div>
+
+        <div class="task-card" id="telegaBtn3" onclick="startTelegaTask('3e2ccab9-b77e-44e3-8d9b-d4d8250459af', 0.0015, 'telegaBtn3')">
+            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
+            <div class="task-details"><h3>Telega Ad ($0.0015)</h3><p>Watch ad to earn $0.0015.</p></div>
+            <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+        </div>
+
+        <div class="task-card" id="telegaBtn4" onclick="startTelegaTask('f1f357fa-4ebb-47d3-8782-1692066da244', 0.0005, 'telegaBtn4')">
+            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
+            <div class="task-details"><h3>Telega Ad ($0.0005)</h3><p>Watch ad to earn $0.0005.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -437,7 +454,7 @@
             balance = points * ratePerPoint;
         }
         updateDisplay();
-        addToHistory('earn', customCashReward ? `+$${customCashReward.toFixed(3)} from ${sourceName}` : `+${earnedPoints} Point(s) from ${sourceName}`);
+        addToHistory('earn', customCashReward ? `+$${customCashReward.toFixed(4)} from ${sourceName}` : `+${earnedPoints} Point(s) from ${sourceName}`);
         saveData();
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -557,9 +574,9 @@
         });
     }
 
-    // Telega.io Task Handler
-    function startTelegaTask() {
-        const btn = document.getElementById("telegaBtn");
+    // Telega.io Task Handler (Supports multiple ad blocks)
+    function startTelegaTask(uuid, cashReward, buttonId) {
+        const btn = document.getElementById(buttonId);
         if (btn) {
             btn.style.pointerEvents = "none";
             const desc = btn.querySelector('.task-details p');
@@ -579,46 +596,48 @@
         if (telegaAds) {
             try {
                 const adResult = telegaAds.ad_show({
-                    adBlockUuid: "ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f"
+                    adBlockUuid: uuid
                 });
 
                 if (adResult && typeof adResult.then === 'function') {
                     adResult.then(() => {
-                        grantReward(2, 'Telega.io Network');
+                        grantReward(0, `Telega.io ($${cashReward})`, cashReward);
                         if (btn) {
                             const desc = btn.querySelector('.task-details p');
                             if(desc) desc.textContent = "Completed ✅";
                         }
-                        alert("🎉 Telega.io ad completed! Earned +2 points.");
+                        alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
+                        setTimeout(() => resetTelegaButton(btn, cashReward), 3000);
                     }).catch(e => {
                         console.error("Telega ad error:", e);
-                        resetTelegaButton(btn);
+                        resetTelegaButton(btn, cashReward);
                         alert("Ad was closed or failed to load.");
                     });
                 } else {
-                    grantReward(2, 'Telega.io Network');
+                    grantReward(0, `Telega.io ($${cashReward})`, cashReward);
                     if (btn) {
                         const desc = btn.querySelector('.task-details p');
                         if(desc) desc.textContent = "Completed ✅";
                     }
-                    alert("🎉 Telega.io ad completed! Earned +2 points.");
+                    alert(`🎉 Telega.io ad completed! Earned $${cashReward}.`);
+                    setTimeout(() => resetTelegaButton(btn, cashReward), 3000);
                 }
             } catch (e) {
                 console.error("Telega ad error:", e);
-                resetTelegaButton(btn);
+                resetTelegaButton(btn, cashReward);
                 alert("Ad failed to display. Please try again.");
             }
         } else {
-            resetTelegaButton(btn);
+            resetTelegaButton(btn, cashReward);
             alert("Telega.io SDK is still loading. Please try again in a moment.");
         }
     }
 
-    function resetTelegaButton(btn) {
+    function resetTelegaButton(btn, cashReward) {
         if (btn) {
             btn.style.pointerEvents = "auto";
             const desc = btn.querySelector('.task-details p');
-            if(desc) desc.textContent = "Complete sponsored interaction.";
+            if(desc) desc.textContent = `Watch ad to earn $${cashReward}.`;
         }
     }
 

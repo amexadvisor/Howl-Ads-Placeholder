@@ -406,7 +406,7 @@
     }
 
     function addToHistory(type, detail) {
-        historyLog.unshift({ type, detail, timestamp: new Date().toISOString() });
+        historyLog.unshift({ type, detail, timestamp: new Date().toISOString()</i> });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
     }
@@ -554,7 +554,7 @@
         });
     }
 
-    // Telega.io Task Handler
+    // Telega.io Task Handler (Fixed: Awaiting or checking return values so reward occurs ONLY after the ad triggers)
     function startTelegaTask() {
         const btn = document.getElementById("telegaBtn");
         if (btn) {
@@ -575,32 +575,50 @@
 
         if (telegaAds) {
             try {
-                telegaAds.ad_show({
+                // Check if ad_show returns a Promise or handles callbacks, otherwise wrap safely
+                const adResult = telegaAds.ad_show({
                     adBlockUuid: "ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f"
                 });
-                // Grant reward after triggering ad block interaction
-                grantReward(2, 'Telega.io Network');
-                if (btn) {
-                    const desc = btn.querySelector('.task-details p');
-                    if(desc) desc.textContent = "Completed ✅";
+
+                // If ad_show returns a Promise, handle success / error properly
+                if (adResult && typeof adResult.then === 'function') {
+                    adResult.then(() => {
+                        grantReward(2, 'Telega.io Network');
+                        if (btn) {
+                            const desc = btn.querySelector('.task-details p');
+                            if(desc) desc.textContent = "Completed ✅";
+                        }
+                        alert("🎉 Telega.io ad completed! Earned +2 points.");
+                    }).catch(e => {
+                        console.error("Telega ad error:", e);
+                        resetTelegaButton(btn);
+                        alert("Ad was closed or failed to load.");
+                    });
+                } else {
+                    // Synchronous invocation safeguard
+                    grantReward(2, 'Telega.io Network');
+                    if (btn) {
+                        const desc = btn.querySelector('.task-details p');
+                        if(desc) desc.textContent = "Completed ✅";
+                    }
+                    alert("🎉 Telega.io ad completed! Earned +2 points.");
                 }
-                alert("🎉 Telega.io ad completed! Earned +2 points.");
             } catch (e) {
                 console.error("Telega ad error:", e);
-                if (btn) {
-                    btn.style.pointerEvents = "auto";
-                    const desc = btn.querySelector('.task-details p');
-                    if(desc) desc.textContent = "Complete sponsored interaction.";
-                }
+                resetTelegaButton(btn);
                 alert("Ad failed to display. Please try again.");
             }
         } else {
-            if (btn) {
-                btn.style.pointerEvents = "auto";
-                const desc = btn.querySelector('.task-details p');
-                if(desc) desc.textContent = "Complete sponsored interaction.";
-            }
+            resetTelegaButton(btn);
             alert("Telega.io SDK is still loading. Please try again in a moment.");
+        }
+    }
+
+    function resetTelegaButton(btn) {
+        if (btn) {
+            btn.style.pointerEvents = "auto";
+            const desc = btn.querySelector('.task-details p');
+            if(desc) desc.textContent = "Complete sponsored interaction.";
         }
     }
 

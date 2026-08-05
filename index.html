@@ -11,8 +11,8 @@
   <script src='//libtl.com/sdk.js' data-zone='9954272' data-sdk='show_9954272'></script>
   <!-- Adsgram SDK Load -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-  <!-- Adsbitvex SDK Load (App ID: 000281) -->
-  <script src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281" defer></script>
+  <!-- Telega.io SDK Load -->
+  <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
 
   <style>
     :root {
@@ -240,10 +240,10 @@
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Adsbitvex Campaign Task (ID: 000281) -->
-        <div class="task-card" id="adsbitvexBtn" onclick="startAdsbitvexTask()">
-            <div class="task-icon" style="color: #ff8c00; background: rgba(255,140,0,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details"><h3>Adsbitvex Ad Network</h3><p>Complete sponsored interaction (ID: 000281).</p></div>
+        <!-- Telega.io Task -->
+        <div class="task-card" id="telegaBtn" onclick="startTelegaTask()">
+            <div class="task-icon" style="color: #0088cc; background: rgba(0,136,204,0.1);"><i class="fa-solid fa-bullhorn"></i></div>
+            <div class="task-details"><h3>Telega.io Ad Network</h3><p>Complete sponsored interaction.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
         </div>
       </div>
@@ -310,6 +310,14 @@
     let adsgramController = null;
     if (typeof Adsgram !== 'undefined') {
         adsgramController = Adsgram.init({ blockId: "41229" });
+    }
+
+    // Initialize Telega.io Ads Controller
+    let telegaAds = null;
+    if (typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
+        telegaAds = window.TelegaIn.AdsController.create_miniapp({
+            token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -546,9 +554,9 @@
         });
     }
 
-    // Adsbitvex Campaign Task Handler (App ID: 000281) with window.showadsbitvex()
-    function startAdsbitvexTask() {
-        const btn = document.getElementById("adsbitvexBtn");
+    // Telega.io Task Handler
+    function startTelegaTask() {
+        const btn = document.getElementById("telegaBtn");
         if (btn) {
             btn.style.pointerEvents = "none";
             const desc = btn.querySelector('.task-details p');
@@ -559,40 +567,40 @@
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
 
-        if (typeof window.showadsbitvex === "function") {
-            window.showadsbitvex().then(() => {
-                grantReward(2, 'Adsbitvex Network');
+        if (!telegaAds && typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
+            telegaAds = window.TelegaIn.AdsController.create_miniapp({
+                token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
+            });
+        }
+
+        if (telegaAds) {
+            try {
+                telegaAds.ad_show({
+                    adBlockUuid: "ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f"
+                });
+                // Grant reward after triggering ad block interaction
+                grantReward(2, 'Telega.io Network');
                 if (btn) {
                     const desc = btn.querySelector('.task-details p');
                     if(desc) desc.textContent = "Completed ✅";
                 }
-                alert("🎉 Adsbitvex ad completed! Earned +2 points.");
-            }).catch(e => {
-                console.error("Ad error:", e);
+                alert("🎉 Telega.io ad completed! Earned +2 points.");
+            } catch (e) {
+                console.error("Telega ad error:", e);
                 if (btn) {
                     btn.style.pointerEvents = "auto";
                     const desc = btn.querySelector('.task-details p');
-                    if(desc) desc.textContent = "Complete sponsored interaction (ID: 000281).";
+                    if(desc) desc.textContent = "Complete sponsored interaction.";
                 }
-                alert("Ad was closed or failed to load. Please try again.");
-            });
-        } else {
-            // Fallback opening link if triggered directly via SDK URL
-            const fallbackUrl = "https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281";
-            if (window.Telegram && Telegram.WebApp.openLink) {
-                Telegram.WebApp.openLink(fallbackUrl);
-            } else {
-                window.open(fallbackUrl, '_blank');
+                alert("Ad failed to display. Please try again.");
             }
-            
-            setTimeout(() => {
-                grantReward(2, 'Adsbitvex Network');
-                if (btn) {
-                    const desc = btn.querySelector('.task-details p');
-                    if(desc) desc.textContent = "Completed ✅";
-                }
-                alert("🎉 Task verified! Earned +2 points.");
-            }, 6000);
+        } else {
+            if (btn) {
+                btn.style.pointerEvents = "auto";
+                const desc = btn.querySelector('.task-details p');
+                if(desc) desc.textContent = "Complete sponsored interaction.";
+            }
+            alert("Telega.io SDK is still loading. Please try again in a moment.");
         }
     }
 

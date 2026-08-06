@@ -663,7 +663,6 @@
         const iframe = document.getElementById('offerwall-iframe');
         if (iframe) {
             const userId = tgUser ? tgUser.id : 'guest_user';
-            // Set your target Offerwall iframe URL here, appending the user ID parameter dynamically
             iframe.src = `https://your-offerwall-domain.com/embed?user_id=${userId}`;
         }
     }
@@ -834,7 +833,7 @@
             let icon = '<i class="fa-solid fa-plus-circle"></i>';
             if (item.type === 'withdraw') {
                 icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
-            } else if (item.type === 'offerwall') {
+            } else if (item.type === 'offerwall' || item.type === 'survey' || item.type === 'earn_ada') {
                 icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
             }
             return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
@@ -1034,6 +1033,32 @@
             if(desc) desc.textContent = defaultText || `Unlimited high-tier reward`;
         }
     }
+
+    // --- Pubscale Postback Handler Function Logic Added Here ---
+    window.addEventListener('message', function(event) {
+        try {
+            if (typeof event.data === 'string' && event.data.startsWith('{')) {
+                const data = JSON.parse(event.data);
+                if (data && data.reward && data.source) {
+                    const rewardAmount = parseFloat(data.reward) || 0;
+                    if (rewardAmount > 0) {
+                        const sourceName = data.source;
+                        let type = 'earn';
+                        if (sourceName.toLowerCase().includes('offerwall')) {
+                            type = 'offerwall';
+                        } else if (sourceName.toLowerCase().includes('survey')) {
+                            type = 'survey';
+                        } else if (sourceName.toLowerCase().includes('ada') || sourceName.toLowerCase().includes('earn ada')) {
+                            type = 'earn_ada';
+                        }
+                        grantReward(rewardAmount, sourceName, type);
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore non-JSON post messages
+        }
+    });
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {
         const btn = document.getElementById('submitWithdraw');

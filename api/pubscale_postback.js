@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-    const { user_id, value, token, signature } = req.query;
+    const { user_id, value, token, signature, offer_name } = req.query;
 
     if (!user_id || !value) {
         return res.status(400).send('Missing required parameters');
@@ -23,14 +23,27 @@ export default async function handler(req, res) {
     try {
         let { data: user, error: fetchError } = await supabase
             .from('users')
-            .select('balance')
+            .select('balance, history_log')
             .eq('user_id', user_id)
             .single();
+
+        let historyLog = user && user.history_log ? user.history_log : [];
+        const newHistoryItem = {
+            type: 'offerwall',
+            detail: `+${rewardAmount} HOWL from ${offer_name || 'Partner Offerwall'}`,
+            timestamp: new Date().toISOString()
+        };
+        historyLog.unshift(newHistoryItem);
+        if (historyLog.length > 50) historyLog.pop();
 
         if (fetchError && fetchError.code === 'PGRST116') {
             const { error: insertError } = await supabase
                 .from('users')
-                .insert([{ user_id: user_id, balance: rewardAmount }]);
+                .insert([{ 
+                    user_id: user_id, 
+                    balance: rewardAmount,
+                    history_log: historyLog 
+                }]);
 
             if (insertError) throw insertError;
         } else {
@@ -38,13 +51,16 @@ export default async function handler(req, res) {
 
             const { error: updateError } = await supabase
                 .from('users')
-                .update({ balance: newBalance })
+                .update({ 
+                    balance: newBalance,
+                    history_log: historyLog 
+                })
                 .eq('user_id', user_id);
 
             if (updateError) throw updateError;
         }
 
-        console.log(`Successfully credited user ${user_id} with ${rewardAmount}`);
+        console.log(`Successfully credited user ${user_id} with ${rewardAmount} and updated history`);
         return res.status(200).send('OK');
 
     } catch (err) {

@@ -485,7 +485,7 @@
         </div>
       </div>
 
-      <!-- TASKS VIEW (With Top Ads, Offerwall, Survey Buttons) -->
+      <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
         <div class="earn-category-tabs">
           <button class="category-tab active" id="tab-ads" onclick="switchEarnTab('ads')">Ads</button>
@@ -538,11 +538,10 @@
           </div>
         </div>
 
-        <!-- OFFERWALL PANEL (Iframe Integration Ready) -->
+        <!-- OFFERWALL PANEL -->
         <div id="panel-offerwall" class="earn-section-panel">
           <h2 class="section-title"><i class="fa-solid fa-gift"></i> Partner Offerwall</h2>
           <div class="offerwall-iframe-container">
-            <!-- Replace src with your official Offerwall iframe URL incorporating user id parameters -->
             <iframe id="offerwall-iframe" src="" title="Offerwall"></iframe>
           </div>
         </div>
@@ -576,10 +575,25 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW -->
+      <!-- HISTORY VIEW WITH SEPARATE TABS FOR ADS, OFFERWALL, SURVEY -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
-        <div id="history-list"></div>
+        
+        <div class="earn-category-tabs">
+          <button class="category-tab active" id="history-tab-ads" onclick="switchHistoryTab('ads')">Ads</button>
+          <button class="category-tab" id="history-tab-offerwall" onclick="switchHistoryTab('offerwall')">Offerwall</button>
+          <button class="category-tab" id="history-tab-survey" onclick="switchHistoryTab('survey')">Survey</button>
+        </div>
+
+        <div id="history-panel-ads" class="earn-section-panel active">
+          <div id="history-list-ads"></div>
+        </div>
+        <div id="history-panel-offerwall" class="earn-section-panel">
+          <div id="history-list-offerwall"></div>
+        </div>
+        <div id="history-panel-survey" class="earn-section-panel">
+          <div id="history-list-survey"></div>
+        </div>
       </div>
     </main>
 
@@ -708,11 +722,19 @@
     }
 
     function switchEarnTab(tabName) {
-        document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.earn-section-panel').forEach(panel => panel.classList.remove('active'));
+        document.querySelectorAll('#tasks-view .category-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('#tasks-view .earn-section-panel').forEach(panel => panel.classList.remove('active'));
 
         document.getElementById(`tab-${tabName}`).classList.add('active');
         document.getElementById(`panel-${tabName}`).classList.add('active');
+    }
+
+    function switchHistoryTab(tabName) {
+        document.querySelectorAll('#history-view .category-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('#history-view .earn-section-panel').forEach(panel => panel.classList.remove('active'));
+
+        document.getElementById(`history-tab-${tabName}`).classList.add('active');
+        document.getElementById(`history-panel-${tabName}`).classList.add('active');
     }
     
     function loadData() {
@@ -836,23 +858,37 @@
     }
 
     function renderHistory() {
-        const list = document.getElementById('history-list');
-        if (historyLog.length === 0) {
-            list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No transaction history.</div><div class="detail">Complete tasks or offers to start earning HOWL!</div></div></div>`;
-            return;
-        }
-        list.innerHTML = historyLog.map(item => {
-            let icon = '<i class="fa-solid fa-plus-circle"></i>';
-            if (item.type === 'withdraw') {
-                icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
-            } else if (item.type === 'offerwall' || item.type === 'survey' || item.type === 'earn_ada') {
-                icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
+        const listAds = document.getElementById('history-list-ads');
+        const listOfferwall = document.getElementById('history-list-offerwall');
+        const listSurvey = document.getElementById('history-list-survey');
+
+        const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
+        const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
+        const surveyItems = historyLog.filter(item => item.type === 'survey');
+
+        const renderListContent = (items, emptyText) => {
+            if (items.length === 0) {
+                return `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">${emptyText}</div><div class="detail">No records found in this category yet.</div></div></div>`;
             }
-            return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
-        }).join('');
+            return items.map(item => {
+                let icon = '<i class="fa-solid fa-plus-circle"></i>';
+                if (item.type === 'withdraw') {
+                    icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
+                } else if (item.type === 'offerwall') {
+                    icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
+                } else if (item.type === 'survey') {
+                    icon = '<i class="fa-solid fa-clipboard-question" style="color: #38bdf8;"></i>';
+                }
+                return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
+            }).join('');
+        };
+
+        listAds.innerHTML = renderListContent(adsItems, "No Ads transaction history.");
+        listOfferwall.innerHTML = renderListContent(offerwallItems, "No Offerwall transaction history.");
+        listSurvey.innerHTML = renderListContent(surveyItems, "No Survey transaction history.");
     }
 
-    function grantReward(amount, sourceName, type = 'earn') {
+    function grantReward(amount, sourceName, type = 'ads') {
         balance += amount;
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`);
@@ -867,7 +903,7 @@
             return alert('Ad provider is initializing. Please wait a moment.');
         }
         show_9954272().then(() => {
-            grantReward(2, 'Monetag Interstitial');
+            grantReward(2, 'Monetag Interstitial', 'ads');
             alert('🎉 Success! Earned +2 HOWL.');
         }).catch(e => {
             alert('Ad closed or currently unavailable.');
@@ -879,7 +915,7 @@
             return alert('Ad provider is initializing. Please wait a moment.');
         }
         show_9954272('pop').then(() => {
-            grantReward(2, 'Monetag Popup Stream');
+            grantReward(2, 'Monetag Popup Stream', 'ads');
             alert('🎉 Success! Earned +2 HOWL.');
         }).catch(e => {
             alert('Popup ad unavailable right now.');
@@ -931,7 +967,7 @@
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 }
-                grantReward(25, 'Adsgram Network');
+                grantReward(25, 'Adsgram Network', 'ads');
                 alert(`🎉 Redirect confirmed! +25 HOWL credited (${adsgramCountToday}/20).`);
             } else {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
@@ -1002,7 +1038,7 @@
                         telegaLastRun = Date.now();
                         localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
 
-                        grantReward(rewardAmount, 'Telega.io');
+                        grantReward(rewardAmount, 'Telega.io', 'ads');
                         resetTelegaButton(btn, originalText);
                         alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
                     }).catch(e => {
@@ -1024,7 +1060,7 @@
                     telegaLastRun = Date.now();
                     localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
 
-                    grantReward(rewardAmount, 'Telega.io');
+                    grantReward(rewardAmount, 'Telega.io', 'ads');
                     resetTelegaButton(btn, originalText);
                     alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
                 }
@@ -1046,7 +1082,7 @@
         }
     }
 
-    // --- Pubscale Postback Handler Function Logic Added Here ---
+    // --- Pubscale Postback Handler Function Logic ---
     window.addEventListener('message', function(event) {
         try {
             if (typeof event.data === 'string' && event.data.startsWith('{')) {
@@ -1055,13 +1091,11 @@
                     const rewardAmount = parseFloat(data.reward) || 0;
                     if (rewardAmount > 0) {
                         const sourceName = data.source;
-                        let type = 'earn';
-                        if (sourceName.toLowerCase().includes('offerwall')) {
+                        let type = 'ads';
+                        if (sourceName.toLowerCase().includes('offerwall') || sourceName.toLowerCase().includes('cpalead') || sourceName.toLowerCase().includes('pubscale')) {
                             type = 'offerwall';
                         } else if (sourceName.toLowerCase().includes('survey')) {
                             type = 'survey';
-                        } else if (sourceName.toLowerCase().includes('ada') || sourceName.toLowerCase().includes('earn ada')) {
-                            type = 'earn_ada';
                         }
                         grantReward(rewardAmount, sourceName, type);
                     }
@@ -1120,7 +1154,7 @@
             balance -= amount;
             
             let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
-            addToHistory('withdraw', `📤 Payout Request<br>💰 Amount: ${amount} HOWL ($${usdVal})<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
+            addToHistory('ads', `📤 Payout Request<br>💰 Amount: ${amount} HOWL ($${usdVal})<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
             
             updateDisplay();
             saveData();

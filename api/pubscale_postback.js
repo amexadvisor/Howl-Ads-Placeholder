@@ -25,9 +25,9 @@ export default async function handler(req, res) {
             .from('users')
             .select('balance, history_log')
             .eq('user_id', user_id)
-            .maybeSingle();
+            .single();
 
-        let historyLog = user && user.history_log ? user.history_log : [];
+        let historyLog = (user && user.history_log) || [];
         const newHistoryItem = {
             type: 'offerwall',
             detail: `+${rewardAmount} HOWL from ${offer_name || 'Partner Offerwall'}`,
@@ -36,11 +36,7 @@ export default async function handler(req, res) {
         historyLog.unshift(newHistoryItem);
         if (historyLog.length > 50) historyLog.pop();
 
-        if (fetchError) {
-            console.error('Fetch error:', fetchError.message);
-        }
-
-        if (!user) {
+        if (fetchError && fetchError.code === 'PGRST116') {
             const { error: insertError } = await supabase
                 .from('users')
                 .insert([{ 
@@ -51,6 +47,8 @@ export default async function handler(req, res) {
 
             if (insertError) throw insertError;
         } else {
+            if (fetchError) throw fetchError;
+            
             const newBalance = (user.balance || 0) + rewardAmount;
 
             const { error: updateError } = await supabase
@@ -64,7 +62,7 @@ export default async function handler(req, res) {
             if (updateError) throw updateError;
         }
 
-        console.log(`Successfully credited user ${user_id} with ${rewardAmount} and updated history`);
+        console.log(`Successfully credited user ${user_id} with ${rewardAmount}`);
         return res.status(200).send('OK');
 
     } catch (err) {

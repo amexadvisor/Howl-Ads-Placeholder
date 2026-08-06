@@ -85,7 +85,7 @@
       animation: floatCoinUp 4.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
       opacity: 0;
     }
-    .floating-coin img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .floating-coin img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; background: #ffffff; }
     
     .coin-1 { left: calc(50% - 80px); animation-delay: 0s; }
     .coin-2 { left: calc(50% - 20px); animation-delay: 1.2s; }
@@ -115,12 +115,12 @@
 
     .splash-logo {
       position: relative; width: 96px; height: 96px; border-radius: 30px; 
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      background: #ffffff;
       display: flex; align-items: center; justify-content: center; overflow: hidden;
       box-shadow: 0 0 40px var(--primary-glow), inset 0 0 15px rgba(255,255,255,0.4);
       border: 2px solid rgba(255,255,255,0.3); z-index: 2;
     }
-    .splash-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .splash-logo img { width: 100%; height: 100%; object-fit: cover; background: #ffffff; }
 
     .splash-title-wrapper { text-align: center; z-index: 2; margin-bottom: 24px; }
     .splash-title { 
@@ -205,12 +205,12 @@
     }
     .user-avatar {
       width: 52px; height: 52px; border-radius: 50%; margin-right: 14px; overflow: hidden; 
-      background: linear-gradient(135deg, var(--primary), var(--accent)); 
+      background: #ffffff; 
       display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 20px; color: #fff;
       box-shadow: 0 4px 15px var(--primary-glow); border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0;
       position: relative;
     }
-    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; background: #ffffff; }
     
     .user-info .username { font-size: 17px; font-weight: 700; margin: 0; color: #fff; letter-spacing: 0.2px; }
     .user-info .badge-container { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
@@ -232,10 +232,10 @@
       border: 1px solid rgba(16, 185, 129, 0.25);
     }
     .balance-card .currency-emblem {
-      width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 10px auto; overflow: hidden;
+      width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 10px auto; overflow: hidden; background: #ffffff;
       border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary-glow);
     }
-    .balance-card .currency-emblem img { width: 100%; height: 100%; object-fit: cover; }
+    .balance-card .currency-emblem img { width: 100%; height: 100%; object-fit: cover; background: #ffffff; }
     .balance-card .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 6px; font-weight: 700; }
     .balance-card .balance-value { font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -0.5px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
     .balance-card .currency-tag { font-size: 14px; color: var(--primary); font-weight: 700; margin-left: 4px; }
@@ -473,6 +473,15 @@
       <div id="tasks-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Active Monetization Modules</h2>
         
+        <!-- CPX Research Offerwall Task -->
+        <div class="task-card" onclick="openCpxOfferwall()">
+            <div class="task-icon" style="color: #f59e0b; background: rgba(245,158,11,0.12); box-shadow: inset 0 0 0 1px rgba(245,158,11,0.3);"><i class="fa-solid fa-clipboard-question"></i></div>
+            <div class="task-details"><h3>CPX Research Surveys</h3><p>Complete surveys for high-yield HOWL rewards.</p></div>
+            <div class="task-action-meta">
+              <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+            </div>
+        </div>
+
         <!-- Monetag Ad Type (2 Howl) -->
         <div class="task-card" onclick="showMonetagAd1()">
             <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
@@ -695,7 +704,7 @@
         document.getElementById('balance-value').textContent = balance.toLocaleString();
         document.getElementById('balance2').textContent = balance.toLocaleString();
         
-        const usdValue = (balance / 10000).toFixed(2);
+        const usdValue = (balance / 10000).jsdelivr ? (balance / 10000).toFixed(2) : (balance / 10000).toFixed(2);
         document.getElementById('usd-value').textContent = usdValue;
         document.getElementById('usd-balance2').textContent = usdValue;
 
@@ -760,6 +769,18 @@
         saveData();
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        }
+    }
+
+    function openCpxOfferwall() {
+        const userId = tgUser ? tgUser.id : 'guest_user';
+        const appId = 'YOUR_CPX_APP_ID'; // Replace with your actual CPX Research App ID
+        const cpxUrl = `https://oferwall.com/index.php?app_id=${appId}&ext_user_id=${userId}`;
+        
+        if (window.Telegram && Telegram.WebApp.openLink) {
+            Telegram.WebApp.openLink(cpxUrl);
+        } else {
+            window.open(cpxUrl, '_blank');
         }
     }
 

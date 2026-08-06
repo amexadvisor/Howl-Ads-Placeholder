@@ -6,7 +6,7 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-    const { user_id, value, token, signature, offer_name } = req.query;
+    const { user_id, value, token, signature, transaction_id, offer_name } = req.query;
 
     if (!user_id || !value) {
         return res.status(400).send('Missing required parameters');
@@ -19,50 +19,52 @@ export default async function handler(req, res) {
     }
 
     const rewardAmount = parseFloat(value);
+    const txId = transaction_id || token || `${user_id}-${Date.now()}`;
+    const offerName = offer_name || 'PubScale Offer';
 
     try {
-        let { data: user, error: fetchError } = await supabase
-            .from('users')
-            .select('balance, history_log')
-            .eq('user_id', user_id)
-            .maybeSingle();
+        const { data: existingTx } = await supabase
+            .from('transactions')
+            .select('transaction_id')
+            .eq('transaction_id', txId)
+            .single();
 
-        let historyLog = [];
-        if (user && Array.isArray(user.history_log)) {
-            historyLog = [...user.history_log];
+        if (existingTx) {
+            return res.status(200).send('Duplicate transaction');
         }
 
-        const newHistoryItem = {
-            type: 'offerwall',
-            detail: `+${rewardAmount} HOWL from ${offer_name || 'Partner Offerwall'}`,
-            timestamp: new Date().toISOString()
-        };
-        historyLog.unshift(newHistoryItem);
-        if (historyLog.length > 50) historyLog.pop();
+        let { data: user, error: fetchError } = await supabase
+            .from('users')
+            .select('balance')
+            .eq('user_id', user_id)
+            .single();
 
-        if (!user) {
+        let newBalance = rewardAmount;
+
+        if (fetchError && fetchError.code === 'PGRST116') {
             const { error: insertError } = await supabase
                 .from('users')
-                .insert([{ 
-                    user_id: user_id, 
-                    balance: rewardAmount,
-                    history_log: historyLog 
-                }]);
+                .insert([{ user_id: user_id.toString(), balance: rewardAmount }]);
 
             if (insertError) throw insertError;
         } else {
-            const newBalance = (user.balance || 0) + rewardAmount;
+            newBalance = (user.balance || 0) + rewardAmount;
 
             const { error: updateError } = await supabase
                 .from('users')
-                .update({ 
-                    balance: newBalance,
-                    history_log: historyLog 
-                })
+                .update({ balance: newBalance, updated_at: new Date().toISOString() })
                 .eq('user_id', user_id);
 
             if (updateError) throw updateError;
         }
+
+        await supabase.from('transactions').insert([{
+            user_id: user_id.toString(),
+            transaction_id: txId,
+            type: 'pubscale',
+            detail: `+${rewardAmount} HOWL from PubScale: ${offerName}`,
+            timestamp: new Date().toISOString()
+        }]);
 
         console.log(`Successfully credited user ${user_id} with ${rewardAmount}`);
         return res.status(200).send('OK');

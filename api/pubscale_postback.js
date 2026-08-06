@@ -25,7 +25,7 @@ export default async function handler(req, res) {
             .from('users')
             .select('balance, history_log')
             .eq('user_id', user_id)
-            .single();
+            .maybeSingle();
 
         let historyLog = user && user.history_log ? user.history_log : [];
         const newHistoryItem = {
@@ -36,7 +36,11 @@ export default async function handler(req, res) {
         historyLog.unshift(newHistoryItem);
         if (historyLog.length > 50) historyLog.pop();
 
-        if (fetchError && fetchError.code === 'PGRST116') {
+        if (fetchError) {
+            console.error('Fetch error:', fetchError.message);
+        }
+
+        if (!user) {
             const { error: insertError } = await supabase
                 .from('users')
                 .insert([{ 

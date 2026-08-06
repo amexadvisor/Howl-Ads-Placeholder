@@ -1,0 +1,5 @@
+{
+  "routes": [
+    { "src": "/api/cpx_postback", "destination": "/api/cpx_postback.js" }
+  ]
+}

@@ -685,6 +685,17 @@
         }
     }
 
+    async function syncBalanceToSupabase(newBalance) {
+        if (!tgUser || !tgUser.id) return;
+        try {
+            await supabaseClient
+                .from('users')
+                .upsert({ user_id: tgUser.id.toString(), balance: newBalance, updated_at: new Date().toISOString() });
+        } catch (err) {
+            console.log('Failed to sync balance to Supabase.');
+        }
+    }
+
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
@@ -725,6 +736,7 @@
 
     function saveData() {
         localStorage.setItem('howlRewardsBotV6', JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog }));
+        syncBalanceToSupabase(balance);
     }
 
     function checkStoredCooldowns() {

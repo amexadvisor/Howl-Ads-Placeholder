@@ -43,7 +43,7 @@
         radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
     }
 
-    /* Ultimate Tech Splash Screen Animation (Slower Duration) */
+    /* Ultimate Tech Splash Screen Animation */
     #splash-screen {
       position: absolute; inset: 0; background: #040508; z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -52,7 +52,6 @@
     }
     #splash-screen.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    /* Cyberpunk Grid Background Lines */
     .splash-grid {
       position: absolute; inset: 0; background-image: 
         linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
@@ -61,7 +60,6 @@
     }
     @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 30px 30px; } }
 
-    /* Tech Particle Rings */
     .tech-ring {
       position: absolute; border-radius: 50%; border: 1px dashed rgba(16, 185, 129, 0.3);
       animation: rotateRing 18s linear infinite; pointer-events: none;
@@ -70,22 +68,13 @@
     .ring-2 { width: 280px; height: 280px; border-style: solid; border-width: 1px; border-color: rgba(99, 102, 241, 0.2); animation-direction: reverse; animation-duration: 24s; }
     @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-    /* Floating Coin Particles Animation (Slower & Upwards) */
     .floating-coin {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
+      position: absolute; width: 32px; height: 32px; border-radius: 50%;
       background: linear-gradient(135deg, var(--gold), #d97706);
       border: 2px solid rgba(255, 255, 255, 0.4);
       box-shadow: 0 0 18px rgba(245, 158, 11, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 3;
-      pointer-events: none;
-      animation: floatCoinUp 4.8s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-      opacity: 0;
+      display: flex; align-items: center; justify-content: center; z-index: 3;
+      pointer-events: none; animation: floatCoinUp 4.8s cubic-bezier(0.25, 1, 0.5, 1) infinite; opacity: 0;
     }
     .floating-coin img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     
@@ -101,7 +90,6 @@
       100% { transform: translateY(-160px) scale(1.3); opacity: 0; }
     }
 
-    /* Center Logo Hologram Box */
     .splash-logo-container {
       position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;
       margin-bottom: 28px; animation: floatLogo 4s ease-in-out infinite alternate;
@@ -133,7 +121,6 @@
       font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; color: var(--primary);
     }
 
-    /* Advanced Tech Progress Bar (Slower Duration) */
     .splash-loader-container { width: 220px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .splash-loader { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.1); }
     .splash-loader-bar { 
@@ -159,7 +146,6 @@
       border-right: 1px solid rgba(255,255,255,0.04);
     }
 
-    /* Live Animated Dashboard Background */
     .live-dashboard-bg {
       position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
     }
@@ -192,6 +178,27 @@
     .view { display: none; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     .view.active { display: block; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Category Switcher Navigation Bar */
+    .earn-category-tabs {
+      display: flex; gap: 8px; margin-bottom: 18px; background: var(--card-bg);
+      padding: 5px; border-radius: 16px; border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+    }
+    .category-tab {
+      flex: 1; padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 700;
+      color: var(--text-muted); background: transparent; border: none; border-radius: 12px;
+      cursor: pointer; transition: all 0.25s ease; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .category-tab:hover { color: #fff; background: rgba(255,255,255,0.04); }
+    .category-tab.active {
+      color: #fff; background: linear-gradient(135deg, var(--primary), #059669);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .earn-section-panel { display: none; }
+    .earn-section-panel.active { display: block; animation: fadeInPanel 0.3s ease; }
+    @keyframes fadeInPanel { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     /* User Header */
     .user-header-card {
@@ -380,13 +387,12 @@
 </head>
 <body>
 
-  <!-- Ultimate Tech Opening Splash Screen Animation with Slower Floating Coins -->
+  <!-- Ultimate Tech Opening Splash Screen Animation -->
   <div id="splash-screen">
     <div class="splash-grid"></div>
     <div class="tech-ring ring-1"></div>
     <div class="tech-ring ring-2"></div>
 
-    <!-- Floating Howl Coins Animation Elements -->
     <div class="floating-coin coin-1"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
     <div class="floating-coin coin-2"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
     <div class="floating-coin coin-3"><img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL"></div>
@@ -411,7 +417,6 @@
   </div>
 
   <div class="container">
-    <!-- Live Animated Background Elements for Dashboard -->
     <div class="live-dashboard-bg">
       <div class="live-grid"></div>
       <div class="ambient-glow orb-1"></div>
@@ -443,7 +448,6 @@
             <div class="usd-value">≈ $<span id="usd-value">0.00</span> USD</div>
         </div>
 
-        <!-- Daily Adsgram Progress Widget -->
         <div class="progress-section">
           <div class="progress-info">
             <span>Adsgram Daily Ads (<span id="adsgram-count-today">0</span>/20)</span>
@@ -471,52 +475,85 @@
         </div>
       </div>
 
-      <!-- TASKS VIEW -->
+      <!-- TASKS VIEW (With Top Ads, Offerwall, Survey Buttons) -->
       <div id="tasks-view" class="view">
-        <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Active Monetization Modules</h2>
-        
-        <!-- Monetag Ad Type (2 Howl) -->
-        <div class="task-card" onclick="showMonetagAd1()">
-            <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
-            <div class="task-details"><h3>Monetag Interstitial</h3><p>Watch full-screen high yield ad for +2 HOWL.</p></div>
-            <div class="task-action-meta">
-              <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-            </div>
+        <div class="earn-category-tabs">
+          <button class="category-tab active" id="tab-ads" onclick="switchEarnTab('ads')">Ads</button>
+          <button class="category-tab" id="tab-offerwall" onclick="switchEarnTab('offerwall')">Offerwall</button>
+          <button class="category-tab" id="tab-survey" onclick="switchEarnTab('survey')">Survey</button>
         </div>
 
-        <!-- Monetag Popup Stream (2 Howl) -->
-        <div class="task-card" onclick="showMonetagAd2()">
-            <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
-            <div class="task-details"><h3>Monetag Popup Stream</h3><p>Engage with dynamic stream for +2 HOWL.</p></div>
-            <div class="task-action-meta">
-              <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-            </div>
+        <!-- ADS PANEL -->
+        <div id="panel-ads" class="earn-section-panel active">
+          <h2 class="section-title"><i class="fa-solid fa-rectangle-ad"></i> Active Ad Modules</h2>
+          
+          <div class="task-card" onclick="showMonetagAd1()">
+              <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
+              <div class="task-details"><h3>Monetag Interstitial</h3><p>Watch full-screen high yield ad for +2 HOWL.</p></div>
+              <div class="task-action-meta">
+                <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+              </div>
+          </div>
+
+          <div class="task-card" onclick="showMonetagAd2()">
+              <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
+              <div class="task-details"><h3>Monetag Popup Stream</h3><p>Engage with dynamic stream for +2 HOWL.</p></div>
+              <div class="task-action-meta">
+                <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+              </div>
+          </div>
+
+          <div class="task-card" id="adsgramCard" onclick="startAdsgramTaskFlow()">
+              <div class="task-icon" style="color: #38bdf8; background: rgba(56,189,248,0.12); box-shadow: inset 0 0 0 1px rgba(56,189,248,0.3);"><i class="fa-solid fa-tv"></i></div>
+              <div class="task-details">
+                <h3>Adsgram Rewarded Ad (+25 HOWL)</h3>
+                <p>Daily limit: <span id="adsgram-limit-text">0</span>/20 (5s cooldown)</p>
+              </div>
+              <div class="task-action-meta">
+                <span id="adsgramCD" class="cooldown-badge">5s</span>
+                <div class="task-arrow" id="adsgramArrow"><i class="fa-solid fa-play"></i></div>
+              </div>
+          </div>
+
+          <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 50, 'telegaBtn1')">
+              <div class="task-icon" style="color: #fb7185; background: rgba(251,113,133,0.12); box-shadow: inset 0 0 0 1px rgba(251,113,133,0.3);"><i class="fa-solid fa-bullhorn"></i></div>
+              <div class="task-details">
+                <h3>Telega Pro Ad (+50 HOWL)</h3>
+                <p>Unlimited high-tier reward (5m cooldown)</p>
+              </div>
+              <div class="task-action-meta">
+                <span id="telegaBtn1CD" class="cooldown-badge">5:00</span>
+                <div class="task-arrow" id="telegaBtn1Arrow"><i class="fa-solid fa-play"></i></div>
+              </div>
+          </div>
         </div>
 
-        <!-- Adsgram Rewarded Block (25 Howl, 5s cooldown, 20 limit) -->
-        <div class="task-card" id="adsgramCard" onclick="startAdsgramTaskFlow()">
-            <div class="task-icon" style="color: #38bdf8; background: rgba(56,189,248,0.12); box-shadow: inset 0 0 0 1px rgba(56,189,248,0.3);"><i class="fa-solid fa-tv"></i></div>
-            <div class="task-details">
-              <h3>Adsgram Rewarded Ad (+25 HOWL)</h3>
-              <p>Daily limit: <span id="adsgram-limit-text">0</span>/20 (5s cooldown)</p>
-            </div>
-            <div class="task-action-meta">
-              <span id="adsgramCD" class="cooldown-badge">5s</span>
-              <div class="task-arrow" id="adsgramArrow"><i class="fa-solid fa-play"></i></div>
-            </div>
+        <!-- OFFERWALL PANEL -->
+        <div id="panel-offerwall" class="earn-section-panel">
+          <h2 class="section-title"><i class="fa-solid fa-gift"></i> Partner Offerwalls</h2>
+          
+          <div class="task-card" onclick="simulateOfferwallReward('PubScale Offerwall', 500)">
+              <div class="task-icon" style="color: var(--gold); background: rgba(245,158,11,0.12); box-shadow: inset 0 0 0 1px rgba(245,158,11,0.3);"><i class="fa-solid fa-boxes-stacked"></i></div>
+              <div class="task-details"><h3>PubScale Offers</h3><p>Complete partner app installs & tasks (+500 HOWL)</p></div>
+              <div class="task-action-meta"><div class="task-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></div></div>
+          </div>
+
+          <div class="task-card" onclick="simulateOfferwallReward('CPALead Wall', 350)">
+              <div class="task-icon" style="color: #a855f7; background: rgba(168,85,247,0.12); box-shadow: inset 0 0 0 1px rgba(168,85,247,0.3);"><i class="fa-solid fa-rectangle-list"></i></div>
+              <div class="task-details"><h3>CPALead Offerwall</h3><p>Complete mobile apps & offers (+350 HOWL)</p></div>
+              <div class="task-action-meta"><div class="task-arrow"><i class="fa-solid fa-arrow-up-right-from-square"></i></div></div>
+          </div>
         </div>
 
-        <!-- Telega.io Task (50 Howl, 5 min cooldown, unlimited) -->
-        <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 50, 'telegaBtn1')">
-            <div class="task-icon" style="color: #fb7185; background: rgba(251,113,133,0.12); box-shadow: inset 0 0 0 1px rgba(251,113,133,0.3);"><i class="fa-solid fa-bullhorn"></i></div>
-            <div class="task-details">
-              <h3>Telega Pro Ad (+50 HOWL)</h3>
-              <p>Unlimited high-tier reward (5m cooldown)</p>
-            </div>
-            <div class="task-action-meta">
-              <span id="telegaBtn1CD" class="cooldown-badge">5:00</span>
-              <div class="task-arrow" id="telegaBtn1Arrow"><i class="fa-solid fa-play"></i></div>
-            </div>
+        <!-- SURVEY PANEL -->
+        <div id="panel-survey" class="earn-section-panel">
+          <h2 class="section-title"><i class="fa-solid fa-clipboard-question"></i> Market Surveys</h2>
+          
+          <div class="task-card" onclick="alert('Survey modules will load available forms soon.')">
+              <div class="task-icon" style="color: #38bdf8; background: rgba(56,189,248,0.12); box-shadow: inset 0 0 0 1px rgba(56,189,248,0.3);"><i class="fa-solid fa-clipboard-user"></i></div>
+              <div class="task-details"><h3>Daily Opinion Survey</h3><p>Answer brief questionnaires (+1000 HOWL)</p></div>
+              <div class="task-action-meta"><div class="task-arrow"><i class="fa-solid fa-play"></i></div></div>
+          </div>
         </div>
       </div>
 
@@ -554,7 +591,6 @@
   </div>
 
 <script>
-    // Initialize Supabase Client for Frontend Sync
     const supabaseUrl = 'https://iqtygrrdvxvkzqmglkwy.supabase.co';
     const supabaseKey = 'sb_publishable_fgMcfZ7_Rcw6-EGAq_JZOg_ApepsDyN';
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -615,7 +651,6 @@
         showView('home-view');
         checkStoredCooldowns();
         
-        // Sync balance from Supabase database upon startup
         if (tgUser && tgUser.id) {
             loadUserBalanceFromSupabase(tgUser.id);
         }
@@ -648,6 +683,14 @@
         if(activeBtn) activeBtn.classList.add('active');
         
         if (viewId === 'history-view') renderHistory();
+    }
+
+    function switchEarnTab(tabName) {
+        document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.earn-section-panel').forEach(panel => panel.classList.remove('active'));
+
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        document.getElementById(`panel-${tabName}`).classList.add('active');
     }
     
     function loadData() {
@@ -772,25 +815,33 @@
     function renderHistory() {
         const list = document.getElementById('history-list');
         if (historyLog.length === 0) {
-            list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No transaction history.</div><div class="detail">Complete ads to start earning HOWL!</div></div></div>`;
+            list.innerHTML = `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">No transaction history.</div><div class="detail">Complete tasks or offers to start earning HOWL!</div></div></div>`;
             return;
         }
         list.innerHTML = historyLog.map(item => {
-            const icon = item.type === 'earn' 
-                ? '<i class="fa-solid fa-plus-circle"></i>' 
-                : '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
+            let icon = '<i class="fa-solid fa-plus-circle"></i>';
+            if (item.type === 'withdraw') {
+                icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
+            } else if (item.type === 'offerwall') {
+                icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
+            }
             return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
         }).join('');
     }
 
-    function grantReward(amount, sourceName) {
+    function grantReward(amount, sourceName, type = 'earn') {
         balance += amount;
         updateDisplay();
-        addToHistory('earn', `+${amount} HOWL from ${sourceName}`);
+        addToHistory(type, `+${amount} HOWL from ${sourceName}`);
         saveData();
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
+    }
+
+    function simulateOfferwallReward(wallName, rewardAmount) {
+        grantReward(rewardAmount, wallName, 'offerwall');
+        alert(`🎉 Offerwall Credit! Earned +${rewardAmount} HOWL from ${wallName}. Check your history!`);
     }
 
     function showMonetagAd1() {

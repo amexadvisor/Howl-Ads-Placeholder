@@ -669,7 +669,7 @@
         checkStoredCooldowns();
         
         if (tgUser && tgUser.id) {
-            loadUserBalanceFromSupabase(tgUser.id);
+            loadUserBalanceAndHistory(tgUser.id);
         }
     }
 
@@ -681,21 +681,42 @@
         }
     }
 
-    async function loadUserBalanceFromSupabase(userId) {
+    async function loadUserBalanceAndHistory(userId) {
         try {
-            const { data, error } = await supabaseClient
+            // Fetch User Balance
+            const { data: userData } = await supabaseClient
                 .from('users')
                 .select('balance')
                 .eq('user_id', userId.toString())
                 .single();
 
-            if (data && typeof data.balance === 'number') {
-                balance = data.balance;
+            if (userData && typeof userData.balance === 'number') {
+                balance = userData.balance;
                 updateDisplay();
                 saveData();
             }
+
+            // Fetch Transactions / History from Supabase
+            const { data: txData } = await supabaseClient
+                .from('transactions')
+                .select('*')
+                .eq('user_id', userId.toString())
+                .order('timestamp', { ascending: false });
+
+            if (txData && txData.length > 0) {
+                historyLog = txData.map(tx => ({
+                    type: tx.type || 'offerwall',
+                    detail: tx.detail,
+                    meta: {
+                        taskId: tx.task_id || tx.transaction_id,
+                        rewardAmount: tx.reward_amount
+                    },
+                    timestamp: tx.timestamp
+                }));
+                saveData();
+            }
         } catch (err) {
-            console.log('Using local fallback balance.');
+            console.log('Using local fallback data due to network connection.');
         }
     }
 
@@ -914,7 +935,7 @@
         show_9954272().then(() => {
             grantReward(2, 'Monetag Interstitial', 'ads');
             alert('🎉 Success! Earned +2 HOWL.');
-        }).catch(e => {
+        }).catch(() => {
             alert('Ad closed or currently unavailable.');
         });
     }
@@ -926,7 +947,7 @@
         show_9954272('pop').then(() => {
             grantReward(2, 'Monetag Popup Stream', 'ads');
             alert('🎉 Success! Earned +2 HOWL.');
-        }).catch(e => {
+        }).catch(() => {
             alert('Popup ad unavailable right now.');
         });
     }
@@ -984,7 +1005,7 @@
                 }
                 alert('⚠️ No redirect detected. Please tap on join now inside the ad.');
             }
-        }).catch((err) => {
+        }).catch(() => {
             window.removeEventListener('blur', blurHandler);
             document.removeEventListener('visibilitychange', visibilityHandler);
 
@@ -1050,7 +1071,7 @@
                         grantReward(rewardAmount, 'Telega.io', 'ads');
                         resetTelegaButton(btn, originalText);
                         alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
-                    }).catch(e => {
+                    }).catch(() => {
                         if (isResolved) return;
                         isResolved = true;
                         clearTimeout(safetyTimeout);
@@ -1073,7 +1094,7 @@
                     resetTelegaButton(btn, originalText);
                     alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
                 }
-            } catch (e) {
+            } catch {
                 resetTelegaButton(btn, originalText);
                 alert("Ad execution failed. Check network connection.");
             }
@@ -1083,32 +1104,11 @@
         }
     }
 
-    // --- Enhanced Postback Handler Function with Task ID & Reward Parsing ---
-    window.addEventListener('message', function(event) {
-        try {
-            if (typeof event.data === 'string' && event.data.startsWith('{')) {
-                const data = JSON.parse(event.data);
-                if (data && (data.reward || data.amount)) {
-                    const rewardAmount = parseFloat(data.reward || data.amount) || 0;
-                    if (rewardAmount > 0) {
-                        const sourceName = data.source || data.wall || 'PubScale Offerwall';
-                        const taskId = data.task_id || data.trans_id || data.id || 'N/A';
-                        
-                        let type = 'offerwall';
-                        if (sourceName.toLowerCase().includes('survey')) {
-                            type = 'survey';
-                        } else if (sourceName.toLowerCase().includes('ad')) {
-                            type = 'ads';
-                        }
-                        
-                        grantReward(rewardAmount, sourceName, type, { taskId: taskId, rewardAmount: rewardAmount });
-                    }
-                }
-            }
-        } catch (e) {
-            // Ignore non-JSON post messages
-        }
-    });
+    function resetTelegaButton(btn, originalText) {
+        btn.classList.remove('loading');
+        const desc = btn.querySelector('.task-details p');
+        if (desc) desc.textContent = originalText;
+    }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {
         const btn = document.getElementById('submitWithdraw');

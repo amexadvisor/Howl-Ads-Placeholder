@@ -665,7 +665,7 @@
         loadData();
         loadTelegramUser();
         setupOfferwallIframe();
-        setupOfferwallPostMessageListener();
+        setupPostbackQueryListener(); // Listens for URL postback query params coming back from server callbacks
         showView('home-view');
         checkStoredCooldowns();
         
@@ -678,44 +678,44 @@
         const iframe = document.getElementById('offerwall-iframe');
         if (iframe) {
             const userId = tgUser ? tgUser.id : 'guest_user';
-            iframe.src = `https://your-offerwall-domain.com/embed?user_id=${userId}`;
+            // Point this to your pubscale/offerwall integration URL supporting user_id tracking
+            iframe.src = `https://howl-ads-placeholder.vercel.app/embed?user_id=${userId}`;
         }
     }
 
-    // Fully Robust PostMessage Listener with comprehensive inspection and fallback parsing
-    function setupOfferwallPostMessageListener() {
-        window.addEventListener('message', (event) => {
-            console.log("Received postMessage from iframe/window:", event.data);
+    // Handles Server-Side Callbacks / Postbacks captured via URL Query Parameters (e.g., Pubscale Postback callback)
+    function setupPostbackQueryListener() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const postbackUserId = urlParams.get('user_id');
+        const postbackValue = urlParams.get('value');
+        const offerId = urlParams.get('offer_id');
+        const token = urlParams.get('token');
 
-            if (event.data) {
-                let data = event.data;
-                
-                // Parse text-string payloads if sent from the partner iframe
-                if (typeof data === 'string') {
-                    try { 
-                        data = JSON.parse(data); 
-                    } catch (e) { 
-                        return; 
-                    }
+        if (postbackUserId && postbackValue) {
+            const rewardAmount = parseFloat(postbackValue) || 0;
+            if (rewardAmount > 0) {
+                // Check if this specific token was already credited to prevent double processing on page reloads
+                const processedTokens = JSON.parse(localStorage.getItem('howl_processed_tokens') || '[]');
+                if (token && processedTokens.includes(token)) return;
+
+                if (token) {
+                    processedTokens.push(token);
+                    localStorage.setItem('howl_processed_tokens', JSON.stringify(processedTokens));
                 }
 
-                // Check for standard reward trigger structures
-                if (data.type === 'offerwall_reward' || data.reward !== undefined || data.amount !== undefined) {
-                    const rewardAmount = parseFloat(data.amount || data.reward) || 0;
-                    const taskName = data.task_name || data.title || 'Offerwall Partner Task';
-                    const taskId = data.task_id || data.transaction_id || 'ow_' + Date.now();
+                grantReward(rewardAmount, `Offerwall (ID: ${offerId || 'N/A'})`, 'offerwall', { 
+                    taskId: offerId || 'pubscale_offer', 
+                    rewardAmount 
+                });
 
-                    if (rewardAmount > 0) {
-                        grantReward(rewardAmount, taskName, 'offerwall', { taskId, rewardAmount });
-                    }
-                }
+                // Clean URL parameters after successful read to keep browser clean
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
-        });
+        }
     }
 
     async function loadUserBalanceAndHistory(userId) {
         try {
-            // Fetch User Balance
             const { data: userData } = await supabaseClient
                 .from('users')
                 .select('balance')
@@ -728,7 +728,6 @@
                 saveData();
             }
 
-            // Fetch Transactions / History from Supabase
             const { data: txData, error: txError } = await supabaseClient
                 .from('transactions')
                 .select('*')

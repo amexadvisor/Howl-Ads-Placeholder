@@ -665,6 +665,7 @@
         loadData();
         loadTelegramUser();
         setupOfferwallIframe();
+        setupOfferwallPostMessageListener();
         showView('home-view');
         checkStoredCooldowns();
         
@@ -679,6 +680,22 @@
             const userId = tgUser ? tgUser.id : 'guest_user';
             iframe.src = `https://your-offerwall-domain.com/embed?user_id=${userId}`;
         }
+    }
+
+    // Listens for postMessage updates from the offerwall iframe (or direct window messages)
+    function setupOfferwallPostMessageListener() {
+        window.addEventListener('message', (event) => {
+            // Validate your iframe source domain here if needed
+            if (event.data && event.data.type === 'offerwall_reward') {
+                const rewardAmount = parseFloat(event.data.amount) || 0;
+                const taskName = event.data.task_name || 'Offerwall Task';
+                const taskId = event.data.task_id || 'ow_' + Date.now();
+
+                if (rewardAmount > 0) {
+                    grantReward(rewardAmount, taskName, 'offerwall', { taskId, rewardAmount });
+                }
+            }
+        });
     }
 
     async function loadUserBalanceAndHistory(userId) {

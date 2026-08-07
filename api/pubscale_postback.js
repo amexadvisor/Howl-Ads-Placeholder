@@ -6,7 +6,8 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-    const { user_id, value, token, signature, transaction_id, offer_name } = req.query;
+    // Updated to use 'offer_id' matching your PubScale dashboard configuration
+    const { user_id, value, token, signature, offer_id } = req.query;
 
     if (!user_id || !value) {
         return res.status(400).send('Missing required parameters');
@@ -19,8 +20,8 @@ export default async function handler(req, res) {
     }
 
     const rewardAmount = parseFloat(value);
-    const txId = transaction_id || token || `pubscale-${Date.now()}`;
-    const offer = offer_name || 'PubScale Offer';
+    const txId = token || `pubscale-${Date.now()}`;
+    const offer = offer_id ? `Offer #${offer_id}` : 'PubScale Offer';
 
     try {
         let { data: user, error: fetchError } = await supabase

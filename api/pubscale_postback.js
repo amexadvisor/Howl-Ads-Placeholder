@@ -1,13 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req, res) {
-  // Pubscale uses GET requests for postbacks
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // Extract parameters sent by Pubscale
-  const { offer_id, signature, token, user_id, value } = req.query;
+  const { offer_id, token, user_id, value } = req.query;
 
   if (!user_id || !value) {
     return res.status(400).json({ error: 'Missing required user_id or value parameters' });
@@ -22,7 +20,6 @@ export default async function handler(req, res) {
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase environment variables');
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
@@ -32,7 +29,7 @@ export default async function handler(req, res) {
 
   try {
     // ------------------------------------------------------------------
-    // STEP 1: DUPLICATE CHECK (Prevent double crediting if Pubscale retries)
+    // STEP 1: DUPLICATE CHECK
     // ------------------------------------------------------------------
     if (token) {
       const { data: existingTx } = await supabase
@@ -43,23 +40,18 @@ export default async function handler(req, res) {
         .limit(1);
 
       if (existingTx && existingTx.length > 0) {
-        console.log(`Duplicate transaction ignored for token: ${token}`);
-        return res.status(200).send('OK'); // Return 200 so Pubscale stops retrying
+        return res.status(200).send('OK');
       }
     }
 
     // ------------------------------------------------------------------
-    // STEP 2: FETCH & UPDATE USER BALANCE
+    // STEP 2: FETCH & UPDATE USER BALANCE (Fixed: Removed updated_at)
     // ------------------------------------------------------------------
-    const { data: userData, error: userFetchError } = await supabase
+    const { data: userData } = await supabase
       .from('users')
       .select('balance')
       .eq('user_id', formattedUserId)
       .maybeSingle();
-
-    if (userFetchError) {
-      console.error('Error fetching user balance:', userFetchError.message);
-    }
 
     const currentBalance = userData?.balance || 0;
     const newBalance = currentBalance + rewardAmount;
@@ -68,17 +60,16 @@ export default async function handler(req, res) {
       .from('users')
       .upsert({
         user_id: formattedUserId,
-        balance: newBalance,
-        updated_at: new Date().toISOString()
+        balance: newBalance
       });
 
     if (upsertError) {
       console.error('Error updating user balance:', upsertError.message);
-      return res.status(500).json({ error: 'Failed to update user balance' });
+      return res.status(500).json({ error: 'Failed to update user balance: ' + upsertError.message });
     }
 
     // ------------------------------------------------------------------
-    // STEP 3: INSERT TRANSACTION RECORD FOR OFFERWALL HISTORY
+    // STEP 3: INSERT TRANSACTION RECORD (Safe Fallback Version)
     // ------------------------------------------------------------------
     const { error: txError } = await supabase
       .from('transactions')
@@ -92,17 +83,15 @@ export default async function handler(req, res) {
       });
 
     if (txError) {
-      console.error('Failed to log offerwall transaction:', txError.message);
-      // Fallback: Attempting minimal insert if optional schema columns differ
+      console.error('Failed to log detailed transaction, trying basic insert:', txError.message);
+      // Fallback if some transaction columns don't exist yet either
       await supabase.from('transactions').insert({
         user_id: formattedUserId,
         type: 'offerwall',
-        detail: `+${rewardAmount} HOWL from Offerwall`,
-        timestamp: new Date().toISOString()
+        detail: `+${rewardAmount} HOWL from Offerwall`
       });
     }
 
-    // Return 200 OK to confirm success to Pubscale
     return res.status(200).send('OK');
 
   } catch (error) {

@@ -682,17 +682,32 @@
         }
     }
 
-    // Listens for postMessage updates from the offerwall iframe (or direct window messages)
+    // Fully Robust PostMessage Listener with comprehensive inspection and fallback parsing
     function setupOfferwallPostMessageListener() {
         window.addEventListener('message', (event) => {
-            // Validate your iframe source domain here if needed
-            if (event.data && event.data.type === 'offerwall_reward') {
-                const rewardAmount = parseFloat(event.data.amount) || 0;
-                const taskName = event.data.task_name || 'Offerwall Task';
-                const taskId = event.data.task_id || 'ow_' + Date.now();
+            console.log("Received postMessage from iframe/window:", event.data);
 
-                if (rewardAmount > 0) {
-                    grantReward(rewardAmount, taskName, 'offerwall', { taskId, rewardAmount });
+            if (event.data) {
+                let data = event.data;
+                
+                // Parse text-string payloads if sent from the partner iframe
+                if (typeof data === 'string') {
+                    try { 
+                        data = JSON.parse(data); 
+                    } catch (e) { 
+                        return; 
+                    }
+                }
+
+                // Check for standard reward trigger structures
+                if (data.type === 'offerwall_reward' || data.reward !== undefined || data.amount !== undefined) {
+                    const rewardAmount = parseFloat(data.amount || data.reward) || 0;
+                    const taskName = data.task_name || data.title || 'Offerwall Partner Task';
+                    const taskId = data.task_id || data.transaction_id || 'ow_' + Date.now();
+
+                    if (rewardAmount > 0) {
+                        grantReward(rewardAmount, taskName, 'offerwall', { taskId, rewardAmount });
+                    }
                 }
             }
         });
@@ -751,6 +766,24 @@
                 .upsert({ user_id: tgUser.id.toString(), balance: newBalance, updated_at: new Date().toISOString() });
         } catch (err) {
             console.log('Failed to sync balance to Supabase.');
+        }
+    }
+
+    async function logTransactionToSupabase(type, detail, meta = {}) {
+        if (!tgUser || !tgUser.id) return;
+        try {
+            await supabaseClient
+                .from('transactions')
+                .insert({
+                    user_id: tgUser.id.toString(),
+                    type: type,
+                    detail: detail,
+                    task_id: meta.taskId || null,
+                    reward_amount: meta.rewardAmount || null,
+                    timestamp: new Date().toISOString()
+                });
+        } catch (err) {
+            console.error('Failed to save transaction to Supabase table:', err);
         }
     }
 
@@ -899,12 +932,16 @@
         historyLog.unshift({ type, detail, meta, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
+        renderHistory();
+        logTransactionToSupabase(type, detail, meta);
     }
 
     function renderHistory() {
         const listAds = document.getElementById('history-list-ads');
         const listOfferwall = document.getElementById('history-list-offerwall');
         const listSurvey = document.getElementById('history-list-survey');
+
+        if (!listAds || !listOfferwall || !listSurvey) return;
 
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');

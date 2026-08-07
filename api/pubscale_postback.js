@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { offer_id, token, user_id, value } = req.query;
+  const { user_id, value } = req.query;
 
   if (!user_id || !value) {
     return res.status(400).json({ error: 'Missing required user_id or value parameters' });
@@ -25,27 +25,10 @@ export default async function handler(req, res) {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
   const formattedUserId = user_id.toString().trim();
-  const taskId = (offer_id || token || 'pubscale_offer').toString();
 
   try {
     // ------------------------------------------------------------------
-    // STEP 1: DUPLICATE CHECK (Transactions)
-    // ------------------------------------------------------------------
-    if (token) {
-      const { data: existingTx } = await supabase
-        .from('transactions')
-        .select('id')
-        .eq('user_id', formattedUserId)
-        .eq('task_id', token.toString())
-        .limit(1);
-
-      if (existingTx && existingTx.length > 0) {
-        return res.status(200).send('OK');
-      }
-    }
-
-    // ------------------------------------------------------------------
-    // STEP 2: FETCH & UPDATE USER BALANCE (Fixed with onConflict)
+    // STEP 1: FETCH & UPDATE USER BALANCE
     // ------------------------------------------------------------------
     const { data: userData } = await supabase
       .from('users')
@@ -56,7 +39,6 @@ export default async function handler(req, res) {
     const currentBalance = userData?.balance || 0;
     const newBalance = currentBalance + rewardAmount;
 
-    // Fixed: Added { onConflict: 'user_id' } so upsert knows how to handle existing IDs
     const { error: upsertError } = await supabase
       .from('users')
       .upsert(
@@ -66,11 +48,11 @@ export default async function handler(req, res) {
 
     if (upsertError) {
       console.error('Error updating user balance:', upsertError.message);
-      return res.status(500).json({ error: 'Failed to update user balance: ' + upsertError.message });
+      return res.status(500).json({ error: 'Failed to update user balance' });
     }
 
     // ------------------------------------------------------------------
-    // STEP 3: INSERT TRANSACTION RECORD
+    // STEP 2: INSERT TRANSACTION HISTORY (Using only standard columns)
     // ------------------------------------------------------------------
     const { error: txError } = await supabase
       .from('transactions')
@@ -78,18 +60,11 @@ export default async function handler(req, res) {
         user_id: formattedUserId,
         type: 'offerwall',
         detail: `+${rewardAmount} HOWL from Offerwall`,
-        task_id: taskId,
-        reward_amount: rewardAmount,
         timestamp: new Date().toISOString()
       });
 
     if (txError) {
-      console.error('Failed to log detailed transaction, trying basic insert:', txError.message);
-      await supabase.from('transactions').insert({
-        user_id: formattedUserId,
-        type: 'offerwall',
-        detail: `+${rewardAmount} HOWL from Offerwall`
-      });
+      console.error('Failed to insert history:', txError.message);
     }
 
     return res.status(200).send('OK');

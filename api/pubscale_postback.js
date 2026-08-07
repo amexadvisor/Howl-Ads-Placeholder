@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   try {
     // ------------------------------------------------------------------
-    // STEP 1: DUPLICATE CHECK
+    // STEP 1: DUPLICATE CHECK (Transactions)
     // ------------------------------------------------------------------
     if (token) {
       const { data: existingTx } = await supabase
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     }
 
     // ------------------------------------------------------------------
-    // STEP 2: FETCH & UPDATE USER BALANCE (Fixed: Removed updated_at)
+    // STEP 2: FETCH & UPDATE USER BALANCE (Fixed with onConflict)
     // ------------------------------------------------------------------
     const { data: userData } = await supabase
       .from('users')
@@ -56,12 +56,13 @@ export default async function handler(req, res) {
     const currentBalance = userData?.balance || 0;
     const newBalance = currentBalance + rewardAmount;
 
+    // Fixed: Added { onConflict: 'user_id' } so upsert knows how to handle existing IDs
     const { error: upsertError } = await supabase
       .from('users')
-      .upsert({
-        user_id: formattedUserId,
-        balance: newBalance
-      });
+      .upsert(
+        { user_id: formattedUserId, balance: newBalance },
+        { onConflict: 'user_id' }
+      );
 
     if (upsertError) {
       console.error('Error updating user balance:', upsertError.message);
@@ -69,7 +70,7 @@ export default async function handler(req, res) {
     }
 
     // ------------------------------------------------------------------
-    // STEP 3: INSERT TRANSACTION RECORD (Safe Fallback Version)
+    // STEP 3: INSERT TRANSACTION RECORD
     // ------------------------------------------------------------------
     const { error: txError } = await supabase
       .from('transactions')
@@ -84,7 +85,6 @@ export default async function handler(req, res) {
 
     if (txError) {
       console.error('Failed to log detailed transaction, trying basic insert:', txError.message);
-      // Fallback if some transaction columns don't exist yet either
       await supabase.from('transactions').insert({
         user_id: formattedUserId,
         type: 'offerwall',

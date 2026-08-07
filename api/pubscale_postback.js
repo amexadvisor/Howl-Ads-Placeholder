@@ -47,29 +47,36 @@ export default async function handler(req, res) {
       );
 
     if (upsertError) {
-      console.error('Error updating user balance:', upsertError.message);
+      console.error('CRITICAL BALANCE ERROR:', upsertError);
       return res.status(500).json({ error: 'Failed to update user balance' });
     }
 
     // ------------------------------------------------------------------
-    // STEP 2: INSERT TRANSACTION HISTORY (Minimal columns only)
+    // STEP 2: INSERT TRANSACTION HISTORY WITH LOGGING
     // ------------------------------------------------------------------
-    const { error: txError } = await supabase
+    const insertPayload = {
+      user_id: formattedUserId,
+      type: 'offerwall',
+      detail: `+${rewardAmount} HOWL from Offerwall`
+    };
+
+    console.log('Attempting to insert into transactions:', insertPayload);
+
+    const { data: txData, error: txError } = await supabase
       .from('transactions')
-      .insert({
-        user_id: formattedUserId,
-        type: 'offerwall',
-        detail: `+${rewardAmount} HOWL from Offerwall`
-      });
+      .insert(insertPayload)
+      .select();
 
     if (txError) {
-      console.error('Failed to insert history:', txError.message);
+      console.error('TRANSACTIONS INSERT ERROR:', JSON.stringify(txError, null, 2));
+    } else {
+      console.log('Successfully inserted transaction row:', txData);
     }
 
     return res.status(200).send('OK');
 
   } catch (error) {
-    console.error('Postback processing execution error:', error.message || error);
+    console.error('Execution Exception:', error.message || error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

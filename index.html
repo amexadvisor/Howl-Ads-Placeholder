@@ -851,8 +851,8 @@
         }
     }
 
-    function addToHistory(type, detail) {
-        historyLog.unshift({ type, detail, timestamp: new Date().toISOString() });
+    function addToHistory(type, detail, meta = {}) {
+        historyLog.unshift({ type, detail, meta, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
     }
@@ -879,7 +879,16 @@
                 } else if (item.type === 'survey') {
                     icon = '<i class="fa-solid fa-clipboard-question" style="color: #38bdf8;"></i>';
                 }
-                return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div><div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
+                
+                let extraDetails = '';
+                if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
+                    extraDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
+                    if (item.meta.taskId) extraDetails += `Task ID: ${item.meta.taskId} `;
+                    if (item.meta.rewardAmount) extraDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
+                    extraDetails += `</div>`;
+                }
+
+                return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div>${extraDetails}<div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
             }).join('');
         };
 
@@ -888,10 +897,10 @@
         listSurvey.innerHTML = renderListContent(surveyItems, "No Survey transaction history.");
     }
 
-    function grantReward(amount, sourceName, type = 'ads') {
+    function grantReward(amount, sourceName, type = 'ads', meta = {}) {
         balance += amount;
         updateDisplay();
-        addToHistory(type, `+${amount} HOWL from ${sourceName}`);
+        addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
         saveData();
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -1074,30 +1083,25 @@
         }
     }
 
-    function resetTelegaButton(btn, defaultText) {
-        if (btn) {
-            btn.classList.remove('loading');
-            const desc = btn.querySelector('.task-details p');
-            if(desc) desc.textContent = defaultText || `Unlimited high-tier reward`;
-        }
-    }
-
-    // --- Pubscale Postback Handler Function Logic ---
+    // --- Enhanced Postback Handler Function with Task ID & Reward Parsing ---
     window.addEventListener('message', function(event) {
         try {
             if (typeof event.data === 'string' && event.data.startsWith('{')) {
                 const data = JSON.parse(event.data);
-                if (data && data.reward && data.source) {
-                    const rewardAmount = parseFloat(data.reward) || 0;
+                if (data && (data.reward || data.amount)) {
+                    const rewardAmount = parseFloat(data.reward || data.amount) || 0;
                     if (rewardAmount > 0) {
-                        const sourceName = data.source;
-                        let type = 'ads';
-                        if (sourceName.toLowerCase().includes('offerwall') || sourceName.toLowerCase().includes('cpalead') || sourceName.toLowerCase().includes('pubscale')) {
-                            type = 'offerwall';
-                        } else if (sourceName.toLowerCase().includes('survey')) {
+                        const sourceName = data.source || data.wall || 'PubScale Offerwall';
+                        const taskId = data.task_id || data.trans_id || data.id || 'N/A';
+                        
+                        let type = 'offerwall';
+                        if (sourceName.toLowerCase().includes('survey')) {
                             type = 'survey';
+                        } else if (sourceName.toLowerCase().includes('ad')) {
+                            type = 'ads';
                         }
-                        grantReward(rewardAmount, sourceName, type);
+                        
+                        grantReward(rewardAmount, sourceName, type, { taskId: taskId, rewardAmount: rewardAmount });
                     }
                 }
             }

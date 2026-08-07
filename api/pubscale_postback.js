@@ -19,8 +19,6 @@ export default async function handler(req, res) {
     }
 
     const rewardAmount = parseFloat(value);
-    
-    // Set up history and tracking variables
     const txId = transaction_id || token || `pubscale-${Date.now()}`;
     const offer = offer_name || 'PubScale Offer';
 
@@ -28,32 +26,31 @@ export default async function handler(req, res) {
         let { data: user, error: fetchError } = await supabase
             .from('users')
             .select('balance')
-            .eq('user_id', user_id)
+            .eq('user_id', user_id.toString())
             .single();
 
         if (fetchError && fetchError.code === 'PGRST116') {
             const { error: insertError } = await supabase
                 .from('users')
-                .insert([{ user_id: user_id, balance: rewardAmount }]);
+                .insert([{ user_id: user_id.toString(), balance: rewardAmount }]);
 
             if (insertError) throw insertError;
         } else {
-            const newBalance = (user.balance || 0) + rewardAmount;
+            const newBalance = ((user && user.balance) || 0) + rewardAmount;
 
             const { error: updateError } = await supabase
                 .from('users')
                 .update({ balance: newBalance })
-                .eq('user_id', user_id);
+                .eq('user_id', user_id.toString());
 
             if (updateError) throw updateError;
         }
 
         // --- OFFERWALL HISTORY INSERTION ---
-        // Inserts the structured record matching your offerwall history fields (task_id, reward amount, detail)
         const { error: historyError } = await supabase
             .from('transactions') 
             .insert([{
-                user_id: user_id,
+                user_id: user_id.toString(),
                 transaction_id: txId,
                 type: 'offerwall',
                 detail: `+${rewardAmount} HOWL from ${offer}`,
@@ -67,7 +64,6 @@ export default async function handler(req, res) {
         }
         // -----------------------------------
 
-        console.log(`Successfully credited user ${user_id} with ${rewardAmount} HOWL and recorded offerwall history.`);
         return res.status(200).send('OK');
 
     } catch (err) {

@@ -52,15 +52,14 @@ export default async function handler(req, res) {
     }
 
     // ------------------------------------------------------------------
-    // STEP 2: INSERT TRANSACTION HISTORY (Using only standard columns)
+    // STEP 2: INSERT TRANSACTION HISTORY (Minimal columns only)
     // ------------------------------------------------------------------
     const { error: txError } = await supabase
       .from('transactions')
       .insert({
         user_id: formattedUserId,
         type: 'offerwall',
-        detail: `+${rewardAmount} HOWL from Offerwall`,
-        timestamp: new Date().toISOString()
+        detail: `+${rewardAmount} HOWL from Offerwall`
       });
 
     if (txError) {

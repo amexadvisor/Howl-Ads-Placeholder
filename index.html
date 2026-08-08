@@ -719,20 +719,26 @@
     }
 
     async function loadUserBalanceAndHistory(userId) {
+        const userIdStr = userId ? userId.toString() : 'guest_user';
+        console.log(`[DIAGNOSTIC] Starting balance & history fetch for user_id: "${userIdStr}"`);
+
         try {
-            const userIdStr = userId.toString();
-            const { data: userData } = await supabaseClient
+            const { data: userData, error: userError } = await supabaseClient
                 .from('users')
                 .select('balance')
                 .eq('user_id', userIdStr)
                 .single();
 
-            if (userData && typeof userData.balance === 'number') {
+            if (userError) {
+                console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
+            } else if (userData && typeof userData.balance === 'number') {
+                console.log('[DIAGNOSTIC] Successfully fetched balance:', userData.balance);
                 balance = userData.balance;
                 updateDisplay();
                 saveData();
             }
 
+            console.log('[DIAGNOSTIC] Querying transactions table...');
             const { data: txData, error: txError } = await supabaseClient
                 .from('transactions')
                 .select('*')
@@ -740,14 +746,19 @@
                 .order('timestamp', { ascending: false });
 
             if (txError) {
-                console.error('Error fetching transactions from Supabase:', txError.message);
+                console.error('[DIAGNOSTIC ERROR] Failed to fetch transactions from Supabase:', txError.message);
                 renderHistory();
                 return;
             }
 
             if (txData && txData.length > 0) {
+                console.log(`[DIAGNOSTIC] Found ${txData.length} total raw transactions in Supabase database.`);
+                
+                const detectedTypes = [...new Set(txData.map(t => t.type))];
+                console.log('[DIAGNOSTIC] Transaction types present in database:', detectedTypes);
+
                 historyLog = txData.map(tx => ({
-                    type: tx.type || 'ads',
+                    type: tx.type ? tx.type.trim().toLowerCase() : 'ads',
                     detail: tx.detail,
                     meta: {
                         taskId: tx.task_id || tx.transaction_id,
@@ -755,13 +766,24 @@
                     },
                     timestamp: tx.timestamp
                 }));
+                
                 saveData();
             } else {
-                historyLog = [];
+                console.warn('[DIAGNOSTIC] Transactions query returned 0 rows for this user_id. Checking local storage fallback...');
+                const savedData = localStorage.getItem('howlRewardsBotV6');
+                if (savedData) {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed.historyLog && parsed.historyLog.length > 0) {
+                        console.log(`[DIAGNOSTIC] Loaded ${parsed.historyLog.length} items from localStorage fallback.`);
+                        historyLog = parsed.historyLog;
+                    }
+                }
             }
+            
             renderHistory();
+
         } catch (err) {
-            console.log('Using local fallback data due to network connection.');
+            console.error('[DIAGNOSTIC CRITICAL] Exception thrown during data sync:', err);
             renderHistory();
         }
     }
@@ -952,11 +974,16 @@
         const listOfferwall = document.getElementById('history-list-offerwall');
         const listSurvey = document.getElementById('history-list-survey');
 
-        if (!listAds || !listOfferwall || !listSurvey) return;
+        if (!listAds || !listOfferwall || !listSurvey) {
+            console.error('[DIAGNOSTIC ERROR] One or more history list DOM elements are missing!');
+            return;
+        }
 
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
+
+        console.log(`[DIAGNOSTIC RENDER] Breakdown -> Ads: ${adsItems.length}, Offerwall: ${offerwallItems.length}, Survey: ${surveyItems.length}`);
 
         const buildHistoryCard = (item) => {
             let icon = '<i class="fa-solid fa-plus-circle"></i>';
@@ -988,7 +1015,6 @@
             `;
         };
 
-        // Render Ads Tab
         if (adsItems.length === 0) {
             listAds.innerHTML = `
                 <div class="list-item">
@@ -999,18 +1025,18 @@
             listAds.innerHTML = adsItems.map(item => buildHistoryCard(item)).join('');
         }
 
-        // Render Offerwall Tab
         if (offerwallItems.length === 0) {
+            console.log('[DIAGNOSTIC] Offerwall array is empty. Displaying placeholder card.');
             listOfferwall.innerHTML = `
                 <div class="list-item">
                     <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
                     <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Complete partner offers to populate logs.</div></div>
                 </div>`;
         } else {
+            console.log('[DIAGNOSTIC] Rendering actual offerwall transaction cards.');
             listOfferwall.innerHTML = offerwallItems.map(item => buildHistoryCard(item)).join('');
         }
 
-        // Render Survey Tab
         if (surveyItems.length === 0) {
             listSurvey.innerHTML = `
                 <div class="list-item">

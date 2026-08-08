@@ -575,7 +575,7 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW -->
+      <!-- HISTORY VIEW WITH CLEAN EMPTY OFFERWALL HISTORY -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -589,9 +589,13 @@
           <div id="history-list-ads"></div>
         </div>
         
+        <!-- COMPLETELY CLEARED OFFERWALL HISTORY PANEL -->
         <div id="history-panel-offerwall" class="earn-section-panel">
           <div id="ow-history-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
-            <!-- Completely cleared/removed old mock/dummy items. Populates exclusively via real grantReward() postbacks -->
+            <div class="list-item">
+              <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
+              <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Offerwall transactions will not be recorded here.</div></div>
+            </div>
           </div>
         </div>
 
@@ -704,10 +708,13 @@
                     localStorage.setItem('howl_processed_tokens', JSON.stringify(processedTokens));
                 }
 
-                grantReward(rewardAmount, `Offerwall Campaign (${offerId || 'Partner Offer'})`, 'offerwall', { 
-                    taskId: offerId || 'offerwall_reward', 
-                    rewardAmount 
-                });
+                // Grant reward directly without logging into history or database for offerwalls
+                balance += rewardAmount;
+                updateDisplay();
+                saveData();
+                if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
 
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
@@ -740,8 +747,9 @@
             }
 
             if (txData && txData.length > 0) {
-                historyLog = txData.map(tx => ({
-                    type: tx.type || 'offerwall',
+                // Filter out offerwall transactions from local history logic entirely
+                historyLog = txData.filter(tx => tx.type !== 'offerwall').map(tx => ({
+                    type: tx.type || 'ads',
                     detail: tx.detail,
                     meta: {
                         taskId: tx.task_id || tx.transaction_id,
@@ -820,7 +828,8 @@
             balance = data.balance || 0;
             adsgramCountToday = data.adsgramCountToday || 0;
             lastResetDate = data.lastResetDate || new Date().toDateString();
-            historyLog = data.historyLog || [];
+            // Clean out any legacy offerwall items from local history log
+            historyLog = (data.historyLog || []).filter(item => item.type !== 'offerwall');
         }
 
         const currentDate = new Date().toDateString();
@@ -928,6 +937,7 @@
     }
 
     function addToHistory(type, detail, meta = {}) {
+        if (type === 'offerwall') return; // Completely block offerwall history logs
         historyLog.unshift({ type, detail, meta, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
@@ -935,7 +945,6 @@
         logTransactionToSupabase(type, detail, meta);
     }
 
-    // --- CLEAN OFFERWALL HISTORY RENDERING ENGINE ---
     function renderHistory() {
         const listAds = document.getElementById('history-list-ads');
         const offerwallWrapper = document.getElementById('ow-history-wrapper');
@@ -944,7 +953,6 @@
         if (!listAds || !offerwallWrapper || !listSurvey) return;
 
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
-        const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
 
         const buildHistoryCard = (item, customIcon = null, customBadgeStyle = '') => {
@@ -975,31 +983,6 @@
             `;
         };
 
-        const buildOfferwallCard = (item) => {
-            const offerTitle = item.detail || 'Offerwall Reward';
-            const rewardVal = item.meta && item.meta.rewardAmount ? item.meta.rewardAmount : '0';
-            const campaignId = item.meta && item.meta.taskId ? item.meta.taskId : 'N/A';
-            const formattedDate = new Date(item.timestamp).toLocaleString();
-
-            return `
-                <div class="list-item" style="border-left: 3px solid var(--gold); background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), var(--card-bg));">
-                    <div class="history-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--gold);">
-                        <i class="fa-solid fa-gift"></i>
-                    </div>
-                    <div class="info">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="name" style="color: #fff;">${offerTitle}</span>
-                            <span style="font-size: 11px; font-weight: 800; color: var(--gold); background: rgba(245, 158, 11, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">+${rewardVal} HOWL</span>
-                        </div>
-                        <div class="detail" style="font-family: monospace; color: var(--text-muted); margin-top: 4px;">
-                            Campaign ID: <span style="color: var(--primary);">${campaignId}</span>
-                        </div>
-                        <div class="detail" style="margin-top: 2px;">${formattedDate}</div>
-                    </div>
-                </div>
-            `;
-        };
-
         // Render Ads Tab
         if (adsItems.length === 0) {
             listAds.innerHTML = `
@@ -1011,16 +994,12 @@
             listAds.innerHTML = adsItems.map(item => buildHistoryCard(item)).join('');
         }
 
-        // Render Clean Offerwall Tab Content (Exclusively real postbacks)
-        if (offerwallItems.length === 0) {
-            offerwallWrapper.innerHTML = `
-                <div class="list-item">
-                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
-                    <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall Rewards Yet</div><div class="detail">Complete partner tasks & offers to see your earnings here.</div></div>
-                </div>`;
-        } else {
-            offerwallWrapper.innerHTML = offerwallItems.map(item => buildOfferwallCard(item)).join('');
-        }
+        // Offerwall Tab permanently empty as requested
+        offerwallWrapper.innerHTML = `
+            <div class="list-item">
+                <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
+                <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Offerwall transactions will not be recorded here.</div></div>
+            </div>`;
 
         // Render Survey Tab
         if (surveyItems.length === 0) {
@@ -1035,6 +1014,7 @@
     }
 
     function grantReward(amount, sourceName, type = 'ads', meta = {}) {
+        if (type === 'offerwall') return;
         balance += amount;
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);

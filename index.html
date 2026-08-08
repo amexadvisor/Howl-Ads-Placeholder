@@ -701,19 +701,20 @@
         console.log(`🔍 [LOG START] Fetching user balance and history for: "${userIdStr}"`);
 
         try {
-            // 1. Fetch Balance
-            const userQuery = await supabaseClient
+            // 1. Fetch or Ensure User in Supabase (Upsert to prevent row-missing errors)
+            const userCheck = await supabaseClient
                 .from('users')
                 .select('balance')
                 .eq('user_id', userIdStr)
                 .single();
 
-            console.log("🔍 [LOG SUPABASE USER RESULT]:", userQuery);
-
-            if (userQuery.error) {
-                console.warn("⚠️ [LOG USER ERROR DETAIL]:", userQuery.error);
-            } else if (userQuery.data && typeof userQuery.data.balance === 'number') {
-                balance = userQuery.data.balance;
+            if (userCheck.error && userCheck.error.code === 'PGRST116') {
+                // User doesn't exist yet, insert initial record
+                await supabaseClient
+                    .from('users')
+                    .upsert({ user_id: userIdStr, balance: balance, updated_at: new Date().toISOString() });
+            } else if (userCheck.data && typeof userCheck.data.balance === 'number') {
+                balance = userCheck.data.balance;
                 updateDisplay();
                 saveData();
             }
@@ -729,7 +730,6 @@
 
             if (txQuery.error) {
                 console.error("❌ [LOG TRANSACTION ERROR DETAIL]:", txQuery.error);
-                alert("Supabase Error: " + txQuery.error.message);
                 renderHistory();
                 return;
             }
@@ -762,7 +762,6 @@
 
         } catch (err) {
             console.error("💥 [LOG CRITICAL EXCEPTION]:", err);
-            alert("Critical Error: " + err.message);
             renderHistory();
         }
     }
@@ -796,7 +795,6 @@
             console.log("📝 [LOG INSERT TRANSACTION RESULT]:", res);
             if (res.error) {
                 console.error("❌ [LOG INSERT TRANSACTION FAILED]:", res.error);
-                alert("Save Transaction Error: " + res.error.message);
             }
         } catch (err) {
             console.error("💥 [LOG INSERT EXCEPTION]:", err);
@@ -1022,6 +1020,11 @@
         if (adsgramCountToday >= 20) return alert('Daily limit reached.');
         if (!adsgramController) return alert('Adsgram SDK not loaded.');
 
+        const now = Date.now();
+        if ((now - adsgramLastRun) / 1000 < 5) return;
+        adsgramLastRun = now;
+        localStorage.setItem('howl_adsgram_cd', now.toString());
+
         adsgramController.show().then(() => {
             adsgramCountToday += 1;
             grantReward(25, 'Adsgram Network', 'ads');
@@ -1029,7 +1032,12 @@
     }
 
     function startTelegaTask(uuid, rewardAmount, buttonId) {
-        grantReward(rewardAmount, 'Telega.io', 'ads');
+        const now = Date.now();
+        if ((now - telegaLastRun) / 1000 < 300) return;
+        telegaLastRun = now;
+        localStorage.setItem('howl_telega_cd', now.toString());
+
+        grantReward(rewardAmount, 'Telega.io', 'ads', { taskId: uuid, rewardAmount: rewardAmount });
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {

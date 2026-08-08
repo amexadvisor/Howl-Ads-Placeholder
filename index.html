@@ -575,7 +575,7 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW WITH SUPABASE FETCHING & CLEARED OFFERWALL -->
+      <!-- HISTORY VIEW WITH SUPABASE FETCHING & OFFERWALL RENDERING -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -589,7 +589,7 @@
           <div id="history-list-ads"></div>
         </div>
         
-        <!-- OFFERWALL PANEL NOW RENDERS HISTORY -->
+        <!-- OFFERWALL HISTORY PANEL -->
         <div id="history-panel-offerwall" class="earn-section-panel">
           <div id="history-list-offerwall"></div>
         </div>
@@ -707,7 +707,7 @@
 
                 balance += rewardAmount;
                 updateDisplay();
-                addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount });
+                addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount, taskId: offerId });
                 saveData();
                 if (window.Telegram && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -746,7 +746,6 @@
             }
 
             if (txData && txData.length > 0) {
-                // Filter REMOVED - Offerwall is now mapped and included in history
                 historyLog = txData.map(tx => ({
                     type: tx.type || 'ads',
                     detail: tx.detail,
@@ -779,7 +778,6 @@
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
-        // Condition checking for 'offerwall' was removed so it saves normally
         const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
             await supabaseClient
@@ -942,7 +940,6 @@
     }
 
     function addToHistory(type, detail, meta = {}) {
-        // Return block removed so offerwall is added to array 
         historyLog.unshift({ type, detail, meta, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
@@ -1026,7 +1023,6 @@
     }
 
     function grantReward(amount, sourceName, type = 'ads', meta = {}) {
-        // Return block removed so offerwall is allowed to trigger manually if needed
         balance += amount;
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);

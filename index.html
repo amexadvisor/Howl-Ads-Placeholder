@@ -575,7 +575,7 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW WITH CLEAN EMPTY OFFERWALL HISTORY -->
+      <!-- HISTORY VIEW WITH SUPABASE FETCHING & CLEARED OFFERWALL -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -589,7 +589,7 @@
           <div id="history-list-ads"></div>
         </div>
         
-        <!-- COMPLETELY CLEARED OFFERWALL HISTORY PANEL -->
+        <!-- OFFERWALL PANEL WITH NO HISTORY -->
         <div id="history-panel-offerwall" class="earn-section-panel">
           <div id="ow-history-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
             <div class="list-item">
@@ -679,6 +679,8 @@
         
         if (tgUser && tgUser.id) {
             loadUserBalanceAndHistory(tgUser.id);
+        } else {
+            loadUserBalanceAndHistory('guest_user');
         }
     }
 
@@ -708,7 +710,6 @@
                     localStorage.setItem('howl_processed_tokens', JSON.stringify(processedTokens));
                 }
 
-                // Grant reward directly without logging into history or database for offerwalls
                 balance += rewardAmount;
                 updateDisplay();
                 saveData();
@@ -723,10 +724,11 @@
 
     async function loadUserBalanceAndHistory(userId) {
         try {
+            const userIdStr = userId.toString();
             const { data: userData } = await supabaseClient
                 .from('users')
                 .select('balance')
-                .eq('user_id', userId.toString())
+                .eq('user_id', userIdStr)
                 .single();
 
             if (userData && typeof userData.balance === 'number') {
@@ -738,16 +740,17 @@
             const { data: txData, error: txError } = await supabaseClient
                 .from('transactions')
                 .select('*')
-                .eq('user_id', userId.toString())
+                .eq('user_id', userIdStr)
                 .order('timestamp', { ascending: false });
 
             if (txError) {
                 console.error('Error fetching transactions from Supabase:', txError.message);
+                renderHistory();
                 return;
             }
 
             if (txData && txData.length > 0) {
-                // Filter out offerwall transactions from local history logic entirely
+                // Filter out offerwall transactions completely from history display
                 historyLog = txData.filter(tx => tx.type !== 'offerwall').map(tx => ({
                     type: tx.type || 'ads',
                     detail: tx.detail,
@@ -758,31 +761,35 @@
                     timestamp: tx.timestamp
                 }));
                 saveData();
-                renderHistory();
+            } else {
+                historyLog = [];
             }
+            renderHistory();
         } catch (err) {
             console.log('Using local fallback data due to network connection.');
+            renderHistory();
         }
     }
 
     async function syncBalanceToSupabase(newBalance) {
-        if (!tgUser || !tgUser.id) return;
+        const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
             await supabaseClient
                 .from('users')
-                .upsert({ user_id: tgUser.id.toString(), balance: newBalance, updated_at: new Date().toISOString() });
+                .upsert({ user_id: userIdStr, balance: newBalance, updated_at: new Date().toISOString() });
         } catch (err) {
             console.log('Failed to sync balance to Supabase.');
         }
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
-        if (!tgUser || !tgUser.id) return;
+        if (type === 'offerwall') return; // Do not log offerwall transactions
+        const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
             await supabaseClient
                 .from('transactions')
                 .insert({
-                    user_id: tgUser.id.toString(),
+                    user_id: userIdStr,
                     type: type,
                     detail: detail,
                     task_id: meta.taskId || null,
@@ -802,7 +809,10 @@
         const activeBtn = document.querySelector(`.nav-button[onclick="showView('${viewId}')"]`);
         if(activeBtn) activeBtn.classList.add('active');
         
-        if (viewId === 'history-view') renderHistory();
+        if (viewId === 'history-view') {
+            const currentUserId = tgUser && tgUser.id ? tgUser.id : 'guest_user';
+            loadUserBalanceAndHistory(currentUserId);
+        }
     }
 
     function switchEarnTab(tabName) {
@@ -828,7 +838,6 @@
             balance = data.balance || 0;
             adsgramCountToday = data.adsgramCountToday || 0;
             lastResetDate = data.lastResetDate || new Date().toDateString();
-            // Clean out any legacy offerwall items from local history log
             historyLog = (data.historyLog || []).filter(item => item.type !== 'offerwall');
         }
 
@@ -937,7 +946,7 @@
     }
 
     function addToHistory(type, detail, meta = {}) {
-        if (type === 'offerwall') return; // Completely block offerwall history logs
+        if (type === 'offerwall') return; 
         historyLog.unshift({ type, detail, meta, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
@@ -955,8 +964,8 @@
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
 
-        const buildHistoryCard = (item, customIcon = null, customBadgeStyle = '') => {
-            let icon = customIcon || '<i class="fa-solid fa-plus-circle"></i>';
+        const buildHistoryCard = (item) => {
+            let icon = '<i class="fa-solid fa-plus-circle"></i>';
             if (item.type === 'withdraw') {
                 icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
             } else if (item.type === 'survey') {
@@ -965,7 +974,7 @@
 
             let metaDetails = '';
             if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
-                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px; ${customBadgeStyle}">`;
+                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
                 if (item.meta.taskId) metaDetails += `ID: ${item.meta.taskId} `;
                 if (item.meta.rewardAmount) metaDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
                 metaDetails += `</div>`;

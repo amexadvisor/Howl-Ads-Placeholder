@@ -575,7 +575,7 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW WITH CLEAN OFFERWALL & TRANSACTION ENGINE -->
+      <!-- HISTORY VIEW WITH BRAND NEW OFFERWALL HISTORY CODE -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -588,9 +588,14 @@
         <div id="history-panel-ads" class="earn-section-panel active">
           <div id="history-list-ads"></div>
         </div>
+        
+        <!-- COMPLETELY REBUILT OFFERWALL HISTORY PANEL -->
         <div id="history-panel-offerwall" class="earn-section-panel">
-          <div id="history-list-offerwall"></div>
+          <div id="ow-history-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Dynamically populated by clean brand new offerwall history logic -->
+          </div>
         </div>
+
         <div id="history-panel-survey" class="earn-section-panel">
           <div id="history-list-survey"></div>
         </div>
@@ -931,31 +936,31 @@
         logTransactionToSupabase(type, detail, meta);
     }
 
-    // --- REBUILT CLEAN OFFERWALL & TRANSACTION HISTORY ENGINE ---
+    // --- BRAND NEW SEPARATED OFFERWALL HISTORY RENDERING ENGINE ---
     function renderHistory() {
         const listAds = document.getElementById('history-list-ads');
-        const listOfferwall = document.getElementById('history-list-offerwall');
+        const offerwallWrapper = document.getElementById('ow-history-wrapper');
         const listSurvey = document.getElementById('history-list-survey');
 
-        if (!listAds || !listOfferwall || !listSurvey) return;
+        if (!listAds || !offerwallWrapper || !listSurvey) return;
 
+        // Filter transaction types cleanly
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
 
-        const buildHistoryCard = (item) => {
-            let icon = '<i class="fa-solid fa-plus-circle"></i>';
+        // General helper card builder for standard lists
+        const buildHistoryCard = (item, customIcon = null, customBadgeStyle = '') => {
+            let icon = customIcon || '<i class="fa-solid fa-plus-circle"></i>';
             if (item.type === 'withdraw') {
                 icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
-            } else if (item.type === 'offerwall') {
-                icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
             } else if (item.type === 'survey') {
                 icon = '<i class="fa-solid fa-clipboard-question" style="color: #38bdf8;"></i>';
             }
 
             let metaDetails = '';
             if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
-                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
+                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px; ${customBadgeStyle}">`;
                 if (item.meta.taskId) metaDetails += `ID: ${item.meta.taskId} `;
                 if (item.meta.rewardAmount) metaDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
                 metaDetails += `</div>`;
@@ -973,28 +978,66 @@
             `;
         };
 
-        const renderCategoryList = (items, emptyNotice) => {
-            if (!items || items.length === 0) {
-                return `
-                    <div class="list-item">
-                        <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);">
-                            <i class="fa-solid fa-folder-open"></i>
-                        </div>
-                        <div class="info">
-                            <div class="name" style="color:var(--text-muted);">No Activity Recorded</div>
-                            <div class="detail">${emptyNotice}</div>
-                        </div>
+        // Brand New Dedicated Offerwall Item Builder
+        const buildOfferwallCard = (item, index) => {
+            const offerTitle = item.detail || 'Offerwall Reward';
+            const rewardVal = item.meta && item.meta.rewardAmount ? item.meta.rewardAmount : '0';
+            const campaignId = item.meta && item.meta.taskId ? item.meta.taskId : 'N/A';
+            const formattedDate = new Date(item.timestamp).toLocaleString();
+
+            return `
+                <div class="list-item" style="border-left: 3px solid var(--gold); background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), var(--card-bg));">
+                    <div class="history-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--gold);">
+                        <i class="fa-solid fa-gift"></i>
                     </div>
-                `;
-            }
-            return items.map(buildHistoryCard).join('');
+                    <div class="info">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="name" style="color: #fff;">${offerTitle}</span>
+                            <span style="font-size: 11px; font-weight: 800; color: var(--gold); background: rgba(245, 158, 11, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">+${rewardVal} HOWL</span>
+                        </div>
+                        <div class="detail" style="font-family: monospace; color: var(--text-muted); margin-top: 4px;">
+                            Campaign ID: <span style="color: var(--primary);">${campaignId}</span>
+                        </div>
+                        <div class="detail" style="margin-top: 2px;">${formattedDate}</div>
+                    </div>
+                </div>
+            `;
         };
 
-        listAds.innerHTML = renderCategoryList(adsItems, "Complete ads or request payouts to populate logs.");
-        listOfferwall.innerHTML = renderCategoryList(offerwallItems, "Complete offers from partner walls to view earnings here.");
-        listSurvey.innerHTML = renderCategoryList(surveyItems, "Participate in opinion questionnaires to see history here.");
+        // Render Ads Tab
+        if (adsItems.length === 0) {
+            listAds.innerHTML = `
+                <div class="list-item">
+                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-folder-open"></i></div>
+                    <div class="info"><div class="name" style="color:var(--text-muted);">No Activity Recorded</div><div class="detail">Complete ads or request payouts to populate logs.</div></div>
+                </div>`;
+        } else {
+            listAds.innerHTML = adsItems.map(item => buildHistoryCard(item)).join('');
+        }
+
+        // Render Brand New Offerwall Tab Content
+        if (offerwallItems.length === 0) {
+            offerwallWrapper.innerHTML = `
+                <div class="list-item">
+                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
+                    <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall Rewards Yet</div><div class="detail">Complete partner tasks & offers to see your earnings here.</div></div>
+                </div>`;
+        } else {
+            offerwallWrapper.innerHTML = offerwallItems.map((item, idx) => buildOfferwallCard(item, idx)).join('');
+        }
+
+        // Render Survey Tab
+        if (surveyItems.length === 0) {
+            listSurvey.innerHTML = `
+                <div class="list-item">
+                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-clipboard-question"></i></div>
+                    <div class="info"><div class="name" style="color:var(--text-muted);">No Survey History</div><div class="detail">Participate in opinion questionnaires to see history here.</div></div>
+                </div>`;
+        } else {
+            listSurvey.innerHTML = surveyItems.map(item => buildHistoryCard(item)).join('');
+        }
     }
-    // --- END OF REBUILT ENGINE ---
+    // --- END OF NEW RENDER ENGINE ---
 
     function grantReward(amount, sourceName, type = 'ads', meta = {}) {
         balance += amount;

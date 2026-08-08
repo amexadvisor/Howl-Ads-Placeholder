@@ -653,7 +653,6 @@
         checkStoredCooldowns();
         
         const currentUserId = tgUser && tgUser.id ? tgUser.id : 'guest_user';
-        console.log("=== APP INITIALIZED FOR USER ID ==>", currentUserId);
         loadUserBalanceAndHistory(currentUserId);
     }
 
@@ -698,10 +697,8 @@
 
     async function loadUserBalanceAndHistory(userId) {
         const userIdStr = userId ? userId.toString() : 'guest_user';
-        console.log(`🔍 [LOG START] Fetching user balance and history for: "${userIdStr}"`);
 
         try {
-            // 1. Fetch or Ensure User in Supabase (Upsert to prevent row-missing errors)
             const userCheck = await supabaseClient
                 .from('users')
                 .select('balance')
@@ -709,7 +706,6 @@
                 .single();
 
             if (userCheck.error && userCheck.error.code === 'PGRST116') {
-                // User doesn't exist yet, insert initial record
                 await supabaseClient
                     .from('users')
                     .upsert({ user_id: userIdStr, balance: balance, updated_at: new Date().toISOString() });
@@ -719,23 +715,13 @@
                 saveData();
             }
 
-            // 2. Fetch Transactions
             const txQuery = await supabaseClient
                 .from('transactions')
                 .select('*')
                 .eq('user_id', userIdStr)
                 .order('timestamp', { ascending: false });
 
-            console.log("🔍 [LOG SUPABASE TRANSACTIONS RESULT]:", txQuery);
-
-            if (txQuery.error) {
-                console.error("❌ [LOG TRANSACTION ERROR DETAIL]:", txQuery.error);
-                renderHistory();
-                return;
-            }
-
-            if (txQuery.data && txQuery.data.length > 0) {
-                console.log(`✅ [LOG] Found ${txQuery.data.length} transactions in Supabase database.`);
+            if (!txQuery.error && txQuery.data && txQuery.data.length > 0) {
                 historyLog = txQuery.data.map(tx => ({
                     type: tx.type ? tx.type.trim().toLowerCase() : 'ads',
                     detail: tx.detail,
@@ -747,21 +733,17 @@
                 }));
                 saveData();
             } else {
-                console.warn("⚠️ [LOG] Supabase returned 0 rows for transactions matching user_id:", userIdStr);
                 const savedData = localStorage.getItem('howlRewardsBotV6');
                 if (savedData) {
                     const parsed = JSON.parse(savedData);
                     if (parsed.historyLog && parsed.historyLog.length > 0) {
-                        console.log(`📦 [LOG] Loaded ${parsed.historyLog.length} items from localStorage fallback.`);
                         historyLog = parsed.historyLog;
                     }
                 }
             }
             
             renderHistory();
-
         } catch (err) {
-            console.error("💥 [LOG CRITICAL EXCEPTION]:", err);
             renderHistory();
         }
     }
@@ -769,13 +751,10 @@
     async function syncBalanceToSupabase(newBalance) {
         const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
-            const res = await supabaseClient
+            await supabaseClient
                 .from('users')
                 .upsert({ user_id: userIdStr, balance: newBalance, updated_at: new Date().toISOString() });
-            console.log("📤 [LOG SYNC BALANCE]:", res);
-        } catch (err) {
-            console.error("❌ [LOG SYNC BALANCE ERROR]:", err);
-        }
+        } catch (err) {}
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
@@ -788,17 +767,9 @@
             reward_amount: meta.rewardAmount || null,
             timestamp: new Date().toISOString()
         };
-        console.log("📝 [LOG INSERT TRANSACTION PAYLOAD]:", payload);
-        
         try {
-            const res = await supabaseClient.from('transactions').insert(payload);
-            console.log("📝 [LOG INSERT TRANSACTION RESULT]:", res);
-            if (res.error) {
-                console.error("❌ [LOG INSERT TRANSACTION FAILED]:", res.error);
-            }
-        } catch (err) {
-            console.error("💥 [LOG INSERT EXCEPTION]:", err);
-        }
+            await supabaseClient.from('transactions').insert(payload);
+        } catch (err) {}
     }
 
     function showView(viewId) {
@@ -961,8 +932,6 @@
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
-
-        console.log(`🎨 [RENDER BREAKDOWN] Ads: ${adsItems.length}, Offerwall: ${offerwallItems.length}, Survey: ${surveyItems.length}`);
 
         const buildHistoryCard = (item) => {
             let icon = '<i class="fa-solid fa-plus-circle"></i>';

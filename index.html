@@ -589,14 +589,9 @@
           <div id="history-list-ads"></div>
         </div>
         
-        <!-- OFFERWALL PANEL WITH NO HISTORY -->
+        <!-- OFFERWALL PANEL NOW RENDERS HISTORY -->
         <div id="history-panel-offerwall" class="earn-section-panel">
-          <div id="ow-history-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
-            <div class="list-item">
-              <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
-              <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Offerwall transactions will not be recorded here.</div></div>
-            </div>
-          </div>
+          <div id="history-list-offerwall"></div>
         </div>
 
         <div id="history-panel-survey" class="earn-section-panel">
@@ -712,6 +707,7 @@
 
                 balance += rewardAmount;
                 updateDisplay();
+                addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount });
                 saveData();
                 if (window.Telegram && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -750,8 +746,8 @@
             }
 
             if (txData && txData.length > 0) {
-                // Filter out offerwall transactions completely from history display
-                historyLog = txData.filter(tx => tx.type !== 'offerwall').map(tx => ({
+                // Filter REMOVED - Offerwall is now mapped and included in history
+                historyLog = txData.map(tx => ({
                     type: tx.type || 'ads',
                     detail: tx.detail,
                     meta: {
@@ -783,7 +779,7 @@
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
-        if (type === 'offerwall') return; // Do not log offerwall transactions
+        // Condition checking for 'offerwall' was removed so it saves normally
         const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
             await supabaseClient
@@ -838,7 +834,7 @@
             balance = data.balance || 0;
             adsgramCountToday = data.adsgramCountToday || 0;
             lastResetDate = data.lastResetDate || new Date().toDateString();
-            historyLog = (data.historyLog || []).filter(item => item.type !== 'offerwall');
+            historyLog = data.historyLog || [];
         }
 
         const currentDate = new Date().toDateString();
@@ -946,7 +942,7 @@
     }
 
     function addToHistory(type, detail, meta = {}) {
-        if (type === 'offerwall') return; 
+        // Return block removed so offerwall is added to array 
         historyLog.unshift({ type, detail, meta, timestamp: new Date().toISOString() });
         if (historyLog.length > 50) historyLog.pop();
         saveData();
@@ -956,12 +952,13 @@
 
     function renderHistory() {
         const listAds = document.getElementById('history-list-ads');
-        const offerwallWrapper = document.getElementById('ow-history-wrapper');
+        const listOfferwall = document.getElementById('history-list-offerwall');
         const listSurvey = document.getElementById('history-list-survey');
 
-        if (!listAds || !offerwallWrapper || !listSurvey) return;
+        if (!listAds || !listOfferwall || !listSurvey) return;
 
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
+        const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
 
         const buildHistoryCard = (item) => {
@@ -970,6 +967,8 @@
                 icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
             } else if (item.type === 'survey') {
                 icon = '<i class="fa-solid fa-clipboard-question" style="color: #38bdf8;"></i>';
+            } else if (item.type === 'offerwall') {
+                icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
             }
 
             let metaDetails = '';
@@ -1003,12 +1002,16 @@
             listAds.innerHTML = adsItems.map(item => buildHistoryCard(item)).join('');
         }
 
-        // Offerwall Tab permanently empty as requested
-        offerwallWrapper.innerHTML = `
-            <div class="list-item">
-                <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
-                <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Offerwall transactions will not be recorded here.</div></div>
-            </div>`;
+        // Render Offerwall Tab
+        if (offerwallItems.length === 0) {
+            listOfferwall.innerHTML = `
+                <div class="list-item">
+                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
+                    <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Complete partner offers to populate logs.</div></div>
+                </div>`;
+        } else {
+            listOfferwall.innerHTML = offerwallItems.map(item => buildHistoryCard(item)).join('');
+        }
 
         // Render Survey Tab
         if (surveyItems.length === 0) {
@@ -1023,7 +1026,7 @@
     }
 
     function grantReward(amount, sourceName, type = 'ads', meta = {}) {
-        if (type === 'offerwall') return;
+        // Return block removed so offerwall is allowed to trigger manually if needed
         balance += amount;
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
@@ -1263,7 +1266,7 @@
             balance -= amount;
             
             let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
-            addToHistory('ads', `📤 Payout Request<br>💰 Amount: ${amount} HOWL ($${usdVal})<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
+            addToHistory('withdraw', `📤 Payout Request<br>💰 Amount: ${amount} HOWL ($${usdVal})<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
             
             updateDisplay();
             saveData();

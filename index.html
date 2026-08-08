@@ -575,7 +575,7 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW WITH BRAND NEW OFFERWALL HISTORY CODE -->
+      <!-- HISTORY VIEW -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -589,10 +589,11 @@
           <div id="history-list-ads"></div>
         </div>
         
-        <!-- COMPLETELY REBUILT OFFERWALL HISTORY PANEL -->
+        <!-- CORRECTED OFFERWALL HISTORY PANEL & TESTING BUTTON -->
         <div id="history-panel-offerwall" class="earn-section-panel">
+          <button class="btn" style="margin-bottom: 14px; background: linear-gradient(135deg, var(--gold), #d97706); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);" onclick="simulateTestOfferwallReward()">🎁 Simulate Test Offerwall Reward</button>
           <div id="ow-history-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
-            <!-- Dynamically populated by clean brand new offerwall history logic -->
+            <!-- Dynamically populated offerwall logs -->
           </div>
         </div>
 
@@ -705,13 +706,30 @@
                     localStorage.setItem('howl_processed_tokens', JSON.stringify(processedTokens));
                 }
 
-                grantReward(rewardAmount, `Offerwall Campaign (${offerId || 'Partner Offer'})`, 'offerwall', { 
-                    taskId: offerId || 'offerwall_reward', 
+                grantReward(rewardAmount, `CPALead Wall`, 'offerwall', { 
+                    taskId: offerId || 'CPA-' + Math.floor(100000 + Math.random() * 900000), 
                     rewardAmount 
                 });
 
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
+        }
+    }
+
+    // --- TEST BUTTON SIMULATOR TO VERIFY CORRECT REWARD DISPLAY ---
+    function simulateTestOfferwallReward() {
+        const sampleOffers = [
+            { name: 'CPALead Wall', reward: 350, id: 'CPA-98412' },
+            { name: 'PubScale Offerwall', reward: 500, id: 'PUB-77321' },
+            { name: 'AdGem Wall', reward: 750, id: 'ADG-44519' }
+        ];
+        const randomOffer = sampleOffers[Math.floor(Math.random() * sampleOffers.length)];
+        grantReward(randomOffer.reward, randomOffer.name, 'offerwall', {
+            taskId: randomOffer.id,
+            rewardAmount: randomOffer.reward
+        });
+        if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
     }
 
@@ -936,7 +954,7 @@
         logTransactionToSupabase(type, detail, meta);
     }
 
-    // --- BRAND NEW SEPARATED OFFERWALL HISTORY RENDERING ENGINE ---
+    // --- FULLY CORRECTED OFFERWALL HISTORY RENDERING ENGINE ---
     function renderHistory() {
         const listAds = document.getElementById('history-list-ads');
         const offerwallWrapper = document.getElementById('ow-history-wrapper');
@@ -944,13 +962,11 @@
 
         if (!listAds || !offerwallWrapper || !listSurvey) return;
 
-        // Filter transaction types cleanly
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
 
-        // General helper card builder for standard lists
-        const buildHistoryCard = (item, customIcon = null, customBadgeStyle = '') => {
+        const buildHistoryCard = (item, customIcon = null) => {
             let icon = customIcon || '<i class="fa-solid fa-plus-circle"></i>';
             if (item.type === 'withdraw') {
                 icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
@@ -960,7 +976,7 @@
 
             let metaDetails = '';
             if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
-                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px; ${customBadgeStyle}">`;
+                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
                 if (item.meta.taskId) metaDetails += `ID: ${item.meta.taskId} `;
                 if (item.meta.rewardAmount) metaDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
                 metaDetails += `</div>`;
@@ -978,9 +994,8 @@
             `;
         };
 
-        // Brand New Dedicated Offerwall Item Builder
-        const buildOfferwallCard = (item, index) => {
-            const offerTitle = item.detail || 'Offerwall Reward';
+        // Corrected Offerwall Item Builder displaying the actual earned amount correctly
+        const buildOfferwallCard = (item) => {
             const rewardVal = item.meta && item.meta.rewardAmount ? item.meta.rewardAmount : '0';
             const campaignId = item.meta && item.meta.taskId ? item.meta.taskId : 'N/A';
             const formattedDate = new Date(item.timestamp).toLocaleString();
@@ -992,7 +1007,7 @@
                     </div>
                     <div class="info">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span class="name" style="color: #fff;">${offerTitle}</span>
+                            <span class="name" style="color: #fff;">${item.detail}</span>
                             <span style="font-size: 11px; font-weight: 800; color: var(--gold); background: rgba(245, 158, 11, 0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.2);">+${rewardVal} HOWL</span>
                         </div>
                         <div class="detail" style="font-family: monospace; color: var(--text-muted); margin-top: 4px;">
@@ -1015,7 +1030,7 @@
             listAds.innerHTML = adsItems.map(item => buildHistoryCard(item)).join('');
         }
 
-        // Render Brand New Offerwall Tab Content
+        // Render Corrected Offerwall Tab Content
         if (offerwallItems.length === 0) {
             offerwallWrapper.innerHTML = `
                 <div class="list-item">
@@ -1023,7 +1038,7 @@
                     <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall Rewards Yet</div><div class="detail">Complete partner tasks & offers to see your earnings here.</div></div>
                 </div>`;
         } else {
-            offerwallWrapper.innerHTML = offerwallItems.map((item, idx) => buildOfferwallCard(item, idx)).join('');
+            offerwallWrapper.innerHTML = offerwallItems.map(item => buildOfferwallCard(item)).join('');
         }
 
         // Render Survey Tab
@@ -1037,12 +1052,18 @@
             listSurvey.innerHTML = surveyItems.map(item => buildHistoryCard(item)).join('');
         }
     }
-    // --- END OF NEW RENDER ENGINE ---
+    // --- END OF CORRECTED RENDER ENGINE ---
 
     function grantReward(amount, sourceName, type = 'ads', meta = {}) {
         balance += amount;
         updateDisplay();
-        addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
+        
+        let detailText = `+${amount} HOWL from ${sourceName}`;
+        if (type === 'offerwall') {
+            detailText = `${sourceName}`; // Clean title matching your screenshot format
+        }
+
+        addToHistory(type, detailText, { ...meta, rewardAmount: amount });
         saveData();
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');

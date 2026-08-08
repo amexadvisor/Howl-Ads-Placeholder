@@ -575,7 +575,7 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW WITH SEPARATE TABS FOR ADS, OFFERWALL, SURVEY -->
+      <!-- HISTORY VIEW WITH CLEAN OFFERWALL & TRANSACTION ENGINE -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -665,7 +665,7 @@
         loadData();
         loadTelegramUser();
         setupOfferwallIframe();
-        setupPostbackQueryListener(); // Listens for URL postback query params coming back from server callbacks
+        setupPostbackQueryListener(); 
         showView('home-view');
         checkStoredCooldowns();
         
@@ -678,12 +678,10 @@
         const iframe = document.getElementById('offerwall-iframe');
         if (iframe) {
             const userId = tgUser ? tgUser.id : 'guest_user';
-            // Point this to your pubscale/offerwall integration URL supporting user_id tracking
             iframe.src = `https://howl-ads-placeholder.vercel.app/embed?user_id=${userId}`;
         }
     }
 
-    // Handles Server-Side Callbacks / Postbacks captured via URL Query Parameters (e.g., Pubscale Postback callback)
     function setupPostbackQueryListener() {
         const urlParams = new URLSearchParams(window.location.search);
         const postbackUserId = urlParams.get('user_id');
@@ -694,7 +692,6 @@
         if (postbackUserId && postbackValue) {
             const rewardAmount = parseFloat(postbackValue) || 0;
             if (rewardAmount > 0) {
-                // Check if this specific token was already credited to prevent double processing on page reloads
                 const processedTokens = JSON.parse(localStorage.getItem('howl_processed_tokens') || '[]');
                 if (token && processedTokens.includes(token)) return;
 
@@ -703,12 +700,11 @@
                     localStorage.setItem('howl_processed_tokens', JSON.stringify(processedTokens));
                 }
 
-                grantReward(rewardAmount, `Offerwall (ID: ${offerId || 'N/A'})`, 'offerwall', { 
-                    taskId: offerId || 'pubscale_offer', 
+                grantReward(rewardAmount, `Offerwall Campaign (${offerId || 'Partner Offer'})`, 'offerwall', { 
+                    taskId: offerId || 'offerwall_reward', 
                     rewardAmount 
                 });
 
-                // Clean URL parameters after successful read to keep browser clean
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
@@ -935,6 +931,7 @@
         logTransactionToSupabase(type, detail, meta);
     }
 
+    // --- REBUILT CLEAN OFFERWALL & TRANSACTION HISTORY ENGINE ---
     function renderHistory() {
         const listAds = document.getElementById('history-list-ads');
         const listOfferwall = document.getElementById('history-list-offerwall');
@@ -946,36 +943,58 @@
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
 
-        const renderListContent = (items, emptyText) => {
-            if (items.length === 0) {
-                return `<div class="list-item"><div class="info"><div class="name" style="color:#fff;">${emptyText}</div><div class="detail">No records found in this category yet.</div></div></div>`;
+        const buildHistoryCard = (item) => {
+            let icon = '<i class="fa-solid fa-plus-circle"></i>';
+            if (item.type === 'withdraw') {
+                icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
+            } else if (item.type === 'offerwall') {
+                icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
+            } else if (item.type === 'survey') {
+                icon = '<i class="fa-solid fa-clipboard-question" style="color: #38bdf8;"></i>';
             }
-            return items.map(item => {
-                let icon = '<i class="fa-solid fa-plus-circle"></i>';
-                if (item.type === 'withdraw') {
-                    icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
-                } else if (item.type === 'offerwall') {
-                    icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
-                } else if (item.type === 'survey') {
-                    icon = '<i class="fa-solid fa-clipboard-question" style="color: #38bdf8;"></i>';
-                }
-                
-                let extraDetails = '';
-                if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
-                    extraDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
-                    if (item.meta.taskId) extraDetails += `Task ID: ${item.meta.taskId} `;
-                    if (item.meta.rewardAmount) extraDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
-                    extraDetails += `</div>`;
-                }
 
-                return `<div class="list-item"><div class="history-icon">${icon}</div><div class="info"><div class="name">${item.detail}</div>${extraDetails}<div class="detail">${new Date(item.timestamp).toLocaleString()}</div></div></div>`;
-            }).join('');
+            let metaDetails = '';
+            if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
+                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
+                if (item.meta.taskId) metaDetails += `ID: ${item.meta.taskId} `;
+                if (item.meta.rewardAmount) metaDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
+                metaDetails += `</div>`;
+            }
+
+            return `
+                <div class="list-item">
+                    <div class="history-icon">${icon}</div>
+                    <div class="info">
+                        <div class="name">${item.detail}</div>
+                        ${metaDetails}
+                        <div class="detail">${new Date(item.timestamp).toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
         };
 
-        listAds.innerHTML = renderListContent(adsItems, "No Ads transaction history.");
-        listOfferwall.innerHTML = renderListContent(offerwallItems, "No Offerwall transaction history.");
-        listSurvey.innerHTML = renderListContent(surveyItems, "No Survey transaction history.");
+        const renderCategoryList = (items, emptyNotice) => {
+            if (!items || items.length === 0) {
+                return `
+                    <div class="list-item">
+                        <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <div class="info">
+                            <div class="name" style="color:var(--text-muted);">No Activity Recorded</div>
+                            <div class="detail">${emptyNotice}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            return items.map(buildHistoryCard).join('');
+        };
+
+        listAds.innerHTML = renderCategoryList(adsItems, "Complete ads or request payouts to populate logs.");
+        listOfferwall.innerHTML = renderCategoryList(offerwallItems, "Complete offers from partner walls to view earnings here.");
+        listSurvey.innerHTML = renderCategoryList(surveyItems, "Participate in opinion questionnaires to see history here.");
     }
+    // --- END OF REBUILT ENGINE ---
 
     function grantReward(amount, sourceName, type = 'ads', meta = {}) {
         balance += amount;

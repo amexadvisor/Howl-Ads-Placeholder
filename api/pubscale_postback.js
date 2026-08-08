@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { user_id, value } = req.query;
+  const { user_id, value, transaction_id } = req.query;
 
   if (!user_id || !value) {
     return res.status(400).json({ error: 'Missing required user_id or value parameters' });
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
   const formattedUserId = user_id.toString().trim();
+  const formattedTxId = transaction_id ? transaction_id.toString().trim() : `tx_${Date.now()}`;
 
   try {
     // ------------------------------------------------------------------
@@ -52,15 +53,15 @@ export default async function handler(req, res) {
     }
 
     // ------------------------------------------------------------------
-    // STEP 2: INSERT TRANSACTION HISTORY WITH LOGGING
+    // STEP 2: INSERT TRANSACTION HISTORY WITH REWARD & TX ID
     // ------------------------------------------------------------------
     const insertPayload = {
       user_id: formattedUserId,
       type: 'offerwall',
-      detail: `+${rewardAmount} HOWL from Offerwall`
+      detail: `+${rewardAmount} HOWL from Offerwall`,
+      reward_amount: rewardAmount,
+      transaction_id: formattedTxId
     };
-
-    console.log('Attempting to insert into transactions:', insertPayload);
 
     const { data: txData, error: txError } = await supabase
       .from('transactions')
@@ -70,7 +71,7 @@ export default async function handler(req, res) {
     if (txError) {
       console.error('TRANSACTIONS INSERT ERROR:', JSON.stringify(txError, null, 2));
     } else {
-      console.log('Successfully inserted transaction row:', txData);
+      console.log('Successfully inserted complete transaction row:', txData);
     }
 
     return res.status(200).send('OK');

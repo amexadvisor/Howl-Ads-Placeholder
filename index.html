@@ -683,8 +683,8 @@
     function setupOfferwallIframe() {
         const iframe = document.getElementById('offerwall-iframe');
         if (iframe) {
-            const userId = tgUser ? tgUser.id : 'guest_user';
-            iframe.src = `https://howl-ads-placeholder.vercel.app/embed?user_id=${userId}`;
+            const pubscaleAppId = '16696288';
+            iframe.src = `https://wow.pubscale.com?app_id=${pubscaleAppId}&user_id=${currentUserId}`;
         }
     }
 

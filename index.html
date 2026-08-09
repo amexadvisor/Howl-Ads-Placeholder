@@ -200,9 +200,9 @@
     .earn-section-panel.active { display: block; animation: fadeInPanel 0.3s ease; }
     @keyframes fadeInPanel { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Offerwall Container Frame Styling */
+    /* Offerwall Container Frame Styling (Updated to full height layout) */
     .offerwall-iframe-container {
-      width: 100%; height: 480px; background: var(--card-bg); border-radius: 18px;
+      width: 100%; height: calc(100vh - 210px); min-height: 480px; background: var(--card-bg); border-radius: 18px;
       border: 1px solid var(--card-border); overflow: hidden; backdrop-filter: blur(12px);
       box-shadow: 0 8px 25px rgba(0,0,0,0.3); position: relative;
     }
@@ -540,7 +540,6 @@
 
         <!-- OFFERWALL PANEL -->
         <div id="panel-offerwall" class="earn-section-panel">
-          <h2 class="section-title"><i class="fa-solid fa-gift"></i> Partner Offerwall</h2>
           <div class="offerwall-iframe-container">
             <iframe id="offerwall-iframe" src="" title="Offerwall"></iframe>
           </div>

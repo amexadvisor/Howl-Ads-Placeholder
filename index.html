@@ -43,6 +43,7 @@
         radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.12) 0%, transparent 40%);
     }
 
+    /* Ultimate Tech Splash Screen Animation */
     #splash-screen {
       position: absolute; inset: 0; background: #040508; z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -178,6 +179,7 @@
     .view.active { display: block; }
     @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* Category Switcher Navigation Bar */
     .earn-category-tabs {
       display: flex; gap: 8px; margin-bottom: 18px; background: var(--card-bg);
       padding: 5px; border-radius: 16px; border: 1px solid var(--card-border);
@@ -198,6 +200,7 @@
     .earn-section-panel.active { display: block; animation: fadeInPanel 0.3s ease; }
     @keyframes fadeInPanel { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* Offerwall Container Frame Styling */
     .offerwall-iframe-container {
       width: 100%; height: 480px; background: var(--card-bg); border-radius: 18px;
       border: 1px solid var(--card-border); overflow: hidden; backdrop-filter: blur(12px);
@@ -207,6 +210,7 @@
       width: 100%; height: 100%; border: none; background: transparent;
     }
 
+    /* User Header */
     .user-header-card {
       background: var(--card-bg);
       border-radius: 22px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; 
@@ -238,6 +242,7 @@
     .live-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; animation: pulseDot 1.5s infinite; }
     @keyframes pulseDot { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 
+    /* Balance Card */
     .balance-card {
       background: linear-gradient(135deg, #0d1f18 0%, #06110e 100%); 
       border-radius: 24px; padding: 24px 20px; text-align: center; margin-bottom: 22px;
@@ -255,6 +260,7 @@
     .balance-card .currency-tag { font-size: 14px; color: var(--primary); font-weight: 700; margin-left: 4px; }
     .balance-card .usd-value { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-weight: 600; }
 
+    /* Daily Progress Widget */
     .progress-section {
       background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 22px;
       border: 1px solid var(--card-border); backdrop-filter: blur(12px);
@@ -276,6 +282,7 @@
     .section-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: #fff; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
     .section-title i { color: var(--primary); font-size: 14px; }
 
+    /* Task & Navigation Cards */
     .task-card {
       background: var(--card-bg); border-radius: 18px; padding: 16px; margin-bottom: 12px; 
       display: flex; align-items: center; cursor: pointer; 
@@ -307,6 +314,7 @@
       padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3); display: none; white-space: nowrap;
     }
 
+    /* History & Lists */
     .list-item {
       display: flex; align-items: center; background: var(--card-bg); padding: 14px; 
       border-radius: 16px; margin-bottom: 10px; border: 1px solid var(--card-border);
@@ -317,6 +325,7 @@
     .list-item .info .name { font-weight: 700; font-size: 13px; color: #fff; }
     .list-item .info .detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
+    /* Animated Footer Nav Buttons */
     .footer-nav {
       position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 410px; margin: 0 auto; 
       display: flex; justify-content: space-around; background: rgba(12, 14, 22, 0.85); 
@@ -359,6 +368,7 @@
       text-shadow: 0 0 12px var(--primary-glow);
     }
 
+    /* Buttons & Inputs */
     .btn {
       display: block; width: 100%; margin: 10px auto; padding: 15px; font-size: 15px; font-weight: 700;
       background: linear-gradient(135deg, var(--primary), #059669); color: white; border: none; border-radius: 16px; 
@@ -387,6 +397,7 @@
 </head>
 <body>
 
+  <!-- Ultimate Tech Opening Splash Screen Animation -->
   <div id="splash-screen">
     <div class="splash-grid"></div>
     <div class="tech-ring ring-1"></div>
@@ -423,6 +434,7 @@
     </div>
 
     <main id="main-content">
+      <!-- HOME VIEW -->
       <div id="home-view" class="view active">
         <div class="user-header-card">
           <div class="user-avatar" id="profile-pic">
@@ -473,6 +485,7 @@
         </div>
       </div>
 
+      <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
         <div class="earn-category-tabs">
           <button class="category-tab active" id="tab-ads" onclick="switchEarnTab('ads')">Ads</button>
@@ -480,6 +493,7 @@
           <button class="category-tab" id="tab-survey" onclick="switchEarnTab('survey')">Survey</button>
         </div>
 
+        <!-- ADS PANEL -->
         <div id="panel-ads" class="earn-section-panel active">
           <h2 class="section-title"><i class="fa-solid fa-rectangle-ad"></i> Active Ad Modules</h2>
           
@@ -524,6 +538,7 @@
           </div>
         </div>
 
+        <!-- OFFERWALL PANEL -->
         <div id="panel-offerwall" class="earn-section-panel">
           <h2 class="section-title"><i class="fa-solid fa-gift"></i> Partner Offerwall</h2>
           <div class="offerwall-iframe-container">
@@ -531,6 +546,7 @@
           </div>
         </div>
 
+        <!-- SURVEY PANEL -->
         <div id="panel-survey" class="earn-section-panel">
           <h2 class="section-title"><i class="fa-solid fa-clipboard-question"></i> Market Surveys</h2>
           
@@ -542,6 +558,7 @@
         </div>
       </div>
 
+      <!-- WITHDRAW VIEW -->
       <div id="withdraw" class="view">    
         <h3 class="section-title" style="justify-content: center;"><i class="fa-solid fa-vault"></i> WITHDRAW FUNDS</h3>
         <p>💼 AVAILABLE HOWL: <strong><span id="balance2">0</span> HOWL</strong> (≈ $<span id="usd-balance2">0.00</span>)</p>
@@ -558,6 +575,7 @@
         </div>
       </div>
 
+      <!-- HISTORY VIEW WITH SUPABASE FETCHING & OFFERWALL RENDERING -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -571,6 +589,7 @@
           <div id="history-list-ads"></div>
         </div>
         
+        <!-- OFFERWALL HISTORY PANEL -->
         <div id="history-panel-offerwall" class="earn-section-panel">
           <div id="history-list-offerwall"></div>
         </div>
@@ -600,6 +619,7 @@
     let lastResetDate = new Date().toDateString();
     let historyLog = [];
     let tgUser = null;
+    const payoutGoal = 25000;
 
     let adsgramLastRun = 0;
     let telegaLastRun = 0;
@@ -652,8 +672,11 @@
         showView('home-view');
         checkStoredCooldowns();
         
-        const currentUserId = tgUser && tgUser.id ? tgUser.id : 'guest_user';
-        loadUserBalanceAndHistory(currentUserId);
+        if (tgUser && tgUser.id) {
+            loadUserBalanceAndHistory(tgUser.id);
+        } else {
+            loadUserBalanceAndHistory('guest_user');
+        }
     }
 
     function setupOfferwallIframe() {
@@ -697,32 +720,44 @@
 
     async function loadUserBalanceAndHistory(userId) {
         const userIdStr = userId ? userId.toString() : 'guest_user';
+        console.log(`[DIAGNOSTIC] Starting balance & history fetch for user_id: "${userIdStr}"`);
 
         try {
-            const userCheck = await supabaseClient
+            const { data: userData, error: userError } = await supabaseClient
                 .from('users')
                 .select('balance')
                 .eq('user_id', userIdStr)
                 .single();
 
-            if (userCheck.error && userCheck.error.code === 'PGRST116') {
-                await supabaseClient
-                    .from('users')
-                    .upsert({ user_id: userIdStr, balance: balance, updated_at: new Date().toISOString() });
-            } else if (userCheck.data && typeof userCheck.data.balance === 'number') {
-                balance = userCheck.data.balance;
+            if (userError) {
+                console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
+            } else if (userData && typeof userData.balance === 'number') {
+                console.log('[DIAGNOSTIC] Successfully fetched balance:', userData.balance);
+                balance = userData.balance;
                 updateDisplay();
                 saveData();
             }
 
-            const txQuery = await supabaseClient
+            console.log('[DIAGNOSTIC] Querying transactions table...');
+            const { data: txData, error: txError } = await supabaseClient
                 .from('transactions')
                 .select('*')
                 .eq('user_id', userIdStr)
                 .order('timestamp', { ascending: false });
 
-            if (!txQuery.error && txQuery.data && txQuery.data.length > 0) {
-                historyLog = txQuery.data.map(tx => ({
+            if (txError) {
+                console.error('[DIAGNOSTIC ERROR] Failed to fetch transactions from Supabase:', txError.message);
+                renderHistory();
+                return;
+            }
+
+            if (txData && txData.length > 0) {
+                console.log(`[DIAGNOSTIC] Found ${txData.length} total raw transactions in Supabase database.`);
+                
+                const detectedTypes = [...new Set(txData.map(t => t.type))];
+                console.log('[DIAGNOSTIC] Transaction types present in database:', detectedTypes);
+
+                historyLog = txData.map(tx => ({
                     type: tx.type ? tx.type.trim().toLowerCase() : 'ads',
                     detail: tx.detail,
                     meta: {
@@ -731,19 +766,24 @@
                     },
                     timestamp: tx.timestamp
                 }));
+                
                 saveData();
             } else {
+                console.warn('[DIAGNOSTIC] Transactions query returned 0 rows for this user_id. Checking local storage fallback...');
                 const savedData = localStorage.getItem('howlRewardsBotV6');
                 if (savedData) {
                     const parsed = JSON.parse(savedData);
                     if (parsed.historyLog && parsed.historyLog.length > 0) {
+                        console.log(`[DIAGNOSTIC] Loaded ${parsed.historyLog.length} items from localStorage fallback.`);
                         historyLog = parsed.historyLog;
                     }
                 }
             }
             
             renderHistory();
+
         } catch (err) {
+            console.error('[DIAGNOSTIC CRITICAL] Exception thrown during data sync:', err);
             renderHistory();
         }
     }
@@ -754,22 +794,27 @@
             await supabaseClient
                 .from('users')
                 .upsert({ user_id: userIdStr, balance: newBalance, updated_at: new Date().toISOString() });
-        } catch (err) {}
+        } catch (err) {
+            console.log('Failed to sync balance to Supabase.');
+        }
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
         const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
-        const payload = {
-            user_id: userIdStr,
-            type: type,
-            detail: detail,
-            task_id: meta.taskId || null,
-            reward_amount: meta.rewardAmount || null,
-            timestamp: new Date().toISOString()
-        };
         try {
-            await supabaseClient.from('transactions').insert(payload);
-        } catch (err) {}
+            await supabaseClient
+                .from('transactions')
+                .insert({
+                    user_id: userIdStr,
+                    type: type,
+                    detail: detail,
+                    task_id: meta.taskId || null,
+                    reward_amount: meta.rewardAmount || null,
+                    timestamp: new Date().toISOString()
+                });
+        } catch (err) {
+            console.error('Failed to save transaction to Supabase table:', err);
+        }
     }
 
     function showView(viewId) {
@@ -929,9 +974,16 @@
         const listOfferwall = document.getElementById('history-list-offerwall');
         const listSurvey = document.getElementById('history-list-survey');
 
+        if (!listAds || !listOfferwall || !listSurvey) {
+            console.error('[DIAGNOSTIC ERROR] One or more history list DOM elements are missing!');
+            return;
+        }
+
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
+
+        console.log(`[DIAGNOSTIC RENDER] Breakdown -> Ads: ${adsItems.length}, Offerwall: ${offerwallItems.length}, Survey: ${surveyItems.length}`);
 
         const buildHistoryCard = (item) => {
             let icon = '<i class="fa-solid fa-plus-circle"></i>';
@@ -963,9 +1015,37 @@
             `;
         };
 
-        listAds.innerHTML = adsItems.length === 0 ? `<div class="list-item"><div class="info"><div class="name" style="color:var(--text-muted);">No Activity Recorded</div></div></div>` : adsItems.map(item => buildHistoryCard(item)).join('');
-        listOfferwall.innerHTML = offerwallItems.length === 0 ? `<div class="list-item"><div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div></div></div>` : offerwallItems.map(item => buildHistoryCard(item)).join('');
-        listSurvey.innerHTML = surveyItems.length === 0 ? `<div class="list-item"><div class="info"><div class="name" style="color:var(--text-muted);">No Survey History</div></div></div>` : surveyItems.map(item => buildHistoryCard(item)).join('');
+        if (adsItems.length === 0) {
+            listAds.innerHTML = `
+                <div class="list-item">
+                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-folder-open"></i></div>
+                    <div class="info"><div class="name" style="color:var(--text-muted);">No Activity Recorded</div><div class="detail">Complete ads or request payouts to populate logs.</div></div>
+                </div>`;
+        } else {
+            listAds.innerHTML = adsItems.map(item => buildHistoryCard(item)).join('');
+        }
+
+        if (offerwallItems.length === 0) {
+            console.log('[DIAGNOSTIC] Offerwall array is empty. Displaying placeholder card.');
+            listOfferwall.innerHTML = `
+                <div class="list-item">
+                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
+                    <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Complete partner offers to populate logs.</div></div>
+                </div>`;
+        } else {
+            console.log('[DIAGNOSTIC] Rendering actual offerwall transaction cards.');
+            listOfferwall.innerHTML = offerwallItems.map(item => buildHistoryCard(item)).join('');
+        }
+
+        if (surveyItems.length === 0) {
+            listSurvey.innerHTML = `
+                <div class="list-item">
+                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-clipboard-question"></i></div>
+                    <div class="info"><div class="name" style="color:var(--text-muted);">No Survey History</div><div class="detail">Participate in opinion questionnaires to see history here.</div></div>
+                </div>`;
+        } else {
+            listSurvey.innerHTML = surveyItems.map(item => buildHistoryCard(item)).join('');
+        }
     }
 
     function grantReward(amount, sourceName, type = 'ads', meta = {}) {
@@ -973,60 +1053,264 @@
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
         saveData();
+        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        }
     }
 
     function showMonetagAd1() {
-        if (typeof show_9954272 !== 'function') return alert('Ad provider initializing...');
-        show_9954272().then(() => grantReward(2, 'Monetag Interstitial', 'ads')).catch(() => {});
+        if (typeof show_9954272 !== 'function') {
+            return alert('Ad provider is initializing. Please wait a moment.');
+        }
+        show_9954272().then(() => {
+            grantReward(2, 'Monetag Interstitial', 'ads');
+            alert('🎉 Success! Earned +2 HOWL.');
+        }).catch(() => {
+            alert('Ad closed or currently unavailable.');
+        });
     }
 
     function showMonetagAd2() {
-        if (typeof show_9954272 !== 'function') return alert('Ad provider initializing...');
-        show_9954272('pop').then(() => grantReward(2, 'Monetag Popup Stream', 'ads')).catch(() => {});
+        if (typeof show_9954272 !== 'function') {
+            return alert('Ad provider is initializing. Please wait a moment.');
+        }
+        show_9954272('pop').then(() => {
+            grantReward(2, 'Monetag Popup Stream', 'ads');
+            alert('🎉 Success! Earned +2 HOWL.');
+        }).catch(() => {
+            alert('Popup ad unavailable right now.');
+        });
     }
 
     function startAdsgramTaskFlow() {
-        if (adsgramCountToday >= 20) return alert('Daily limit reached.');
-        if (!adsgramController) return alert('Adsgram SDK not loaded.');
+        if (adsgramCountToday >= 20) {
+            return alert('🚫 Daily Adsgram limit reached (20/20 ads completed). Come back tomorrow!');
+        }
 
         const now = Date.now();
-        if ((now - adsgramLastRun) / 1000 < 5) return;
-        adsgramLastRun = now;
-        localStorage.setItem('howl_adsgram_cd', now.toString());
+        if (now - adsgramLastRun < 5000) {
+            const left = Math.ceil((5000 - (now - adsgramLastRun)) / 1000);
+            return alert(`⏳ Cooldown active! Please wait ${left}s before launching the next Adsgram ad.`);
+        }
 
-        adsgramController.show().then(() => {
-            adsgramCountToday += 1;
-            grantReward(25, 'Adsgram Network', 'ads');
-        }).catch(() => {});
+        if (!adsgramController) {
+            if (typeof Adsgram !== 'undefined') {
+                adsgramController = Adsgram.init({ blockId: "41229" });
+            } else {
+                return alert('Adsgram SDK not loaded properly.');
+            }
+        }
+
+        let redirectDetected = false;
+        const blurHandler = () => { redirectDetected = true; };
+        const visibilityHandler = () => { if (document.hidden) redirectDetected = true; };
+
+        window.addEventListener('blur', blurHandler);
+        document.addEventListener('visibilitychange', visibilityHandler);
+
+        adsgramController.show().then((result) => {
+            window.removeEventListener('blur', blurHandler);
+            document.removeEventListener('visibilitychange', visibilityHandler);
+
+            adsgramLastRun = Date.now();
+            localStorage.setItem('howl_adsgram_cd', adsgramLastRun.toString());
+
+            if (!result || result.error) {
+                if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                }
+                return alert('❌ Ad was skipped or failed. Please watch fully.');
+            }
+
+            if (redirectDetected) {
+                adsgramCountToday += 1;
+                if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
+                grantReward(25, 'Adsgram Network', 'ads');
+                alert(`🎉 Redirect confirmed! +25 HOWL credited (${adsgramCountToday}/20).`);
+            } else {
+                if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+                }
+                alert('⚠️ No redirect detected. Please tap on join now inside the ad.');
+            }
+        }).catch(() => {
+            window.removeEventListener('blur', blurHandler);
+            document.removeEventListener('visibilitychange', visibilityHandler);
+
+            adsgramLastRun = Date.now();
+            localStorage.setItem('howl_adsgram_cd', adsgramLastRun.toString());
+
+            if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            }
+            alert('⚠️ Ad closed early.');
+        });
     }
 
     function startTelegaTask(uuid, rewardAmount, buttonId) {
         const now = Date.now();
-        if ((now - telegaLastRun) / 1000 < 300) return;
-        telegaLastRun = now;
-        localStorage.setItem('howl_telega_cd', now.toString());
+        if (now - telegaLastRun < 300000) {
+            const leftSecs = Math.ceil((300000 - (now - telegaLastRun)) / 1000);
+            const mins = Math.floor(leftSecs / 60);
+            const secs = leftSecs % 60;
+            return alert(`⏳ Telega Cooldown active! Please wait ${mins}m ${secs}s before starting another Telega ad.`);
+        }
 
-        grantReward(rewardAmount, 'Telega.io', 'ads', { taskId: uuid, rewardAmount: rewardAmount });
+        const btn = document.getElementById(buttonId);
+        if (btn.classList.contains('loading')) return;
+        btn.classList.add('loading');
+        
+        const desc = btn.querySelector('.task-details p');
+        const originalText = desc ? desc.textContent : `Unlimited high-tier reward`;
+        if (desc) desc.textContent = "Loading Ad Feed...";
+
+        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+
+        if (!telegaAds && typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
+            telegaAds = window.TelegaIn.AdsController.create_miniapp({
+                token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
+            });
+        }
+
+        if (telegaAds) {
+            try {
+                let isResolved = false;
+                const safetyTimeout = setTimeout(() => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        resetTelegaButton(btn, originalText);
+                        alert("⚠️ Ad inventory currently empty. Please try again shortly.");
+                    }
+                }, 10000);
+
+                const adResult = telegaAds.ad_show({ adBlockUuid: uuid });
+
+                if (adResult && typeof adResult.then === 'function') {
+                    adResult.then(() => {
+                        if (isResolved) return;
+                        isResolved = true;
+                        clearTimeout(safetyTimeout);
+
+                        telegaLastRun = Date.now();
+                        localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
+
+                        grantReward(rewardAmount, 'Telega.io', 'ads');
+                        resetTelegaButton(btn, originalText);
+                        alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
+                    }).catch(() => {
+                        if (isResolved) return;
+                        isResolved = true;
+                        clearTimeout(safetyTimeout);
+
+                        telegaLastRun = Date.now();
+                        localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
+
+                        resetTelegaButton(btn, originalText);
+                        alert("Ad closed or inventory exhausted.");
+                    });
+                } else {
+                    if (isResolved) return;
+                    isResolved = true;
+                    clearTimeout(safetyTimeout);
+
+                    telegaLastRun = Date.now();
+                    localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
+
+                    grantReward(rewardAmount, 'Telega.io', 'ads');
+                    resetTelegaButton(btn, originalText);
+                    alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
+                }
+            } catch {
+                resetTelegaButton(btn, originalText);
+                alert("Ad execution failed. Check network connection.");
+            }
+        } else {
+            resetTelegaButton(btn, originalText);
+            alert("Telega.io SDK loading. Please retry in a moment.");
+        }
+    }
+
+    function resetTelegaButton(btn, originalText) {
+        btn.classList.remove('loading');
+        const desc = btn.querySelector('.task-details p');
+        if (desc) desc.textContent = originalText;
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {
-        const amount = parseFloat(document.getElementById('amount').value);
+        const btn = document.getElementById('submitWithdraw');
+        btn.disabled = true;
+        btn.textContent = "⏳ Processing Request...";
+        
         const method = document.getElementById('method').value;
+        const amount = parseFloat(document.getElementById('amount').value);
         const number = document.getElementById('number').value.trim();
         
-        if (balance < 25000 || isNaN(amount) || amount < 25000 || !number) {
-            return alert("Check amount or destination address.");
+        if (balance < 25000) {
+            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            alert("Minimum payout threshold is 25,000 HOWL ($2.50).");
+            btn.disabled = false;
+            btn.textContent = "📤 Submit Payout Request";
+            return;
+        }
+        if (!number) {
+            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            alert("Please provide a valid destination address or UID.");
+            btn.disabled = false;
+            btn.textContent = "📤 Submit Payout Request";
+            return;
+        }
+        if (isNaN(amount) || amount < 25000 || amount > balance) {
+            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            alert("Invalid payout amount specified.");
+            btn.disabled = false;
+            btn.textContent = "📤 Submit Payout Request";
+            return;
         }
 
-        balance -= amount;
-        addToHistory('withdraw', `📤 Payout Request: ${amount} HOWL via ${method}`);
-        updateDisplay();
-        saveData();
-        alert("Withdrawal recorded!");
+        const date = new Date().toLocaleString();
+        const userInfo = tgUser ? `@${tgUser.username || tgUser.first_name} (ID: ${tgUser.id})` : 'Web Operator';
+        const usdVal = (amount / 10000).toFixed(2);
+        const msg = `💸 *Secure Payout Request*\n\n👤 *User:* ${userInfo}\n📅 *Date:* ${date}\n💰 *Amount:* ${amount} HOWL ($${usdVal})\n📱 *Method:* ${method}\n📞 *Address:* ${number}`;
+        
+        fetch("https://api.telegram.org/bot7281899679:AAHbYMtelNIyu-8Tq8HgBuvBmUO6WjvxuFM/sendMessage", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: "@cryptoadspayment", text: msg, parse_mode: "Markdown" })
+        }).then(response => {
+            if (!response.ok) throw new Error();
+            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            alert("Withdrawal request dispatched successfully!");
+            
+            balance -= amount;
+            
+            let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
+            addToHistory('withdraw', `📤 Payout Request<br>💰 Amount: ${amount} HOWL ($${usdVal})<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
+            
+            updateDisplay();
+            saveData();
+        }).catch(() => {
+            alert("Network connection error. Try again later.");
+        }).finally(() => {
+            btn.disabled = false;
+            btn.textContent = "📤 Submit Payout Request";
+        });
     });
 
     function shareApp() {
-        alert("Share link copied!");
+        const botUsername = "howl_ads_bot"; 
+        const userId = tgUser ? tgUser.id : '1001';
+        const referralLink = `https://t.me/${botUsername}/ads?startapp=${userId}`;
+        const text = `🚀 Join HOWL Rewards and earn instant crypto payouts. Launch now!`;
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
+        if (window.Telegram && Telegram.WebApp.openTelegramLink) {
+            Telegram.WebApp.openTelegramLink(shareUrl);
+        } else {
+            window.open(shareUrl, '_blank');
+        }
     }
 </script>
 </body>

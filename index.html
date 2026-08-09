@@ -707,7 +707,7 @@
 
                 balance += rewardAmount;
                 updateDisplay();
-                addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount, taskId: offerId });
+                addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount, offerId: offerId });
                 saveData();
                 if (window.Telegram && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('success');
@@ -743,7 +743,7 @@
                 .from('transactions')
                 .select('*')
                 .eq('user_id', userIdStr)
-                .order('timestamp', { ascending: false });
+                .order('created_at', { ascending: false });
 
             if (txError) {
                 console.error('[DIAGNOSTIC ERROR] Failed to fetch transactions from Supabase:', txError.message);
@@ -761,10 +761,10 @@
                     type: tx.type ? tx.type.trim().toLowerCase() : 'ads',
                     detail: tx.detail,
                     meta: {
-                        taskId: tx.task_id || tx.transaction_id,
+                        taskId: tx.offer_id || tx.transaction_id,
                         rewardAmount: tx.reward_amount
                     },
-                    timestamp: tx.timestamp
+                    timestamp: tx.created_at
                 }));
                 
                 saveData();
@@ -802,16 +802,19 @@
     async function logTransactionToSupabase(type, detail, meta = {}) {
         const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
-            await supabaseClient
+            const { error } = await supabaseClient
                 .from('transactions')
                 .insert({
                     user_id: userIdStr,
                     type: type,
                     detail: detail,
-                    task_id: meta.taskId || null,
+                    offer_id: meta.taskId || meta.offerId || null,
                     reward_amount: meta.rewardAmount || null,
-                    timestamp: new Date().toISOString()
+                    created_at: new Date().toISOString()
                 });
+            if (error) {
+                console.error('Failed to save transaction to Supabase table:', error.message);
+            }
         } catch (err) {
             console.error('Failed to save transaction to Supabase table:', err);
         }

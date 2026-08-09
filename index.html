@@ -619,6 +619,7 @@
     let lastResetDate = new Date().toDateString();
     let historyLog = [];
     let tgUser = null;
+    let currentUserId = 'guest_user';
     const payoutGoal = 25000;
 
     let adsgramLastRun = 0;
@@ -665,18 +666,18 @@
                 tgUser = Telegram.WebApp.initDataUnsafe.user;
             }
         }
+
+        currentUserId = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
+        console.log('[DIAGNOSTIC] Resolved currentUserId:', currentUserId);
+
         loadData();
         loadTelegramUser();
         setupOfferwallIframe();
         setupPostbackQueryListener(); 
         showView('home-view');
         checkStoredCooldowns();
-        
-        if (tgUser && tgUser.id) {
-            loadUserBalanceAndHistory(tgUser.id);
-        } else {
-            loadUserBalanceAndHistory('guest_user');
-        }
+
+        loadUserBalanceAndHistory(currentUserId);
     }
 
     function setupOfferwallIframe() {
@@ -731,6 +732,10 @@
 
             if (userError) {
                 console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
+                // No row yet for this user_id — this is a brand new user, not a
+                // shared-data bug. Reset instead of leaving a stale in-memory value.
+                balance = 0;
+                updateDisplay();
             } else if (userData && typeof userData.balance === 'number') {
                 console.log('[DIAGNOSTIC] Successfully fetched balance:', userData.balance);
                 balance = userData.balance;
@@ -770,7 +775,7 @@
                 saveData();
             } else {
                 console.warn('[DIAGNOSTIC] Transactions query returned 0 rows for this user_id. Checking local storage fallback...');
-                const savedData = localStorage.getItem('howlRewardsBotV6');
+                const savedData = localStorage.getItem(`howlRewardsBotV6_${userIdStr}`);
                 if (savedData) {
                     const parsed = JSON.parse(savedData);
                     if (parsed.historyLog && parsed.historyLog.length > 0) {
@@ -789,23 +794,21 @@
     }
 
     async function syncBalanceToSupabase(newBalance) {
-        const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
             await supabaseClient
                 .from('users')
-                .upsert({ user_id: userIdStr, balance: newBalance, updated_at: new Date().toISOString() });
+                .upsert({ user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() });
         } catch (err) {
             console.log('Failed to sync balance to Supabase.');
         }
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
-        const userIdStr = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
         try {
             const { error } = await supabaseClient
                 .from('transactions')
                 .insert({
-                    user_id: userIdStr,
+                    user_id: currentUserId,
                     type: type,
                     detail: detail,
                     offer_id: meta.taskId || meta.offerId || null,
@@ -829,7 +832,6 @@
         if(activeBtn) activeBtn.classList.add('active');
         
         if (viewId === 'history-view') {
-            const currentUserId = tgUser && tgUser.id ? tgUser.id : 'guest_user';
             loadUserBalanceAndHistory(currentUserId);
         }
     }
@@ -851,13 +853,20 @@
     }
     
     function loadData() {
-        const savedData = localStorage.getItem('howlRewardsBotV6');
+        const savedData = localStorage.getItem(`howlRewardsBotV6_${currentUserId}`);
         if (savedData) {
             const data = JSON.parse(savedData);
             balance = data.balance || 0;
             adsgramCountToday = data.adsgramCountToday || 0;
             lastResetDate = data.lastResetDate || new Date().toDateString();
             historyLog = data.historyLog || [];
+        } else {
+            // No cache for this specific user_id — start clean. Don't inherit
+            // whatever a different account left behind on this device.
+            balance = 0;
+            adsgramCountToday = 0;
+            lastResetDate = new Date().toDateString();
+            historyLog = [];
         }
 
         const currentDate = new Date().toDateString();
@@ -870,15 +879,15 @@
     }
 
     function saveData() {
-        localStorage.setItem('howlRewardsBotV6', JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog }));
+        localStorage.setItem(`howlRewardsBotV6_${currentUserId}`, JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog }));
         syncBalanceToSupabase(balance);
     }
 
     function checkStoredCooldowns() {
-        const storedAdsgram = localStorage.getItem('howl_adsgram_cd');
+        const storedAdsgram = localStorage.getItem(`howl_adsgram_cd_${currentUserId}`);
         if (storedAdsgram) adsgramLastRun = parseInt(storedAdsgram);
 
-        const storedTelega = localStorage.getItem('howl_telega_cd');
+        const storedTelega = localStorage.getItem(`howl_telega_cd_${currentUserId}`);
         if (storedTelega) telegaLastRun = parseInt(storedTelega);
     }
 
@@ -1116,7 +1125,7 @@
             document.removeEventListener('visibilitychange', visibilityHandler);
 
             adsgramLastRun = Date.now();
-            localStorage.setItem('howl_adsgram_cd', adsgramLastRun.toString());
+            localStorage.setItem(`howl_adsgram_cd_${currentUserId}`, adsgramLastRun.toString());
 
             if (!result || result.error) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
@@ -1143,7 +1152,7 @@
             document.removeEventListener('visibilitychange', visibilityHandler);
 
             adsgramLastRun = Date.now();
-            localStorage.setItem('howl_adsgram_cd', adsgramLastRun.toString());
+            localStorage.setItem(`howl_adsgram_cd_${currentUserId}`, adsgramLastRun.toString());
 
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
@@ -1199,7 +1208,7 @@
                         clearTimeout(safetyTimeout);
 
                         telegaLastRun = Date.now();
-                        localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
+                        localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
 
                         grantReward(rewardAmount, 'Telega.io', 'ads');
                         resetTelegaButton(btn, originalText);
@@ -1210,7 +1219,7 @@
                         clearTimeout(safetyTimeout);
 
                         telegaLastRun = Date.now();
-                        localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
+                        localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
 
                         resetTelegaButton(btn, originalText);
                         alert("Ad closed or inventory exhausted.");
@@ -1221,7 +1230,7 @@
                     clearTimeout(safetyTimeout);
 
                     telegaLastRun = Date.now();
-                    localStorage.setItem('howl_telega_cd', telegaLastRun.toString());
+                    localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
 
                     grantReward(rewardAmount, 'Telega.io', 'ads');
                     resetTelegaButton(btn, originalText);

@@ -631,7 +631,9 @@
                 .from('users')
                 .select('balance')
                 .eq('user_id', userIdStr)
-                .single();
+                .order('updated_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
 
             if (userError) {
                 console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
@@ -698,9 +700,15 @@
 
     async function syncBalanceToSupabase(newBalance) {
         try {
-            await supabaseClient
+            const { error } = await supabaseClient
                 .from('users')
-                .upsert({ user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() });
+                .upsert(
+                    { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
+                    { onConflict: 'user_id' }
+                );
+            if (error) {
+                console.error('[DIAGNOSTIC ERROR] Failed to sync balance to Supabase:', error.message);
+            }
         } catch (err) {
             console.log('Failed to sync balance to Supabase.');
         }

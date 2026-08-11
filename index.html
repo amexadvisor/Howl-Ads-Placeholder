@@ -550,7 +550,6 @@
             if (barEl) barEl.style.width = `${percentTracker}%`;
 
             if (percentTracker >= 100) {
-                // Hold briefly at 100% so it visibly registers, then reveal the dashboard.
                 setTimeout(() => {
                     if (splashEl) splashEl.classList.add('fade-out');
                 }, 350);
@@ -591,7 +590,7 @@
         }
     }
 
-    function setupPostbackQueryListener() {
+    async function setupPostbackQueryListener() {
         const urlParams = new URLSearchParams(window.location.search);
         const postbackUserId = urlParams.get('user_id');
         const postbackValue = urlParams.get('value');
@@ -609,12 +608,39 @@
                     localStorage.setItem('howl_processed_tokens', JSON.stringify(processedTokens));
                 }
 
-                balance += rewardAmount;
-                updateDisplay();
-                addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount, offerId: offerId });
-                saveData();
-                if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-                    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                // STEP 1: FETCH & UPDATE USER BALANCE FOR POSTBACKS
+                try {
+                    const { data: userData } = await supabaseClient
+                        .from('users')
+                        .select('balance')
+                        .eq('user_id', currentUserId)
+                        .maybeSingle();
+
+                    const currentBalance = userData?.balance || 0;
+                    const newBalance = currentBalance + rewardAmount;
+
+                    const { error: upsertError } = await supabaseClient
+                        .from('users')
+                        .upsert(
+                            { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
+                            { onConflict: 'user_id' }
+                        );
+
+                    if (upsertError) {
+                        console.error('Failed to save postback balance:', upsertError);
+                    } else {
+                        balance = newBalance;
+                        updateDisplay();
+                        addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount, offerId: offerId });
+                        
+                        localStorage.setItem(`howlRewardsBotV6_${currentUserId}`, JSON.stringify({ balance, adsbitvexCountToday, lastResetDate, historyLog }));
+
+                        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+                            Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                        }
+                    }
+                } catch(e) {
+                    console.error('Error applying postback reward:', e);
                 }
 
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -631,14 +657,10 @@
                 .from('users')
                 .select('balance')
                 .eq('user_id', userIdStr)
-                .order('updated_at', { ascending: false })
-                .limit(1)
-                .maybeSingle();
+                .single();
 
             if (userError) {
                 console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
-                // No row yet for this user_id — this is a brand new user, not a
-                // shared-data bug. Reset instead of leaving a stale in-memory value.
                 balance = 0;
                 updateDisplay();
             } else if (userData && typeof userData.balance === 'number') {
@@ -707,10 +729,10 @@
                     { onConflict: 'user_id' }
                 );
             if (error) {
-                console.error('[DIAGNOSTIC ERROR] Failed to sync balance to Supabase:', error.message);
+                console.error('Failed to sync balance to Supabase:', error.message);
             }
         } catch (err) {
-            console.log('Failed to sync balance to Supabase.');
+            console.error('Failed to sync balance to Supabase:', err);
         }
     }
 
@@ -778,8 +800,6 @@
             lastResetDate = data.lastResetDate || new Date().toDateString();
             historyLog = data.historyLog || [];
         } else {
-            // No cache for this specific user_id — start clean. Don't inherit
-            // whatever a different account left behind on this device.
             balance = 0;
             adsbitvexCountToday = 0;
             lastResetDate = new Date().toDateString();
@@ -966,13 +986,46 @@
         }
     }
 
-    function grantReward(amount, sourceName, type = 'ads', meta = {}) {
-        balance += amount;
-        updateDisplay();
-        addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
-        saveData();
-        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+    async function grantReward(amount, sourceName, type = 'ads', meta = {}) {
+        try {
+            // STEP 1: FETCH CURRENT BALANCE TO PREVENT OVERWRITES
+            const { data: userData } = await supabaseClient
+                .from('users')
+                .select('balance')
+                .eq('user_id', currentUserId)
+                .maybeSingle();
+
+            const currentBalance = userData?.balance || 0;
+            const newBalance = currentBalance + amount;
+
+            // STEP 2: UPSERT NEW BALANCE WITH onConflict
+            const { error: upsertError } = await supabaseClient
+                .from('users')
+                .upsert(
+                    { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
+                    { onConflict: 'user_id' }
+                );
+
+            if (upsertError) {
+                console.error('CRITICAL BALANCE ERROR:', upsertError);
+                return;
+            }
+
+            // Update local state
+            balance = newBalance;
+            updateDisplay();
+            
+            // STEP 3: LOG TRANSACTION HISTORY
+            addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
+            
+            // Save to local storage cache independently 
+            localStorage.setItem(`howlRewardsBotV6_${currentUserId}`, JSON.stringify({ balance, adsbitvexCountToday, lastResetDate, historyLog }));
+
+            if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
+        } catch (error) {
+            console.error('Execution Exception:', error.message || error);
         }
     }
 

@@ -6,12 +6,10 @@
   <meta name="monetag" content="67ef6bfd7f6fc61b2655ef81898058b9"/>
   <title>HOWL | Elite Earning Platform</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Monetag SDK Load -->
-  <script src='//libtl.com/sdk.js' data-zone='9954272' data-sdk='show_9954272'></script>
-  <!-- Adsgram SDK Load -->
-  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <!-- AdsBitvex SDK Load -->
+  <script src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281"></script>
   <!-- Telega.io SDK Load -->
   <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
   <!-- Supabase JS Client UMD -->
@@ -19,327 +17,304 @@
 
   <style>
     :root {
-      --gold: #c9a24a;
-      --gold-soft: rgba(201, 162, 74, 0.14);
-      --gold-glow: rgba(201, 162, 74, 0.22);
-      --gold-dim: rgba(201, 162, 74, 0.4);
-      --accent: #5c7aa6;
-      --accent-glow: rgba(92, 122, 166, 0.22);
-      --bg-dark: #05060b;
-      --card-bg: rgba(16, 19, 29, 0.72);
-      --card-border: rgba(201, 162, 74, 0.14);
-      --card-border-glow: rgba(201, 162, 74, 0.32);
-      --text-main: #f2eee3;
-      --text-muted: #868a97;
+      --bg: #070c0e;
+      --card: #12191b;
+      --card-alt: #0f2a25;
+      --hairline: rgba(255, 255, 255, 0.07);
+      --mint: #34d399;
+      --mint-dim: #10b981;
+      --mint-soft: rgba(52, 211, 153, 0.12);
+      --mint-glow: rgba(52, 211, 153, 0.28);
+      --amber: #f5b942;
+      --amber-soft: rgba(245, 185, 66, 0.12);
+      --text: #f5f7f8;
+      --text-muted: #8b959a;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     body {
-      margin: 0; padding: 0; background-color: var(--bg-dark); color: var(--text-main); 
-      font-family: 'Plus Jakarta Sans', sans-serif; display: flex; justify-content: center; align-items: center; 
+      margin: 0; padding: 0; background: var(--bg); color: var(--text);
+      font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center;
       height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased;
-      background-image: 
-        radial-gradient(circle at 10% 10%, rgba(201, 162, 74, 0.05) 0%, transparent 45%),
-        radial-gradient(circle at 90% 85%, rgba(92, 122, 166, 0.05) 0%, transparent 45%);
     }
 
-    /* Splash Screen */
+    /* ============ Splash ============ */
     #splash-screen {
-      position: absolute; inset: 0; background: #030408; z-index: 9999;
+      position: absolute; inset: 0; background: var(--bg); z-index: 9999;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1), visibility 1s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
+      transition: opacity 0.7s ease, visibility 0.7s ease;
     }
     #splash-screen.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    .splash-grid {
-      position: absolute; inset: 0; background-image: 
-        linear-gradient(rgba(201, 162, 74, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(201, 162, 74, 0.035) 1px, transparent 1px);
-      background-size: 34px 34px; animation: gridMove 30s linear infinite; opacity: 0.5;
+    .howl-glow {
+      position: absolute; top: 22%; left: 50%; width: 320px; height: 320px; border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, var(--mint-soft) 0%, transparent 70%);
+      animation: moonPulse 3.2s ease-in-out infinite;
     }
-    @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 34px 34px; } }
+    @keyframes moonPulse { 0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } }
 
-    .tech-ring {
-      position: absolute; border-radius: 50%; border: 1px solid rgba(201, 162, 74, 0.16);
-      animation: rotateRing 22s linear infinite; pointer-events: none;
+    .howl-rings { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+    .howl-rings .ring {
+      position: absolute; border-radius: 50%; border: 1px solid var(--mint-glow);
+      animation: sonar 2.6s cubic-bezier(0.2, 0.6, 0.4, 1) infinite; opacity: 0;
     }
-    .ring-1 { width: 220px; height: 220px; }
-    .ring-2 { width: 280px; height: 280px; border-color: rgba(201, 162, 74, 0.08); animation-direction: reverse; animation-duration: 28s; }
-    @keyframes rotateRing { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .howl-rings .r1 { animation-delay: 0s; }
+    .howl-rings .r2 { animation-delay: 0.87s; }
+    .howl-rings .r3 { animation-delay: 1.74s; }
+    @keyframes sonar { 0% { width: 88px; height: 88px; opacity: 0.5; } 100% { width: 320px; height: 320px; opacity: 0; } }
+
+    .howl-embers { display: none; }
 
     .splash-logo-container {
-      position: relative; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;
-      margin-bottom: 28px; animation: floatLogo 4.5s ease-in-out infinite alternate;
+      position: relative; width: 88px; height: 88px; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 24px; z-index: 2; animation: logoRise 0.7s cubic-bezier(0.16,1,0.3,1) both;
     }
-    @keyframes floatLogo { 0% { transform: translateY(0px); } 100% { transform: translateY(-6px); } }
-
-    .splash-radar {
-      position: absolute; inset: -15px; border-radius: 50%;
-      background: conic-gradient(from 0deg at 50% 50%, rgba(201, 162, 74, 0) 0%, rgba(201, 162, 74, 0.18) 85%, rgba(201, 162, 74, 0.5) 100%);
-      animation: spinRadar 5s linear infinite; filter: blur(3px);
-    }
-    @keyframes spinRadar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes logoRise { from { opacity: 0; transform: translateY(12px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
     .splash-logo {
-      position: relative; width: 96px; height: 96px; border-radius: 26px; 
-      background: linear-gradient(150deg, #14161f, #090a10);
+      width: 88px; height: 88px; border-radius: 24px;
+      background: var(--card);
       display: flex; align-items: center; justify-content: center; overflow: hidden;
-      box-shadow: 0 0 24px var(--gold-glow), inset 0 0 0 1px rgba(201, 162, 74, 0.35);
-      border: 1px solid rgba(201, 162, 74, 0.4); z-index: 2;
+      border: 1px solid var(--hairline);
+      box-shadow: 0 0 28px var(--mint-glow);
     }
     .splash-logo img { width: 100%; height: 100%; object-fit: cover; }
 
-    .splash-title-wrapper { text-align: center; z-index: 2; margin-bottom: 24px; }
-    .splash-title { 
-      font-family: 'Fraunces', serif; font-size: 25px; font-weight: 600; letter-spacing: 4px; color: var(--text-main); 
-      margin: 0 0 8px 0;
+    .splash-title-wrapper { text-align: center; z-index: 2; margin-bottom: 22px; }
+    .splash-title {
+      font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: 0.5px; color: var(--text);
+      margin: 0 0 6px 0;
+      animation: fadeIn 0.6s ease both 0.15s; opacity: 0;
     }
+    @keyframes fadeIn { to { opacity: 1; } }
     .splash-subtitle {
-      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 3.5px; color: var(--gold);
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      opacity: 0; animation: fadeIn 0.5s ease both 0.45s;
     }
 
-    .splash-loader-container { width: 220px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .splash-loader { width: 100%; height: 3px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; position: relative; }
-    .splash-loader-bar { 
-      position: absolute; top: 0; left: 0; height: 100%; width: 0%; 
-      background: var(--gold); 
-      transition: width 0.25s ease-out;
+    .splash-loader-container { width: 200px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .splash-loader { width: 100%; height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; position: relative; overflow: hidden; }
+    .splash-loader-bar {
+      position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--mint-dim), var(--mint));
+      border-radius: 4px; transition: width 0.25s ease-out;
     }
-    .splash-percentage { font-size: 10px; font-family: monospace; color: var(--text-muted); font-weight: 600; letter-spacing: 1px; }
+    .splash-percentage { font-family: 'Inter', monospace; font-size: 11px; color: var(--text-muted); font-weight: 600; }
 
+    /* ============ Shell ============ */
     .container {
-      width: 100%; height: 100%; max-width: 410px; background: rgba(6, 7, 12, 0.9); 
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      width: 100%; height: 100%; max-width: 410px; background: var(--bg);
       display: flex; flex-direction: column; overflow: hidden; position: relative;
-      box-shadow: 0 0 50px rgba(0,0,0,0.9);
-      border-left: 1px solid rgba(201, 162, 74, 0.05);
-      border-right: 1px solid rgba(201, 162, 74, 0.05);
+      border-left: 1px solid var(--hairline); border-right: 1px solid var(--hairline);
     }
 
-    .live-dashboard-bg {
-      position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-    }
-    .live-grid {
-      position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
-      background-image: 
-        linear-gradient(rgba(201, 162, 74, 0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(92, 122, 166, 0.025) 1px, transparent 1px);
-      background-size: 35px 35px; animation: liveGridMove 22s linear infinite;
-    }
-    @keyframes liveGridMove { 0% { transform: translateY(0); } 100% { transform: translateY(35px); } }
+    .live-dashboard-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .live-grid { position: absolute; top: -10%; left: 0; width: 100%; height: 240px; background: radial-gradient(ellipse at 50% 0%, var(--mint-soft) 0%, transparent 70%); }
+    .ambient-glow { display: none; }
 
-    .ambient-glow {
-      position: absolute; width: 180px; height: 180px; border-radius: 50%;
-      filter: blur(70px); z-index: 0; pointer-events: none; opacity: 0.28;
-      animation: floatOrb 10s ease-in-out infinite alternate;
-    }
-    .orb-1 { top: -40px; left: -40px; background: var(--gold); }
-    .orb-2 { bottom: 60px; right: -40px; background: var(--accent); animation-delay: -5s; }
+    main { flex-grow: 1; overflow-y: auto; padding: 18px; padding-bottom: 100px; z-index: 1; position: relative; }
+    main::-webkit-scrollbar { width: 3px; }
+    main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 
-    @keyframes floatOrb {
-      0% { transform: translateY(0px) scale(1); }
-      100% { transform: translateY(16px) scale(1.1); }
-    }
-
-    main { flex-grow: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; z-index: 1; position: relative; }
-    main::-webkit-scrollbar { width: 4px; }
-    main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-    .view { display: none; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    .view { display: none; }
     .view.active { display: block; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Category Switcher Navigation Bar */
+    @keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes carveIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .view.active > * { animation: riseIn 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+    .view.active > *:nth-child(1) { animation-delay: 0.02s; }
+    .view.active > *:nth-child(2) { animation-delay: 0.08s; }
+    .view.active > *:nth-child(3) { animation-delay: 0.14s; }
+    .view.active > *:nth-child(4) { animation-delay: 0.2s; }
+    .view.active > *:nth-child(5) { animation-delay: 0.26s; }
+    .view.active > *:nth-child(6) { animation-delay: 0.32s; }
+
+    /* ============ Tabs ============ */
     .earn-category-tabs {
-      display: flex; gap: 6px; margin-bottom: 18px; background: var(--card-bg);
-      padding: 4px; border-radius: 14px; border: 1px solid var(--card-border);
-      backdrop-filter: blur(12px);
+      display: flex; gap: 4px; margin-bottom: 16px; background: var(--card);
+      padding: 4px; border-radius: 14px; border: 1px solid var(--hairline); position: relative;
+    }
+    .tab-pill {
+      position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 3);
+      background: var(--mint); border-radius: 10px;
+      transform: translateX(calc(var(--active-index, 0) * 100%));
+      transition: transform 0.35s cubic-bezier(0.65,0,0.35,1);
     }
     .category-tab {
-      flex: 1; padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 600;
+      flex: 1; padding: 10px 4px; text-align: center; font-size: 12px; font-weight: 700;
       color: var(--text-muted); background: transparent; border: none; border-radius: 10px;
-      cursor: pointer; transition: all 0.25s ease; text-transform: uppercase; letter-spacing: 0.5px;
+      cursor: pointer; transition: color 0.25s ease; position: relative; z-index: 1;
     }
-    .category-tab:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
-    .category-tab.active {
-      color: #12131a; background: var(--gold);
-      box-shadow: 0 2px 10px var(--gold-glow);
-    }
+    .category-tab:hover { color: var(--text); }
+    .category-tab.active { color: #06120e; }
 
     .earn-section-panel { display: none; }
-    .earn-section-panel.active { display: block; animation: fadeInPanel 0.3s ease; }
-    @keyframes fadeInPanel { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .earn-section-panel.active { display: block; }
+    .earn-section-panel.active > * { animation: riseIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+    .earn-section-panel.active > *:nth-child(1) { animation-delay: 0.02s; }
+    .earn-section-panel.active > *:nth-child(2) { animation-delay: 0.07s; }
+    .earn-section-panel.active .task-card:nth-child(3) { animation-delay: 0.12s; }
+    .earn-section-panel.active .task-card:nth-child(4) { animation-delay: 0.17s; }
 
-    /* Offerwall Container Frame Styling */
     .offerwall-iframe-container {
-      width: calc(100% + 40px); margin-left: -20px; height: 480px; background: var(--card-bg);
-      border-radius: 14px; border: 1px solid var(--card-border); overflow: hidden;
-      backdrop-filter: blur(12px); position: relative;
+      width: calc(100% + 36px); margin-left: -18px; height: 480px; background: var(--card);
+      border-radius: 16px; border: 1px solid var(--hairline); overflow: hidden; position: relative;
     }
-    .offerwall-iframe-container iframe {
-      width: 100%; height: 100%; border: none; background: transparent;
-    }
+    .offerwall-iframe-container iframe { width: 100%; height: 100%; border: none; background: transparent; }
 
-    /* User Header */
+    /* ============ User header ============ */
     .user-header-card {
-      background: var(--card-bg);
-      border-radius: 18px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; 
-      border: 1px solid var(--card-border); backdrop-filter: blur(16px);
-      position: relative; overflow: hidden;
-    }
-    .user-header-card::before {
-      content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--gold);
+      background: var(--card); border-radius: 18px; padding: 16px; margin-bottom: 18px;
+      display: flex; align-items: center; border: 1px solid var(--hairline);
     }
     .user-avatar {
-      width: 50px; height: 50px; border-radius: 50%; margin-right: 14px; overflow: hidden; 
-      background: linear-gradient(150deg, #1c1e29, #0b0c12); 
-      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 19px; color: var(--gold);
-      border: 1px solid rgba(201, 162, 74, 0.35); flex-shrink: 0;
-      position: relative;
+      width: 48px; height: 48px; border-radius: 14px; margin-right: 14px; overflow: hidden;
+      background: var(--card-alt);
+      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: var(--mint);
+      border: 1px solid var(--hairline); flex-shrink: 0;
     }
     .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    
-    .user-info .username { font-size: 16px; font-weight: 700; margin: 0; color: var(--text-main); letter-spacing: 0.2px; }
-    .user-info .badge-container { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+
+    .user-info .username { font-size: 16px; font-weight: 800; margin: 0; color: var(--text); }
+    .user-info .badge-container { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
     .user-info .title { font-size: 12px; color: var(--text-muted); font-weight: 500; }
     .live-indicator {
-      display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600;
-      color: var(--gold); background: var(--gold-soft); padding: 2px 8px; border-radius: 10px;
-      border: 1px solid rgba(201, 162, 74, 0.2);
+      display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700;
+      color: var(--mint); background: var(--mint-soft); padding: 3px 9px; border-radius: 20px;
     }
-    .live-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; animation: pulseDot 2.2s infinite; }
-    @keyframes pulseDot { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+    .live-dot { width: 5px; height: 5px; background: var(--mint); border-radius: 50%; animation: pulseDot 1.8s infinite; }
+    @keyframes pulseDot { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 
-    /* Balance Card */
+    /* ============ Balance ============ */
     .balance-card {
-      background: linear-gradient(160deg, #12141d 0%, #08090e 100%); 
-      border-radius: 20px; padding: 26px 20px; text-align: center; margin-bottom: 22px;
-      position: relative; overflow: hidden;
-      border: 1px solid rgba(201, 162, 74, 0.22);
+      background: var(--card); border-radius: 20px; padding: 26px 20px; text-align: center; margin-bottom: 18px;
+      position: relative; overflow: hidden; border: 1px solid var(--hairline);
+      animation: carveIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
     }
-    .balance-card .currency-emblem {
-      width: 42px; height: 42px; border-radius: 50%; margin: 0 auto 12px auto; overflow: hidden;
-      border: 1px solid rgba(201, 162, 74, 0.4);
+    .balance-card::before {
+      content: ''; position: absolute; top: -50%; left: 50%; width: 240px; height: 240px;
+      transform: translateX(-50%); border-radius: 50%;
+      background: radial-gradient(circle, var(--mint-soft) 0%, transparent 70%);
     }
+    .balance-card .currency-emblem { width: 40px; height: 40px; margin: 0 auto 12px auto; position: relative; z-index: 1; border-radius: 12px; overflow: hidden; border: 1px solid var(--hairline); }
     .balance-card .currency-emblem img { width: 100%; height: 100%; object-fit: cover; }
-    .balance-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; font-weight: 600; }
-    .balance-card .balance-value { font-family: 'Fraunces', serif; font-size: 34px; font-weight: 500; margin: 0; letter-spacing: -0.5px; color: var(--text-main); }
-    .balance-card .currency-tag { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--gold); font-weight: 600; margin-left: 4px; }
-    .balance-card .usd-value { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+    .balance-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; position: relative; z-index: 1; }
+    .balance-card .balance-value { font-family: 'Inter', sans-serif; font-size: 38px; font-weight: 800; margin: 0; letter-spacing: -0.5px; color: var(--text); position: relative; z-index: 1; }
+    .balance-card .currency-tag { font-size: 14px; color: var(--mint); font-weight: 700; margin-left: 6px; }
+    .balance-card .usd-value { font-size: 12px; color: var(--text-muted); margin-top: 8px; font-weight: 500; position: relative; z-index: 1; }
 
-    /* Daily Progress Widget */
-    .progress-section {
-      background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 22px;
-      border: 1px solid var(--card-border); backdrop-filter: blur(12px);
-    }
-    .progress-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .progress-info span:last-child { color: var(--gold); }
+    /* ============ Progress ============ */
+    .progress-section { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 18px; border: 1px solid var(--hairline); }
+    .progress-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); }
+    .progress-info span:last-child { color: var(--mint); }
+    .progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--mint-dim), var(--mint)); border-radius: 3px; transition: width 0.4s ease; }
 
-    .progress-track {
-      width: 100%; height: 6px; background: rgba(255, 255, 255, 0.06); border-radius: 3px; overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%; width: 0%; background: var(--gold); border-radius: 3px; transition: width 0.3s ease;
-    }
+    .section-title { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .section-title i { color: var(--mint); font-size: 13px; }
 
-    .section-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--text-main); letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
-    .section-title i { color: var(--gold); font-size: 13px; }
-
-    /* Task & Navigation Cards */
+    /* ============ Task cards ============ */
     .task-card {
-      background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 10px; 
-      display: flex; align-items: center; cursor: pointer; 
-      transition: all 0.2s ease; 
-      border: 1px solid var(--card-border); backdrop-filter: blur(12px);
-      position: relative; overflow: hidden;
+      background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 10px;
+      display: flex; align-items: center; cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.15s ease;
+      border: 1px solid var(--hairline); border-left: 3px solid transparent;
     }
-    .task-card:hover { border-color: var(--card-border-glow); background: rgba(22, 25, 36, 0.75); }
-    .task-card:active { transform: scale(0.98); }
-    
-    .task-card.cooldown-active { opacity: 0.55; cursor: not-allowed; }
-    .task-card.cooldown-active:hover { border-color: var(--card-border); background: var(--card-bg); }
+    .task-card:hover { border-color: var(--mint-glow); }
+    .task-card:active { transform: scale(0.985); }
+    .task-card.cooldown-active { opacity: 0.5; cursor: not-allowed; }
+    .task-card.cooldown-active:hover { border-color: var(--hairline); }
 
-    .task-icon { 
-      font-size: 18px; color: var(--gold); background: var(--gold-soft); 
-      width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; 
-      margin-right: 14px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(201, 162, 74, 0.2);
+    .task-icon {
+      font-size: 18px; color: var(--mint); background: var(--card-alt);
+      width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      margin-right: 14px; flex-shrink: 0;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
     }
+    .task-card:hover .task-icon { transform: scale(1.06); }
     .task-details { flex-grow: 1; }
-    .task-details h3 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text-main); letter-spacing: 0.2px; }
+    .task-details h3 { margin: 0; font-size: 14px; font-weight: 700; color: var(--text); }
     .task-details p { margin: 4px 0 0; font-size: 12px; color: var(--text-muted); font-weight: 500; }
-    
+
     .task-action-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-left: 10px; flex-shrink: 0; }
-    .task-arrow { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); border: 1px solid rgba(255,255,255,0.06); transition: all 0.2s; }
-    .task-card:hover .task-arrow { background: var(--gold); color: #14151d; border-color: var(--gold); }
-    
+    .task-arrow {
+      width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted);
+      border: 1px solid var(--hairline); transition: transform 0.25s ease, background 0.2s ease, color 0.2s ease;
+    }
+    .task-card:hover .task-arrow { background: var(--mint); color: #06120e; transform: translateX(2px); }
+
     .cooldown-badge {
-      font-size: 10px; font-weight: 600; color: var(--gold); background: var(--gold-soft);
-      padding: 3px 8px; border-radius: 8px; border: 1px solid rgba(201, 162, 74, 0.25); display: none; white-space: nowrap;
+      font-size: 10px; font-weight: 700; color: var(--mint); background: var(--mint-soft);
+      padding: 3px 9px; border-radius: 20px; display: none; white-space: nowrap;
     }
 
-    /* History & Lists */
+    /* ============ History list ============ */
     .list-item {
-      display: flex; align-items: center; background: var(--card-bg); padding: 14px; 
-      border-radius: 14px; margin-bottom: 10px; border: 1px solid var(--card-border);
-      backdrop-filter: blur(10px);
+      display: flex; align-items: center; background: var(--card); padding: 13px;
+      border-radius: 14px; margin-bottom: 8px; border: 1px solid var(--hairline);
+      animation: riseIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
     }
-    .list-item .history-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--gold-soft); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 14px; color: var(--gold); flex-shrink: 0; }
+    #history-list-ads .list-item:nth-child(1), #history-list-offerwall .list-item:nth-child(1), #history-list-survey .list-item:nth-child(1) { animation-delay: 0.02s; }
+    #history-list-ads .list-item:nth-child(2), #history-list-offerwall .list-item:nth-child(2), #history-list-survey .list-item:nth-child(2) { animation-delay: 0.07s; }
+    #history-list-ads .list-item:nth-child(3), #history-list-offerwall .list-item:nth-child(3), #history-list-survey .list-item:nth-child(3) { animation-delay: 0.12s; }
+    #history-list-ads .list-item:nth-child(4), #history-list-offerwall .list-item:nth-child(4), #history-list-survey .list-item:nth-child(4) { animation-delay: 0.17s; }
+    #history-list-ads .list-item:nth-child(n+5), #history-list-offerwall .list-item:nth-child(n+5), #history-list-survey .list-item:nth-child(n+5) { animation-delay: 0.2s; }
+
+    .list-item .history-icon { width: 36px; height: 36px; border-radius: 11px; background: var(--card-alt); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 14px; color: var(--mint); flex-shrink: 0; }
     .list-item .info { flex-grow: 1; }
-    .list-item .info .name { font-weight: 700; font-size: 13px; color: var(--text-main); }
+    .list-item .info .name { font-weight: 700; font-size: 13px; color: var(--text); }
     .list-item .info .detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-    /* Footer Nav */
+    /* ============ Footer nav ============ */
     .footer-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 410px; margin: 0 auto; 
-      display: flex; justify-content: space-around; background: rgba(8, 9, 14, 0.9); 
+      position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 410px; margin: 0 auto;
+      display: flex; background: rgba(7, 12, 14, 0.94);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      padding: 10px 6px 16px 6px; border-top: 1px solid rgba(201, 162, 74, 0.08); z-index: 100;
+      padding: 10px 4px 16px 4px; border-top: 1px solid var(--hairline); z-index: 100;
     }
     .nav-button {
-      position: relative;
-      display: flex; flex-direction: column; align-items: center; color: var(--text-muted); 
-      background: transparent; border: 1px solid transparent; 
-      font-size: 10px; font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 12px;
-      transition: all 0.2s ease;
+      flex: 1; display: flex; flex-direction: column; align-items: center; color: var(--text-muted);
+      background: transparent; border: none; font-size: 10px; font-weight: 700; cursor: pointer; padding: 8px 2px;
+      transition: color 0.2s ease;
     }
-    .nav-button .icon { font-size: 17px; margin-bottom: 4px; transition: transform 0.2s ease; }
-    
-    .nav-button:hover {
-      color: var(--text-main);
-      background: rgba(255,255,255,0.03);
-    }
+    .nav-button .icon { font-size: 17px; margin-bottom: 5px; transition: transform 0.2s ease; }
+    .nav-button:hover { color: var(--text); }
     .nav-button:active { transform: scale(0.95); }
+    .nav-button.active { color: var(--mint); }
+    @keyframes iconPop { 0% { transform: scale(1); } 45% { transform: scale(1.25); } 100% { transform: scale(1); } }
+    .nav-button.active .icon { animation: iconPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
 
-    .nav-button.active {
-      color: var(--gold);
-      background: var(--gold-soft);
-      border-color: rgba(201, 162, 74, 0.2);
-    }
-
-    /* Buttons & Inputs */
+    /* ============ Buttons ============ */
     .btn {
-      display: block; width: 100%; margin: 10px auto; padding: 15px; font-size: 14px; font-weight: 700;
-      background: var(--gold); color: #14151d; border: none; border-radius: 14px; 
-      cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.8px;
+      display: block; width: 100%; margin: 10px auto; padding: 16px; font-size: 14px; font-weight: 800;
+      background: linear-gradient(135deg, var(--mint), var(--mint-dim));
+      color: #06120e; border: none; border-radius: 16px;
+      cursor: pointer; transition: transform 0.15s ease, box-shadow 0.25s ease;
+      box-shadow: 0 8px 20px var(--mint-glow);
     }
-    .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px var(--mint-glow); }
     .btn:active { transform: scale(0.98); }
-    .btn:disabled { background: rgba(255,255,255,0.06); color: var(--text-muted); cursor: not-allowed; }
-    
+    .btn:disabled { background: rgba(255,255,255,0.06); color: var(--text-muted); box-shadow: none; cursor: not-allowed; }
+
     .form input, .form select {
-      padding: 14px 16px; font-size: 14px; border: 1px solid var(--card-border); border-radius: 12px; 
-      width: 100%; box-sizing: border-box; margin-bottom: 12px; background: var(--card-bg); 
-      color: var(--text-main); text-align: center; outline: none; transition: all 0.2s ease;
-      backdrop-filter: blur(10px); font-weight: 600;
+      padding: 14px 16px; font-size: 14px; border: 1px solid var(--hairline); border-radius: 14px;
+      width: 100%; box-sizing: border-box; margin-bottom: 12px; background: var(--card);
+      color: var(--text); text-align: center; outline: none; transition: border-color 0.2s ease;
+      font-weight: 600;
     }
-    .form input:focus, .form select:focus { border-color: var(--gold); }
-    
+    .form input:focus, .form select:focus { border-color: var(--mint); }
+
     #withdraw { text-align: center; }
-    #withdraw h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+    #withdraw h3 { font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
     #withdraw p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
-    #withdraw p strong { color: var(--gold); }
+    #withdraw p strong { color: var(--mint); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
   </style>
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -348,20 +323,23 @@
 
   <!-- Ultimate Tech Opening Splash Screen Animation -->
   <div id="splash-screen">
-    <div class="splash-grid"></div>
-    <div class="tech-ring ring-1"></div>
-    <div class="tech-ring ring-2"></div>
+    <div class="howl-glow"></div>
+    <div class="howl-rings">
+      <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+    </div>
+    <div class="howl-embers">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
 
     <div class="splash-logo-container">
-      <div class="splash-radar"></div>
       <div class="splash-logo">
         <img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="HOWL Emblem">
       </div>
     </div>
 
     <div class="splash-title-wrapper">
-      <h1 class="splash-title">HOWL PROTOCOL</h1>
-      <div class="splash-subtitle">INITIALIZING SECURE REWARDS...</div>
+      <h1 class="splash-title">HOWL</h1>
+      <div class="splash-subtitle">Elite Earning Protocol</div>
     </div>
 
     <div class="splash-loader-container">
@@ -404,10 +382,9 @@
 
         <div class="progress-section">
           <div class="progress-info">
-            <span>Adsgram Daily Ads (<span id="adsgram-count-today">0</span>/20)</span>
-            <span id="progress-percent">0%</span>
+            <span>Ads Watched Today</span>
+            <span id="progress-percent"><span id="adsbitvex-count-today">0</span></span>
           </div>
-          <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
         </div>
 
         <h2 class="section-title"><i class="fa-solid fa-bolt"></i> Quick Navigation</h2>
@@ -425,7 +402,8 @@
 
       <!-- TASKS VIEW -->
       <div id="tasks-view" class="view">
-        <div class="earn-category-tabs">
+        <div class="earn-category-tabs" id="earn-tabs" style="--active-index: 0;">
+          <div class="tab-pill"></div>
           <button class="category-tab active" id="tab-ads" onclick="switchEarnTab('ads')">Ads</button>
           <button class="category-tab" id="tab-offerwall" onclick="switchEarnTab('offerwall')">Offerwall</button>
           <button class="category-tab" id="tab-survey" onclick="switchEarnTab('survey')">Survey</button>
@@ -435,31 +413,15 @@
         <div id="panel-ads" class="earn-section-panel active">
           <h2 class="section-title"><i class="fa-solid fa-rectangle-ad"></i> Active Ad Modules</h2>
           
-          <div class="task-card" onclick="showMonetagAd1()">
-              <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
-              <div class="task-details"><h3>Monetag Interstitial</h3><p>Watch full-screen high yield ad for +2 HOWL.</p></div>
-              <div class="task-action-meta">
-                <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-              </div>
-          </div>
-
-          <div class="task-card" onclick="showMonetagAd2()">
-              <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
-              <div class="task-details"><h3>Monetag Popup Stream</h3><p>Engage with dynamic stream for +2 HOWL.</p></div>
-              <div class="task-action-meta">
-                <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
-              </div>
-          </div>
-
-          <div class="task-card" id="adsgramCard" onclick="startAdsgramTaskFlow()">
-              <div class="task-icon" style="color: var(--accent); background: rgba(92,122,166,0.12); box-shadow: inset 0 0 0 1px rgba(92,122,166,0.3);"><i class="fa-solid fa-tv"></i></div>
+          <div class="task-card" id="adsbitvexCard" onclick="startAdsBitvexTask()">
+              <div class="task-icon"><i class="fa-solid fa-fire"></i></div>
               <div class="task-details">
-                <h3>Adsgram Rewarded Ad (+25 HOWL)</h3>
-                <p>Daily limit: <span id="adsgram-limit-text">0</span>/20 (5s cooldown)</p>
+                <h3>AdsBitvex Reward Ad (+10 HOWL)</h3>
+                <p>Watched today: <span id="adsbitvex-limit-text">0</span> (5s cooldown)</p>
               </div>
               <div class="task-action-meta">
-                <span id="adsgramCD" class="cooldown-badge">5s</span>
-                <div class="task-arrow" id="adsgramArrow"><i class="fa-solid fa-play"></i></div>
+                <span id="adsbitvexCD" class="cooldown-badge">5s</span>
+                <div class="task-arrow" id="adsbitvexArrow"><i class="fa-solid fa-play"></i></div>
               </div>
           </div>
 
@@ -517,7 +479,8 @@
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
-        <div class="earn-category-tabs">
+        <div class="earn-category-tabs" id="history-tabs" style="--active-index: 0;">
+          <div class="tab-pill"></div>
           <button class="category-tab active" id="history-tab-ads" onclick="switchHistoryTab('ads')">Ads</button>
           <button class="category-tab" id="history-tab-offerwall" onclick="switchHistoryTab('offerwall')">Offerwall</button>
           <button class="category-tab" id="history-tab-survey" onclick="switchHistoryTab('survey')">Survey</button>
@@ -553,20 +516,15 @@
     const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let balance = 0;
-    let adsgramCountToday = 0;
+    let adsbitvexCountToday = 0;
     let lastResetDate = new Date().toDateString();
     let historyLog = [];
     let tgUser = null;
     let currentUserId = 'guest_user';
     const payoutGoal = 25000;
 
-    let adsgramLastRun = 0;
+    let adsbitvexLastRun = 0;
     let telegaLastRun = 0;
-
-    let adsgramController = null;
-    if (typeof Adsgram !== 'undefined') {
-        adsgramController = Adsgram.init({ blockId: "41229" });
-    }
 
     let telegaAds = null;
     if (typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
@@ -774,12 +732,14 @@
         
         document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.querySelector(`.nav-button[onclick="showView('${viewId}')"]`);
-        if(activeBtn) activeBtn.classList.add('active');
+        if (activeBtn) activeBtn.classList.add('active');
         
         if (viewId === 'history-view') {
             loadUserBalanceAndHistory(currentUserId);
         }
     }
+
+    const TAB_ORDER = ['ads', 'offerwall', 'survey'];
 
     function switchEarnTab(tabName) {
         document.querySelectorAll('#tasks-view .category-tab').forEach(tab => tab.classList.remove('active'));
@@ -787,6 +747,8 @@
 
         document.getElementById(`tab-${tabName}`).classList.add('active');
         document.getElementById(`panel-${tabName}`).classList.add('active');
+
+        document.getElementById('earn-tabs').style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
     }
 
     function switchHistoryTab(tabName) {
@@ -795,6 +757,8 @@
 
         document.getElementById(`history-tab-${tabName}`).classList.add('active');
         document.getElementById(`history-panel-${tabName}`).classList.add('active');
+
+        document.getElementById('history-tabs').style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
     }
     
     function loadData() {
@@ -802,21 +766,21 @@
         if (savedData) {
             const data = JSON.parse(savedData);
             balance = data.balance || 0;
-            adsgramCountToday = data.adsgramCountToday || 0;
+            adsbitvexCountToday = data.adsbitvexCountToday || 0;
             lastResetDate = data.lastResetDate || new Date().toDateString();
             historyLog = data.historyLog || [];
         } else {
             // No cache for this specific user_id — start clean. Don't inherit
             // whatever a different account left behind on this device.
             balance = 0;
-            adsgramCountToday = 0;
+            adsbitvexCountToday = 0;
             lastResetDate = new Date().toDateString();
             historyLog = [];
         }
 
         const currentDate = new Date().toDateString();
         if (lastResetDate !== currentDate) {
-            adsgramCountToday = 0;
+            adsbitvexCountToday = 0;
             lastResetDate = currentDate;
             saveData();
         }
@@ -824,13 +788,13 @@
     }
 
     function saveData() {
-        localStorage.setItem(`howlRewardsBotV6_${currentUserId}`, JSON.stringify({ balance, adsgramCountToday, lastResetDate, historyLog }));
+        localStorage.setItem(`howlRewardsBotV6_${currentUserId}`, JSON.stringify({ balance, adsbitvexCountToday, lastResetDate, historyLog }));
         syncBalanceToSupabase(balance);
     }
 
     function checkStoredCooldowns() {
-        const storedAdsgram = localStorage.getItem(`howl_adsgram_cd_${currentUserId}`);
-        if (storedAdsgram) adsgramLastRun = parseInt(storedAdsgram);
+        const storedAdsbitvex = localStorage.getItem(`howl_adsbitvex_cd_${currentUserId}`);
+        if (storedAdsbitvex) adsbitvexLastRun = parseInt(storedAdsbitvex);
 
         const storedTelega = localStorage.getItem(`howl_telega_cd_${currentUserId}`);
         if (storedTelega) telegaLastRun = parseInt(storedTelega);
@@ -839,21 +803,21 @@
     function updateCooldownTimers() {
         const now = Date.now();
 
-        const adsgramDiff = Math.floor((now - adsgramLastRun) / 1000);
-        const adsgramCard = document.getElementById('adsgramCard');
-        const adsgramCD = document.getElementById('adsgramCD');
-        const adsgramArrow = document.getElementById('adsgramArrow');
+        const adsbitvexDiff = Math.floor((now - adsbitvexLastRun) / 1000);
+        const adsbitvexCard = document.getElementById('adsbitvexCard');
+        const adsbitvexCD = document.getElementById('adsbitvexCD');
+        const adsbitvexArrow = document.getElementById('adsbitvexArrow');
 
-        if (adsgramDiff < 5) {
-            const left = 5 - adsgramDiff;
-            adsgramCard.classList.add('cooldown-active');
-            adsgramCD.style.display = 'inline-block';
-            adsgramCD.textContent = `${left}s`;
-            adsgramArrow.style.display = 'none';
+        if (adsbitvexDiff < 5) {
+            const left = 5 - adsbitvexDiff;
+            adsbitvexCard.classList.add('cooldown-active');
+            adsbitvexCD.style.display = 'inline-block';
+            adsbitvexCD.textContent = `${left}s`;
+            adsbitvexArrow.style.display = 'none';
         } else {
-            adsgramCard.classList.remove('cooldown-active');
-            adsgramCD.style.display = 'none';
-            adsgramArrow.style.display = 'flex';
+            adsbitvexCard.classList.remove('cooldown-active');
+            adsbitvexCD.style.display = 'none';
+            adsbitvexArrow.style.display = 'flex';
         }
 
         const telegaDiff = Math.floor((now - telegaLastRun) / 1000);
@@ -884,14 +848,11 @@
         document.getElementById('usd-value').textContent = usdValue;
         document.getElementById('usd-balance2').textContent = usdValue;
 
-        document.getElementById('adsgram-count-today').textContent = adsgramCountToday;
-        document.getElementById('adsgram-limit-text').textContent = adsgramCountToday;
-        
-        const progressPercent = Math.min(100, (adsgramCountToday / 20) * 100);
-        document.getElementById('progress-percent').textContent = `${progressPercent.toFixed(0)}%`;
+        const countEl = document.getElementById('adsbitvex-count-today');
+        if (countEl) countEl.textContent = adsbitvexCountToday;
 
-        const progressFill = document.getElementById('progress-fill');
-        if (progressFill) progressFill.style.width = `${progressPercent}%`;
+        const limitTextEl = document.getElementById('adsbitvex-limit-text');
+        if (limitTextEl) limitTextEl.textContent = adsbitvexCountToday;
     }
     
     function loadTelegramUser() {
@@ -1007,47 +968,15 @@
         }
     }
 
-    function showMonetagAd1() {
-        if (typeof show_9954272 !== 'function') {
-            return alert('Ad provider is initializing. Please wait a moment.');
-        }
-        show_9954272().then(() => {
-            grantReward(2, 'Monetag Interstitial', 'ads');
-            alert('🎉 Success! Earned +2 HOWL.');
-        }).catch(() => {
-            alert('Ad closed or currently unavailable.');
-        });
-    }
-
-    function showMonetagAd2() {
-        if (typeof show_9954272 !== 'function') {
-            return alert('Ad provider is initializing. Please wait a moment.');
-        }
-        show_9954272('pop').then(() => {
-            grantReward(2, 'Monetag Popup Stream', 'ads');
-            alert('🎉 Success! Earned +2 HOWL.');
-        }).catch(() => {
-            alert('Popup ad unavailable right now.');
-        });
-    }
-
-    function startAdsgramTaskFlow() {
-        if (adsgramCountToday >= 20) {
-            return alert('🚫 Daily Adsgram limit reached (20/20 ads completed). Come back tomorrow!');
-        }
-
+    function startAdsBitvexTask() {
         const now = Date.now();
-        if (now - adsgramLastRun < 5000) {
-            const left = Math.ceil((5000 - (now - adsgramLastRun)) / 1000);
-            return alert(`⏳ Cooldown active! Please wait ${left}s before launching the next Adsgram ad.`);
+        if (now - adsbitvexLastRun < 5000) {
+            const left = Math.ceil((5000 - (now - adsbitvexLastRun)) / 1000);
+            return alert(`⏳ Cooldown active! Please wait ${left}s before launching the next AdsBitvex ad.`);
         }
 
-        if (!adsgramController) {
-            if (typeof Adsgram !== 'undefined') {
-                adsgramController = Adsgram.init({ blockId: "41229" });
-            } else {
-                return alert('Adsgram SDK not loaded properly.');
-            }
+        if (typeof window.showadsbitvex !== 'function') {
+            return alert('AdsBitvex SDK not loaded properly.');
         }
 
         let redirectDetected = false;
@@ -1057,44 +986,38 @@
         window.addEventListener('blur', blurHandler);
         document.addEventListener('visibilitychange', visibilityHandler);
 
-        adsgramController.show().then((result) => {
+        window.showadsbitvex().then(() => {
             window.removeEventListener('blur', blurHandler);
             document.removeEventListener('visibilitychange', visibilityHandler);
 
-            adsgramLastRun = Date.now();
-            localStorage.setItem(`howl_adsgram_cd_${currentUserId}`, adsgramLastRun.toString());
+            adsbitvexLastRun = Date.now();
+            localStorage.setItem(`howl_adsbitvex_cd_${currentUserId}`, adsbitvexLastRun.toString());
 
-            if (!result || result.error) {
+            if (!redirectDetected) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
-                return alert('❌ Ad was skipped or failed. Please watch fully.');
+                return alert('⚠️ No redirect detected. Please tap on the ad to claim your reward.');
             }
 
-            if (redirectDetected) {
-                adsgramCountToday += 1;
-                if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                }
-                grantReward(25, 'Adsgram Network', 'ads');
-                alert(`🎉 Redirect confirmed! +25 HOWL credited (${adsgramCountToday}/20).`);
-            } else {
-                if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                    Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-                }
-                alert('⚠️ No redirect detected. Please tap on join now inside the ad.');
+            adsbitvexCountToday += 1;
+            if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
-        }).catch(() => {
+            grantReward(10, 'AdsBitvex Network', 'ads');
+            alert(`🎉 Ad watched! +10 HOWL credited (${adsbitvexCountToday} today).`);
+        }).catch((e) => {
             window.removeEventListener('blur', blurHandler);
             document.removeEventListener('visibilitychange', visibilityHandler);
 
-            adsgramLastRun = Date.now();
-            localStorage.setItem(`howl_adsgram_cd_${currentUserId}`, adsgramLastRun.toString());
+            adsbitvexLastRun = Date.now();
+            localStorage.setItem(`howl_adsbitvex_cd_${currentUserId}`, adsbitvexLastRun.toString());
 
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-            alert('⚠️ Ad closed early.');
+            console.error('AdsBitvex ad error:', e);
+            alert('⚠️ Ad closed early or failed to load.');
         });
     }
 

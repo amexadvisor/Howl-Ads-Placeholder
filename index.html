@@ -9,25 +9,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Interstitial Ad Tag Load (On-Demand Button Trigger) -->
-  <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
-  <script>
-(function(fmno){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = fmno || {};
-s.src = "\/\/expensive-pollution.com\/cvDh9C6fb.2j5\/lxS\/WSQ\/9HNWz_M\/xNMfjpI\/yzMZSg0U3oMrzDEgyEMtjUIx1l";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-  </script>
-
   <!-- AdsBitvex SDK Load -->
   <script src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281"></script>
   <!-- Telega.io SDK Load -->
   <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
+  <!-- TADS SDK Load -->
+  <script src="https://tads.me/sdk/tads.js"></script>
   <!-- Supabase JS Client UMD -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -425,16 +412,16 @@ l.parentNode.insertBefore(s, l);
               </div>
           </div>
 
-          <!-- Interstitial Ad Button -->
-          <div class="task-card" id="interstitialCard" onclick="startInterstitialTask()">
-              <div class="task-icon" style="color: var(--purple); background: var(--purple-soft);"><i class="fa-solid fa-layer-group"></i></div>
+          <!-- TADS CPC Ad Button -->
+          <div class="task-card" id="tadsCard" onclick="startTadsTask()">
+              <div class="task-icon" style="color: #3b82f6; background: rgba(59, 130, 246, 0.12);"><i class="fa-solid fa-bullseye"></i></div>
               <div class="task-details">
-                <h3>Direct Interstitial Ad (+15 HOWL)</h3>
-                <p>Fast fullscreen ad view (15s cooldown)</p>
+                <h3>TADS Interactive Ad (+20 HOWL)</h3>
+                <p>Tap & interact with ad (dynamic delay)</p>
               </div>
               <div class="task-action-meta">
-                <span id="interstitialCD" class="cooldown-badge">15s</span>
-                <div class="task-arrow" id="interstitialArrow"><i class="fa-solid fa-play"></i></div>
+                <span id="tadsCD" class="cooldown-badge">8s</span>
+                <div class="task-arrow" id="tadsArrow"><i class="fa-solid fa-play"></i></div>
               </div>
           </div>
         </div>
@@ -523,7 +510,9 @@ l.parentNode.insertBefore(s, l);
 
     let adsbitvexLastRun = 0;
     let telegaLastRun = 0;
-    let interstitialLastRun = 0;
+    let tadsLastRun = 0;
+    let tadsCurrentCooldown = 5000;
+    let tadsController = null;
 
     let telegaAds = null;
     if (typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
@@ -532,8 +521,35 @@ l.parentNode.insertBefore(s, l);
         });
     }
 
+    function getRandomTadsCooldown() {
+        return Math.floor(Math.random() * (8000 - 3000 + 1)) + 3000;
+    }
+
+    function initTadsSDK() {
+        if (!window.tads) {
+            console.warn("TADS SDK not loaded yet.");
+            return;
+        }
+
+        tadsController = window.tads.init({
+            widgetId: 11470,
+            type: 'static',
+            debug: false,
+            onClickReward: (adId) => {
+                console.log('Reward verified for clicked ad:', adId);
+                grantReward(20, 'TADS CPC Task', 'ads');
+                alert("🎉 Ad interacted! +20 HOWL credited.");
+            },
+            onAdsNotFound: () => {
+                console.log('No ads available currently.');
+                alert('No ads available at this moment. Please check back shortly.');
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
+        initTadsSDK();
         setInterval(updateCooldownTimers, 1000);
         
         let percentTracker = 0;
@@ -760,8 +776,11 @@ l.parentNode.insertBefore(s, l);
         const storedTelega = localStorage.getItem(`howl_telega_cd_${currentUserId}`);
         if (storedTelega) telegaLastRun = parseInt(storedTelega);
 
-        const storedInterstitial = localStorage.getItem(`howl_interstitial_cd_${currentUserId}`);
-        if (storedInterstitial) interstitialLastRun = parseInt(storedInterstitial);
+        const storedTads = localStorage.getItem(`howl_tads_cd_${currentUserId}`);
+        if (storedTads) tadsLastRun = parseInt(storedTads);
+
+        const storedTadsDuration = localStorage.getItem(`howl_tads_duration_${currentUserId}`);
+        if (storedTadsDuration) tadsCurrentCooldown = parseInt(storedTadsDuration);
     }
 
     function updateCooldownTimers() {
@@ -805,22 +824,24 @@ l.parentNode.insertBefore(s, l);
             telegaArrow.style.display = 'flex';
         }
 
-        // Interstitial timer
-        const interstitialDiff = Math.floor((now - interstitialLastRun) / 1000);
-        const interstitialCard = document.getElementById('interstitialCard');
-        const interstitialCD = document.getElementById('interstitialCD');
-        const interstitialArrow = document.getElementById('interstitialArrow');
+        // TADS dynamic timer
+        const tadsCard = document.getElementById('tadsCard');
+        const tadsCD = document.getElementById('tadsCD');
+        const tadsArrow = document.getElementById('tadsArrow');
 
-        if (interstitialDiff < 15) {
-            const left = 15 - interstitialDiff;
-            interstitialCard.classList.add('cooldown-active');
-            interstitialCD.style.display = 'inline-block';
-            interstitialCD.textContent = `${left}s`;
-            interstitialArrow.style.display = 'none';
-        } else {
-            interstitialCard.classList.remove('cooldown-active');
-            interstitialCD.style.display = 'none';
-            interstitialArrow.style.display = 'flex';
+        if (tadsCard && tadsCD && tadsArrow) {
+            const tadsElapsed = now - tadsLastRun;
+            if (tadsElapsed < tadsCurrentCooldown) {
+                const leftSecs = Math.ceil((tadsCurrentCooldown - tadsElapsed) / 1000);
+                tadsCard.classList.add('cooldown-active');
+                tadsCD.style.display = 'inline-block';
+                tadsCD.textContent = `${leftSecs}s`;
+                tadsArrow.style.display = 'none';
+            } else {
+                tadsCard.classList.remove('cooldown-active');
+                tadsCD.style.display = 'none';
+                tadsArrow.style.display = 'flex';
+            }
         }
     }
 
@@ -1040,35 +1061,37 @@ l.parentNode.insertBefore(s, l);
         }
     }
 
-    function startInterstitialTask() {
+    function startTadsTask() {
         const now = Date.now();
-        if (now - interstitialLastRun < 15000) {
-            const left = Math.ceil((15000 - (now - interstitialLastRun)) / 1000);
-            return alert(`⏳ Please wait ${left}s before watching another interstitial.`);
+        const elapsed = now - tadsLastRun;
+
+        if (elapsed < tadsCurrentCooldown) {
+            const leftSecs = Math.ceil((tadsCurrentCooldown - elapsed) / 1000);
+            return alert(`⏳ Please wait ${leftSecs}s before opening another ad.`);
         }
 
-        if (typeof window.aclib === 'undefined' || typeof window.aclib.runInterstitial !== 'function') {
-            return alert('Interstitial ad engine is initializing. Please retry in a moment.');
+        if (!tadsController) {
+            initTadsSDK();
         }
 
-        try {
-            if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-            }
+        if (!tadsController) {
+            return alert("TADS is initializing. Please try again in a moment.");
+        }
 
-            window.aclib.runInterstitial({
-                zoneId: '11952938'
+        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+
+        tadsLastRun = Date.now();
+        tadsCurrentCooldown = getRandomTadsCooldown();
+        localStorage.setItem(`howl_tads_cd_${currentUserId}`, tadsLastRun.toString());
+        localStorage.setItem(`howl_tads_duration_${currentUserId}`, tadsCurrentCooldown.toString());
+
+        tadsController.loadAd()
+            .then(() => tadsController.showAd())
+            .catch((err) => {
+                console.error("TADS Ad load error:", err);
             });
-
-            interstitialLastRun = Date.now();
-            localStorage.setItem(`howl_interstitial_cd_${currentUserId}`, interstitialLastRun.toString());
-
-            grantReward(15, 'Interstitial Network', 'ads');
-            alert('🎉 Interstitial launched! +15 HOWL credited.');
-        } catch (err) {
-            console.error('Interstitial display error:', err);
-            alert('Failed to load interstitial ad.');
-        }
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {

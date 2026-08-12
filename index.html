@@ -13,8 +13,8 @@
   <script src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281"></script>
   <!-- Telega.io SDK Load -->
   <script src="https://inapp.telega.io/sdk/v1/sdk.js"></script>
-  <!-- TADS SDK Load -->
-  <script src="https://tads.me/sdk/tads.js"></script>
+  <!-- TADS Official SDK CDN -->
+  <script src="https://sdk.tads.me/tads.js"></script>
   <!-- Supabase JS Client UMD -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -525,36 +525,77 @@
         return Math.floor(Math.random() * (8000 - 3000 + 1)) + 3000;
     }
 
+    function getTadsApi() {
+        return window.tads || window.Tads || window.TADS || null;
+    }
+
+    function ensureTadsScript() {
+        if (getTadsApi()) return Promise.resolve(getTadsApi());
+        return new Promise((resolve) => {
+            const existingScript = document.querySelector('script[src*="tads"]');
+            if (existingScript) existingScript.remove();
+
+            const script = document.createElement('script');
+            script.src = 'https://sdk.tads.me/tads.js';
+            script.async = true;
+            script.onload = () => resolve(getTadsApi());
+            script.onerror = () => {
+                const fallback = document.createElement('script');
+                fallback.src = 'https://tads.me/sdk/tads.js';
+                fallback.async = true;
+                fallback.onload = () => resolve(getTadsApi());
+                fallback.onerror = () => resolve(null);
+                document.head.appendChild(fallback);
+            };
+            document.head.appendChild(script);
+        });
+    }
+
     function initTadsSDK() {
-        if (typeof window.tads === 'undefined') {
-            console.warn("TADS SDK not yet loaded.");
-            return null;
-        }
+        const api = getTadsApi();
+        if (!api) return null;
 
         try {
-            tadsController = window.tads.init({
-                widgetId: 11470,
-                type: 'static',
-                debug: false,
-                onClickReward: (adId) => {
-                    console.log('Reward verified for clicked ad:', adId);
-                    grantReward(20, 'TADS Interactive Task', 'ads');
-                    alert("🎉 Ad interacted! +20 HOWL credited.");
-                },
-                onAdsNotFound: () => {
-                    alert('No ads available at this moment. Please check back shortly.');
-                }
-            });
+            if (typeof api.init === 'function') {
+                tadsController = api.init({
+                    widgetId: 11470,
+                    type: 'static',
+                    debug: false,
+                    onClickReward: (adId) => {
+                        console.log('Reward verified for clicked ad:', adId);
+                        grantReward(20, 'TADS Interactive Task', 'ads');
+                        alert("🎉 Ad interacted! +20 HOWL credited.");
+                    },
+                    onAdsNotFound: () => {
+                        alert('No ads available at this moment. Please check back shortly.');
+                    }
+                });
+            } else if (typeof api === 'function') {
+                tadsController = new api({
+                    widgetId: 11470,
+                    type: 'static',
+                    debug: false,
+                    onClickReward: (adId) => {
+                        grantReward(20, 'TADS Interactive Task', 'ads');
+                        alert("🎉 Ad interacted! +20 HOWL credited.");
+                    },
+                    onAdsNotFound: () => {
+                        alert('No ads available at this moment. Please check back shortly.');
+                    }
+                });
+            } else {
+                tadsController = api;
+            }
             return tadsController;
         } catch (e) {
-            console.error("Error initializing TADS:", e);
+            console.error("TADS Init Exception:", e);
             return null;
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
-        initTadsSDK();
+        ensureTadsScript().then(() => initTadsSDK());
         setInterval(updateCooldownTimers, 1000);
         
         let percentTracker = 0;
@@ -1075,21 +1116,33 @@
             return alert(`⏳ Please wait ${leftSecs}s before opening another ad.`);
         }
 
+        await ensureTadsScript();
+
         if (!tadsController) {
             tadsController = initTadsSDK();
         }
 
         if (!tadsController) {
-            let attempts = 0;
-            while (typeof window.tads === 'undefined' && attempts < 15) {
-                await new Promise((res) => setTimeout(res, 100));
-                attempts++;
+            const api = getTadsApi();
+            if (api && typeof api.show === 'function') {
+                try {
+                    await api.show({
+                        widgetId: 11470,
+                        onClickReward: () => {
+                            grantReward(20, 'TADS Interactive Task', 'ads');
+                            alert("🎉 Ad interacted! +20 HOWL credited.");
+                        }
+                    });
+                    tadsLastRun = Date.now();
+                    tadsCurrentCooldown = getRandomTadsCooldown();
+                    localStorage.setItem(`howl_tads_cd_${currentUserId}`, tadsLastRun.toString());
+                    localStorage.setItem(`howl_tads_duration_${currentUserId}`, tadsCurrentCooldown.toString());
+                    return;
+                } catch (e) {
+                    console.error("Direct show error:", e);
+                }
             }
-            tadsController = initTadsSDK();
-        }
-
-        if (!tadsController) {
-            return alert("⚠️ TADS Network is initializing or ad blocker is active. Please try again in 5 seconds.");
+            return alert("⚠️ TADS Network could not load. Please disable ad-blockers / DNS filters and refresh.");
         }
 
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
@@ -1102,8 +1155,14 @@
         localStorage.setItem(`howl_tads_duration_${currentUserId}`, tadsCurrentCooldown.toString());
 
         try {
-            await tadsController.loadAd();
-            await tadsController.showAd();
+            if (typeof tadsController.loadAd === 'function') {
+                await tadsController.loadAd();
+            }
+            if (typeof tadsController.showAd === 'function') {
+                await tadsController.showAd();
+            } else if (typeof tadsController.show === 'function') {
+                await tadsController.show();
+            }
         } catch (err) {
             console.error("TADS Ad load/show error:", err);
             alert("⚠️ Ad inventory currently unavailable or loading failed.");

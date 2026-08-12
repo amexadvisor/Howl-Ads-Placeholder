@@ -729,7 +729,7 @@
 
             if (!response.ok) {
                 const errBody = await response.text();
-                console.error('[BALANCE] Reward endpoint returned an error:', errBody);
+                console.error(`[BALANCE] Reward endpoint returned HTTP ${response.status}:`, errBody);
                 return null;
             }
 
@@ -737,7 +737,7 @@
             console.log(`[BALANCE] +${rewardAmount} applied. Server balance now ${result.balance}.`);
             return result.balance;
         } catch (err) {
-            console.error('[BALANCE] Exception while updating balance in Supabase:', err);
+            console.error('[BALANCE] Network exception calling reward endpoint (likely not deployed, or wrong URL):', err);
             return null;
         }
     }
@@ -844,11 +844,11 @@
         const adsbitvexCD = document.getElementById('adsbitvexCD');
         const adsbitvexArrow = document.getElementById('adsbitvexArrow');
 
-        if (adsbitvexDiff < 5) {
-            const left = 5 - adsbitvexDiff;
+        if (adsbitvexInFlight || adsbitvexDiff < 5) {
+            const left = Math.max(0, 5 - adsbitvexDiff);
             adsbitvexCard.classList.add('cooldown-active');
             adsbitvexCD.style.display = 'inline-block';
-            adsbitvexCD.textContent = `${left}s`;
+            adsbitvexCD.textContent = adsbitvexInFlight ? '…' : `${left}s`;
             adsbitvexArrow.style.display = 'none';
         } else {
             adsbitvexCard.classList.remove('cooldown-active');
@@ -999,10 +999,14 @@
         if (confirmedBalance !== null) {
             balance = confirmedBalance;
         } else {
-            // Supabase write failed (offline, RLS, etc.) — fall back to an
-            // optimistic local increment so the UI isn't stuck stale. saveData()
-            // below will retry syncing this value to Supabase.
+            // Supabase write failed — fall back to an optimistic local increment
+            // so the UI isn't stuck stale, but make this loud rather than silent:
+            // this local value WILL be overwritten by the real (unchanged) server
+            // balance the next time history/balance is re-fetched, which is
+            // exactly the "adds then reverts" symptom. Surface it immediately.
             balance += amount;
+            console.error('[BALANCE] Server sync failed — this reward is LOCAL ONLY and will revert on next refresh.');
+            alert('⚠️ Reward shown locally, but saving it to the server failed. It will revert on refresh — check the console / server logs.');
         }
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
@@ -1012,7 +1016,15 @@
         }
     }
 
+    let adsbitvexInFlight = false;
+
     function startAdsBitvexTask() {
+        if (adsbitvexInFlight) {
+            // An ad is already showing/processing from a previous tap — ignore
+            // this one rather than letting a second reward slip through.
+            return;
+        }
+
         const now = Date.now();
         if (now - adsbitvexLastRun < 5000) {
             const left = Math.ceil((5000 - (now - adsbitvexLastRun)) / 1000);
@@ -1022,6 +1034,10 @@
         if (typeof window.showadsbitvex !== 'function') {
             return alert('AdsBitvex SDK not loaded properly.');
         }
+
+        adsbitvexInFlight = true;
+        const adsbitvexCardEl = document.getElementById('adsbitvexCard');
+        if (adsbitvexCardEl) adsbitvexCardEl.classList.add('cooldown-active');
 
         let redirectDetected = false;
         const blurHandler = () => { redirectDetected = true; };
@@ -1036,6 +1052,7 @@
 
             adsbitvexLastRun = Date.now();
             localStorage.setItem(`howl_adsbitvex_cd_${currentUserId}`, adsbitvexLastRun.toString());
+            adsbitvexInFlight = false;
 
             if (!redirectDetected) {
                 if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
@@ -1056,6 +1073,7 @@
 
             adsbitvexLastRun = Date.now();
             localStorage.setItem(`howl_adsbitvex_cd_${currentUserId}`, adsbitvexLastRun.toString());
+            adsbitvexInFlight = false;
 
             if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');

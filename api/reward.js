@@ -8,7 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 // Both need this because the browser's Supabase client only ever has the
 // public/anon key, and Row Level Security is blocking writes to `users` from
 // that key. This endpoint runs server-side with the SERVICE ROLE key, which
-// bypasses RLS — the only reliable place to actually write a balance.
+// bypasses RLS â€” the only reliable place to actually write a balance.
 //
 // Deploy at: /api/reward  (works fine as the PubScale postback target too)
 //
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
 
   try {
     if (mode === 'set') {
-      // Absolute set — used for withdrawals (balance already deducted
+      // Absolute set â€” used for withdrawals (balance already deducted
       // client-side) and general local->server syncs.
       const newBalance = Math.round(parseFloat(balance));
       if (isNaN(newBalance) || newBalance < 0) {
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       const { error: upsertError } = await supabase
         .from('users')
         .upsert(
-          { user_id: formattedUserId, balance: newBalance, updated_at: new Date().toISOString() },
+          { user_id: formattedUserId, balance: newBalance },
           { onConflict: 'user_id' }
         );
 
@@ -68,7 +68,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, balance: newBalance });
     }
 
-    // Default: increment mode — used for ad rewards and PubScale's postback.
+    // Default: increment mode â€” used for ad rewards and PubScale's postback.
     const rewardAmount = Math.round(parseFloat(value));
     if (isNaN(rewardAmount) || rewardAmount <= 0) {
       return res.status(400).json({ error: 'Invalid reward amount' });
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
     const { error: upsertError } = await supabase
       .from('users')
       .upsert(
-        { user_id: formattedUserId, balance: newBalance, updated_at: new Date().toISOString() },
+        { user_id: formattedUserId, balance: newBalance },
         { onConflict: 'user_id' }
       );
 
@@ -106,4 +106,4 @@ export default async function handler(req, res) {
     console.error('Execution Exception:', error.message || error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+                                 }

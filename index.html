@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="adsbitvex-verify" content="RY6ubs5GoaPfbWBL72HrQhL3">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <meta name="monetag" content="67ef6bfd7f6fc61b2655ef81898058b9"/>
@@ -9,6 +8,14 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Popunder Ad Tag Load -->
+  <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
+  <script type="text/javascript">
+      aclib.runPop({
+          zoneId: '11952802',
+      });
+  </script>
+
   <!-- AdsBitvex SDK Load -->
   <script src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281"></script>
   <!-- Telega.io SDK Load -->
@@ -551,7 +558,6 @@
             if (barEl) barEl.style.width = `${percentTracker}%`;
 
             if (percentTracker >= 100) {
-                // Hold briefly at 100% so it visibly registers, then reveal the dashboard.
                 setTimeout(() => {
                     if (splashEl) splashEl.classList.add('fade-out');
                 }, 350);
@@ -636,8 +642,6 @@
 
             if (userError) {
                 console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
-                // No row yet for this user_id — this is a brand new user, not a
-                // shared-data bug. Reset instead of leaving a stale in-memory value.
                 balance = 0;
                 updateDisplay();
             } else if (userData && typeof userData.balance === 'number') {
@@ -697,13 +701,6 @@
         }
     }
 
-    // REWARD_ENDPOINT_URL: point this at wherever you deploy api-reward.js
-    // (e.g. Vercel gives you https://yourapp.vercel.app/api/reward).
-    // The browser's Supabase client only ever has the public/anon key, and
-    // Row Level Security is blocking writes to `users` from that key — so
-    // balance updates now go through this server endpoint (service role key,
-    // bypasses RLS) instead of calling supabaseClient.from('users').upsert()
-    // directly from the browser.
     const REWARD_ENDPOINT_URL = '/api/reward';
 
     async function syncBalanceToSupabase(newBalance) {
@@ -719,9 +716,6 @@
         }
     }
 
-    // Calls the server-side reward endpoint (service role key, bypasses RLS)
-    // to atomically add rewardAmount to this user's balance in Supabase, and
-    // returns the confirmed new balance so the client never has to guess.
     async function addRewardToSupabase(rewardAmount) {
         try {
             const response = await fetch(
@@ -807,8 +801,6 @@
             lastResetDate = data.lastResetDate || new Date().toDateString();
             historyLog = data.historyLog || [];
         } else {
-            // No cache for this specific user_id — start clean. Don't inherit
-            // whatever a different account left behind on this device.
             balance = 0;
             adsbitvexCountToday = 0;
             lastResetDate = new Date().toDateString();
@@ -1000,11 +992,6 @@
         if (confirmedBalance !== null) {
             balance = confirmedBalance;
         } else {
-            // Supabase write failed — fall back to an optimistic local increment
-            // so the UI isn't stuck stale, but make this loud rather than silent:
-            // this local value WILL be overwritten by the real (unchanged) server
-            // balance the next time history/balance is re-fetched, which is
-            // exactly the "adds then reverts" symptom. Surface it immediately.
             balance += amount;
             console.error('[BALANCE] Server sync failed — this reward is LOCAL ONLY and will revert on next refresh.');
             alert('⚠️ Reward shown locally, but saving it to the server failed. It will revert on refresh — check the console / server logs.');
@@ -1021,8 +1008,6 @@
 
     function startAdsBitvexTask() {
         if (adsbitvexInFlight) {
-            // An ad is already showing/processing from a previous tap — ignore
-            // this one rather than letting a second reward slip through.
             return;
         }
 

@@ -8,13 +8,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Popunder Ad Tag Load -->
+  <!-- Interstitial Ad Tag Load (On-Demand Button Trigger) -->
   <script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
-  <script type="text/javascript">
-      aclib.runPop({
-          zoneId: '11952802',
-      });
-  </script>
 
   <!-- AdsBitvex SDK Load -->
   <script src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000281"></script>
@@ -35,6 +30,8 @@
       --mint-glow: rgba(52, 211, 153, 0.28);
       --amber: #f5b942;
       --amber-soft: rgba(245, 185, 66, 0.12);
+      --purple: #a855f7;
+      --purple-soft: rgba(168, 85, 247, 0.12);
       --text: #f5f7f8;
       --text-muted: #8b959a;
     }
@@ -72,8 +69,6 @@
     .howl-rings .r2 { animation-delay: 0.87s; }
     .howl-rings .r3 { animation-delay: 1.74s; }
     @keyframes sonar { 0% { width: 88px; height: 88px; opacity: 0.5; } 100% { width: 320px; height: 320px; opacity: 0; } }
-
-    .howl-embers { display: none; }
 
     .splash-logo-container {
       position: relative; width: 88px; height: 88px; display: flex; align-items: center; justify-content: center;
@@ -120,7 +115,6 @@
 
     .live-dashboard-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
     .live-grid { position: absolute; top: -10%; left: 0; width: 100%; height: 240px; background: radial-gradient(ellipse at 50% 0%, var(--mint-soft) 0%, transparent 70%); }
-    .ambient-glow { display: none; }
 
     main { flex-grow: 1; overflow-y: auto; padding: 18px; padding-bottom: 100px; z-index: 1; position: relative; }
     main::-webkit-scrollbar { width: 3px; }
@@ -132,12 +126,6 @@
     @keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes carveIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     .view.active > * { animation: riseIn 0.45s cubic-bezier(0.16,1,0.3,1) both; }
-    .view.active > *:nth-child(1) { animation-delay: 0.02s; }
-    .view.active > *:nth-child(2) { animation-delay: 0.08s; }
-    .view.active > *:nth-child(3) { animation-delay: 0.14s; }
-    .view.active > *:nth-child(4) { animation-delay: 0.2s; }
-    .view.active > *:nth-child(5) { animation-delay: 0.26s; }
-    .view.active > *:nth-child(6) { animation-delay: 0.32s; }
 
     /* ============ Tabs ============ */
     .earn-category-tabs {
@@ -161,10 +149,6 @@
     .earn-section-panel { display: none; }
     .earn-section-panel.active { display: block; }
     .earn-section-panel.active > * { animation: riseIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-    .earn-section-panel.active > *:nth-child(1) { animation-delay: 0.02s; }
-    .earn-section-panel.active > *:nth-child(2) { animation-delay: 0.07s; }
-    .earn-section-panel.active .task-card:nth-child(3) { animation-delay: 0.12s; }
-    .earn-section-panel.active .task-card:nth-child(4) { animation-delay: 0.17s; }
 
     .offerwall-iframe-container {
       width: calc(100% + 36px); margin-left: -18px; height: 480px; background: var(--card);
@@ -217,8 +201,6 @@
     .progress-section { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 18px; border: 1px solid var(--hairline); }
     .progress-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); }
     .progress-info span:last-child { color: var(--mint); }
-    .progress-track { width: 100%; height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
-    .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--mint-dim), var(--mint)); border-radius: 3px; transition: width 0.4s ease; }
 
     .section-title { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--text); display: flex; align-items: center; gap: 8px; }
     .section-title i { color: var(--mint); font-size: 13px; }
@@ -265,12 +247,6 @@
       border-radius: 14px; margin-bottom: 8px; border: 1px solid var(--hairline);
       animation: riseIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
     }
-    #history-list-ads .list-item:nth-child(1), #history-list-offerwall .list-item:nth-child(1), #history-list-survey .list-item:nth-child(1) { animation-delay: 0.02s; }
-    #history-list-ads .list-item:nth-child(2), #history-list-offerwall .list-item:nth-child(2), #history-list-survey .list-item:nth-child(2) { animation-delay: 0.07s; }
-    #history-list-ads .list-item:nth-child(3), #history-list-offerwall .list-item:nth-child(3), #history-list-survey .list-item:nth-child(3) { animation-delay: 0.12s; }
-    #history-list-ads .list-item:nth-child(4), #history-list-offerwall .list-item:nth-child(4), #history-list-survey .list-item:nth-child(4) { animation-delay: 0.17s; }
-    #history-list-ads .list-item:nth-child(n+5), #history-list-offerwall .list-item:nth-child(n+5), #history-list-survey .list-item:nth-child(n+5) { animation-delay: 0.2s; }
-
     .list-item .history-icon { width: 36px; height: 36px; border-radius: 11px; background: var(--card-alt); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 14px; color: var(--mint); flex-shrink: 0; }
     .list-item .info { flex-grow: 1; }
     .list-item .info .name { font-weight: 700; font-size: 13px; color: var(--text); }
@@ -292,10 +268,8 @@
     .nav-button:hover { color: var(--text); }
     .nav-button:active { transform: scale(0.95); }
     .nav-button.active { color: var(--mint); }
-    @keyframes iconPop { 0% { transform: scale(1); } 45% { transform: scale(1.25); } 100% { transform: scale(1); } }
-    .nav-button.active .icon { animation: iconPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
 
-    /* ============ Buttons ============ */
+    /* ============ Buttons & Forms ============ */
     .btn {
       display: block; width: 100%; margin: 10px auto; padding: 16px; font-size: 14px; font-weight: 800;
       background: linear-gradient(135deg, var(--mint), var(--mint-dim));
@@ -319,24 +293,17 @@
     #withdraw h3 { font-size: 16px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
     #withdraw p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
     #withdraw p strong { color: var(--mint); }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-    }
   </style>
   
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
-  <!-- Ultimate Tech Opening Splash Screen Animation -->
+  <!-- Opening Splash Screen -->
   <div id="splash-screen">
     <div class="howl-glow"></div>
     <div class="howl-rings">
       <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
-    </div>
-    <div class="howl-embers">
-      <span></span><span></span><span></span><span></span><span></span><span></span>
     </div>
 
     <div class="splash-logo-container">
@@ -359,8 +326,6 @@
   <div class="container">
     <div class="live-dashboard-bg">
       <div class="live-grid"></div>
-      <div class="ambient-glow orb-1"></div>
-      <div class="ambient-glow orb-2"></div>
     </div>
 
     <main id="main-content">
@@ -402,7 +367,7 @@
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
         <div class="task-card" onclick="showView('withdraw')">
-            <div class="task-icon" style="color: var(--accent); background: rgba(92,122,166,0.12); box-shadow: inset 0 0 0 1px rgba(92,122,166,0.3);"><i class="fa-solid fa-wallet"></i></div>
+            <div class="task-icon" style="color: #5c7aa6; background: rgba(92,122,166,0.12);"><i class="fa-solid fa-wallet"></i></div>
             <div class="task-details"><h3>Secure Withdrawal</h3><p>Transfer accumulated HOWL to your wallet.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
@@ -421,6 +386,7 @@
         <div id="panel-ads" class="earn-section-panel active">
           <h2 class="section-title"><i class="fa-solid fa-rectangle-ad"></i> Active Ad Modules</h2>
           
+          <!-- AdsBitvex Button -->
           <div class="task-card" id="adsbitvexCard" onclick="startAdsBitvexTask()">
               <div class="task-icon"><i class="fa-solid fa-fire"></i></div>
               <div class="task-details">
@@ -433,8 +399,9 @@
               </div>
           </div>
 
+          <!-- Telega Button -->
           <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 50, 'telegaBtn1')">
-              <div class="task-icon" style="color: #b8794f; background: rgba(184,121,79,0.12); box-shadow: inset 0 0 0 1px rgba(184,121,79,0.3);"><i class="fa-solid fa-bullhorn"></i></div>
+              <div class="task-icon" style="color: #b8794f; background: rgba(184,121,79,0.12);"><i class="fa-solid fa-bullhorn"></i></div>
               <div class="task-details">
                 <h3>Telega Pro Ad (+50 HOWL)</h3>
                 <p>Unlimited high-tier reward (5m cooldown)</p>
@@ -442,6 +409,19 @@
               <div class="task-action-meta">
                 <span id="telegaBtn1CD" class="cooldown-badge">5:00</span>
                 <div class="task-arrow" id="telegaBtn1Arrow"><i class="fa-solid fa-play"></i></div>
+              </div>
+          </div>
+
+          <!-- Interstitial Ad Button -->
+          <div class="task-card" id="interstitialCard" onclick="startInterstitialTask()">
+              <div class="task-icon" style="color: var(--purple); background: var(--purple-soft);"><i class="fa-solid fa-layer-group"></i></div>
+              <div class="task-details">
+                <h3>Direct Interstitial Ad (+15 HOWL)</h3>
+                <p>Fast fullscreen ad view (15s cooldown)</p>
+              </div>
+              <div class="task-action-meta">
+                <span id="interstitialCD" class="cooldown-badge">15s</span>
+                <div class="task-arrow" id="interstitialArrow"><i class="fa-solid fa-play"></i></div>
               </div>
           </div>
         </div>
@@ -457,9 +437,8 @@
         <!-- SURVEY PANEL -->
         <div id="panel-survey" class="earn-section-panel">
           <h2 class="section-title"><i class="fa-solid fa-clipboard-question"></i> Market Surveys</h2>
-          
           <div class="task-card" onclick="alert('Survey modules will load available forms soon.')">
-              <div class="task-icon" style="color: var(--accent); background: rgba(92,122,166,0.12); box-shadow: inset 0 0 0 1px rgba(92,122,166,0.3);"><i class="fa-solid fa-clipboard-user"></i></div>
+              <div class="task-icon" style="color: #5c7aa6; background: rgba(92,122,166,0.12);"><i class="fa-solid fa-clipboard-user"></i></div>
               <div class="task-details"><h3>Daily Opinion Survey</h3><p>Answer brief questionnaires (+1000 HOWL)</p></div>
               <div class="task-action-meta"><div class="task-arrow"><i class="fa-solid fa-play"></i></div></div>
           </div>
@@ -483,7 +462,7 @@
         </div>
       </div>
 
-      <!-- HISTORY VIEW WITH SUPABASE FETCHING & OFFERWALL RENDERING -->
+      <!-- HISTORY VIEW -->
       <div id="history-view" class="view">
         <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Transaction Activity Log</h2>
         
@@ -498,7 +477,6 @@
           <div id="history-list-ads"></div>
         </div>
         
-        <!-- OFFERWALL HISTORY PANEL -->
         <div id="history-panel-offerwall" class="earn-section-panel">
           <div id="history-list-offerwall"></div>
         </div>
@@ -529,10 +507,10 @@
     let historyLog = [];
     let tgUser = null;
     let currentUserId = 'guest_user';
-    const payoutGoal = 25000;
 
     let adsbitvexLastRun = 0;
     let telegaLastRun = 0;
+    let interstitialLastRun = 0;
 
     let telegaAds = null;
     if (typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
@@ -578,7 +556,6 @@
         }
 
         currentUserId = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
-        console.log('[DIAGNOSTIC] Resolved currentUserId:', currentUserId);
 
         loadData();
         loadTelegramUser();
@@ -631,7 +608,6 @@
 
     async function loadUserBalanceAndHistory(userId) {
         const userIdStr = userId ? userId.toString() : 'guest_user';
-        console.log(`[DIAGNOSTIC] Starting balance & history fetch for user_id: "${userIdStr}"`);
 
         try {
             const { data: userData, error: userError } = await supabaseClient
@@ -640,36 +616,19 @@
                 .eq('user_id', userIdStr)
                 .single();
 
-            if (userError) {
-                console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
-                balance = 0;
-                updateDisplay();
-            } else if (userData && typeof userData.balance === 'number') {
-                console.log('[DIAGNOSTIC] Successfully fetched balance:', userData.balance);
+            if (!userError && userData && typeof userData.balance === 'number') {
                 balance = userData.balance;
                 updateDisplay();
                 saveData();
             }
 
-            console.log('[DIAGNOSTIC] Querying transactions table...');
             const { data: txData, error: txError } = await supabaseClient
                 .from('transactions')
                 .select('*')
                 .eq('user_id', userIdStr)
                 .order('created_at', { ascending: false });
 
-            if (txError) {
-                console.error('[DIAGNOSTIC ERROR] Failed to fetch transactions from Supabase:', txError.message);
-                renderHistory();
-                return;
-            }
-
-            if (txData && txData.length > 0) {
-                console.log(`[DIAGNOSTIC] Found ${txData.length} total raw transactions in Supabase database.`);
-                
-                const detectedTypes = [...new Set(txData.map(t => t.type))];
-                console.log('[DIAGNOSTIC] Transaction types present in database:', detectedTypes);
-
+            if (!txError && txData && txData.length > 0) {
                 historyLog = txData.map(tx => ({
                     type: tx.type ? tx.type.trim().toLowerCase() : 'ads',
                     detail: tx.detail,
@@ -679,24 +638,10 @@
                     },
                     timestamp: tx.created_at
                 }));
-                
                 saveData();
-            } else {
-                console.warn('[DIAGNOSTIC] Transactions query returned 0 rows for this user_id. Checking local storage fallback...');
-                const savedData = localStorage.getItem(`howlRewardsBotV6_${userIdStr}`);
-                if (savedData) {
-                    const parsed = JSON.parse(savedData);
-                    if (parsed.historyLog && parsed.historyLog.length > 0) {
-                        console.log(`[DIAGNOSTIC] Loaded ${parsed.historyLog.length} items from localStorage fallback.`);
-                        historyLog = parsed.historyLog;
-                    }
-                }
             }
-            
             renderHistory();
-
         } catch (err) {
-            console.error('[DIAGNOSTIC CRITICAL] Exception thrown during data sync:', err);
             renderHistory();
         }
     }
@@ -705,56 +650,32 @@
 
     async function syncBalanceToSupabase(newBalance) {
         try {
-            const response = await fetch(
-                `${REWARD_ENDPOINT_URL}?user_id=${encodeURIComponent(currentUserId)}&balance=${encodeURIComponent(newBalance)}&mode=set`
-            );
-            if (!response.ok) {
-                console.log('Failed to sync balance to server.');
-            }
-        } catch (err) {
-            console.log('Failed to sync balance to server.');
-        }
+            await fetch(`${REWARD_ENDPOINT_URL}?user_id=${encodeURIComponent(currentUserId)}&balance=${encodeURIComponent(newBalance)}&mode=set`);
+        } catch (err) {}
     }
 
     async function addRewardToSupabase(rewardAmount) {
         try {
-            const response = await fetch(
-                `${REWARD_ENDPOINT_URL}?user_id=${encodeURIComponent(currentUserId)}&value=${encodeURIComponent(rewardAmount)}`
-            );
-
-            if (!response.ok) {
-                const errBody = await response.text();
-                console.error(`[BALANCE] Reward endpoint returned HTTP ${response.status}:`, errBody);
-                return null;
-            }
-
+            const response = await fetch(`${REWARD_ENDPOINT_URL}?user_id=${encodeURIComponent(currentUserId)}&value=${encodeURIComponent(rewardAmount)}`);
+            if (!response.ok) return null;
             const result = await response.json();
-            console.log(`[BALANCE] +${rewardAmount} applied. Server balance now ${result.balance}.`);
             return result.balance;
         } catch (err) {
-            console.error('[BALANCE] Network exception calling reward endpoint (likely not deployed, or wrong URL):', err);
             return null;
         }
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
         try {
-            const { error } = await supabaseClient
-                .from('transactions')
-                .insert({
-                    user_id: currentUserId,
-                    type: type,
-                    detail: detail,
-                    offer_id: meta.taskId || meta.offerId || null,
-                    reward_amount: meta.rewardAmount || null,
-                    created_at: new Date().toISOString()
-                });
-            if (error) {
-                console.error('Failed to save transaction to Supabase table:', error.message);
-            }
-        } catch (err) {
-            console.error('Failed to save transaction to Supabase table:', err);
-        }
+            await supabaseClient.from('transactions').insert({
+                user_id: currentUserId,
+                type: type,
+                detail: detail,
+                offer_id: meta.taskId || meta.offerId || null,
+                reward_amount: meta.rewardAmount || null,
+                created_at: new Date().toISOString()
+            });
+        } catch (err) {}
     }
 
     function showView(viewId) {
@@ -778,7 +699,6 @@
 
         document.getElementById(`tab-${tabName}`).classList.add('active');
         document.getElementById(`panel-${tabName}`).classList.add('active');
-
         document.getElementById('earn-tabs').style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
     }
 
@@ -788,7 +708,6 @@
 
         document.getElementById(`history-tab-${tabName}`).classList.add('active');
         document.getElementById(`history-panel-${tabName}`).classList.add('active');
-
         document.getElementById('history-tabs').style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
     }
     
@@ -827,11 +746,15 @@
 
         const storedTelega = localStorage.getItem(`howl_telega_cd_${currentUserId}`);
         if (storedTelega) telegaLastRun = parseInt(storedTelega);
+
+        const storedInterstitial = localStorage.getItem(`howl_interstitial_cd_${currentUserId}`);
+        if (storedInterstitial) interstitialLastRun = parseInt(storedInterstitial);
     }
 
     function updateCooldownTimers() {
         const now = Date.now();
 
+        // AdsBitvex timer
         const adsbitvexDiff = Math.floor((now - adsbitvexLastRun) / 1000);
         const adsbitvexCard = document.getElementById('adsbitvexCard');
         const adsbitvexCD = document.getElementById('adsbitvexCD');
@@ -849,6 +772,7 @@
             adsbitvexArrow.style.display = 'flex';
         }
 
+        // Telega timer
         const telegaDiff = Math.floor((now - telegaLastRun) / 1000);
         const telegaCard = document.getElementById('telegaBtn1');
         const telegaCD = document.getElementById('telegaBtn1CD');
@@ -866,6 +790,24 @@
             telegaCard.classList.remove('cooldown-active');
             telegaCD.style.display = 'none';
             telegaArrow.style.display = 'flex';
+        }
+
+        // Interstitial timer
+        const interstitialDiff = Math.floor((now - interstitialLastRun) / 1000);
+        const interstitialCard = document.getElementById('interstitialCard');
+        const interstitialCD = document.getElementById('interstitialCD');
+        const interstitialArrow = document.getElementById('interstitialArrow');
+
+        if (interstitialDiff < 15) {
+            const left = 15 - interstitialDiff;
+            interstitialCard.classList.add('cooldown-active');
+            interstitialCD.style.display = 'inline-block';
+            interstitialCD.textContent = `${left}s`;
+            interstitialArrow.style.display = 'none';
+        } else {
+            interstitialCard.classList.remove('cooldown-active');
+            interstitialCD.style.display = 'none';
+            interstitialArrow.style.display = 'flex';
         }
     }
 
@@ -913,33 +855,20 @@
         const listOfferwall = document.getElementById('history-list-offerwall');
         const listSurvey = document.getElementById('history-list-survey');
 
-        if (!listAds || !listOfferwall || !listSurvey) {
-            console.error('[DIAGNOSTIC ERROR] One or more history list DOM elements are missing!');
-            return;
-        }
+        if (!listAds || !listOfferwall || !listSurvey) return;
 
         const adsItems = historyLog.filter(item => item.type === 'ads' || item.type === 'withdraw');
         const offerwallItems = historyLog.filter(item => item.type === 'offerwall');
         const surveyItems = historyLog.filter(item => item.type === 'survey');
 
-        console.log(`[DIAGNOSTIC RENDER] Breakdown -> Ads: ${adsItems.length}, Offerwall: ${offerwallItems.length}, Survey: ${surveyItems.length}`);
-
         const buildHistoryCard = (item) => {
             let icon = '<i class="fa-solid fa-plus-circle"></i>';
             if (item.type === 'withdraw') {
-                icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
+                icon = '<i class="fa-solid fa-paper-plane" style="color: #5c7aa6;"></i>';
             } else if (item.type === 'survey') {
-                icon = '<i class="fa-solid fa-clipboard-question" style="color: var(--accent);"></i>';
+                icon = '<i class="fa-solid fa-clipboard-question" style="color: #5c7aa6;"></i>';
             } else if (item.type === 'offerwall') {
-                icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
-            }
-
-            let metaDetails = '';
-            if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
-                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
-                if (item.meta.taskId) metaDetails += `ID: ${item.meta.taskId} `;
-                if (item.meta.rewardAmount) metaDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
-                metaDetails += `</div>`;
+                icon = '<i class="fa-solid fa-gift" style="color: var(--amber);"></i>';
             }
 
             return `
@@ -947,44 +876,23 @@
                     <div class="history-icon">${icon}</div>
                     <div class="info">
                         <div class="name">${item.detail}</div>
-                        ${metaDetails}
                         <div class="detail">${new Date(item.timestamp).toLocaleString()}</div>
                     </div>
                 </div>
             `;
         };
 
-        if (adsItems.length === 0) {
-            listAds.innerHTML = `
-                <div class="list-item">
-                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-folder-open"></i></div>
-                    <div class="info"><div class="name" style="color:var(--text-muted);">No Activity Recorded</div><div class="detail">Complete ads or request payouts to populate logs.</div></div>
-                </div>`;
-        } else {
-            listAds.innerHTML = adsItems.map(item => buildHistoryCard(item)).join('');
-        }
+        listAds.innerHTML = adsItems.length === 0 
+            ? `<div class="list-item"><div class="info"><div class="name" style="color:var(--text-muted);">No Activity Recorded</div></div></div>` 
+            : adsItems.map(item => buildHistoryCard(item)).join('');
 
-        if (offerwallItems.length === 0) {
-            console.log('[DIAGNOSTIC] Offerwall array is empty. Displaying placeholder card.');
-            listOfferwall.innerHTML = `
-                <div class="list-item">
-                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-gift"></i></div>
-                    <div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div><div class="detail">Complete partner offers to populate logs.</div></div>
-                </div>`;
-        } else {
-            console.log('[DIAGNOSTIC] Rendering actual offerwall transaction cards.');
-            listOfferwall.innerHTML = offerwallItems.map(item => buildHistoryCard(item)).join('');
-        }
+        listOfferwall.innerHTML = offerwallItems.length === 0 
+            ? `<div class="list-item"><div class="info"><div class="name" style="color:var(--text-muted);">No Offerwall History</div></div></div>` 
+            : offerwallItems.map(item => buildHistoryCard(item)).join('');
 
-        if (surveyItems.length === 0) {
-            listSurvey.innerHTML = `
-                <div class="list-item">
-                    <div class="history-icon" style="background: rgba(255,255,255,0.04); color: var(--text-muted);"><i class="fa-solid fa-clipboard-question"></i></div>
-                    <div class="info"><div class="name" style="color:var(--text-muted);">No Survey History</div><div class="detail">Participate in opinion questionnaires to see history here.</div></div>
-                </div>`;
-        } else {
-            listSurvey.innerHTML = surveyItems.map(item => buildHistoryCard(item)).join('');
-        }
+        listSurvey.innerHTML = surveyItems.length === 0 
+            ? `<div class="list-item"><div class="info"><div class="name" style="color:var(--text-muted);">No Survey History</div></div></div>` 
+            : surveyItems.map(item => buildHistoryCard(item)).join('');
     }
 
     async function grantReward(amount, sourceName, type = 'ads', meta = {}) {
@@ -993,8 +901,6 @@
             balance = confirmedBalance;
         } else {
             balance += amount;
-            console.error('[BALANCE] Server sync failed — this reward is LOCAL ONLY and will revert on next refresh.');
-            alert('⚠️ Reward shown locally, but saving it to the server failed. It will revert on refresh — check the console / server logs.');
         }
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
@@ -1007,14 +913,12 @@
     let adsbitvexInFlight = false;
 
     function startAdsBitvexTask() {
-        if (adsbitvexInFlight) {
-            return;
-        }
+        if (adsbitvexInFlight) return;
 
         const now = Date.now();
         if (now - adsbitvexLastRun < 5000) {
             const left = Math.ceil((5000 - (now - adsbitvexLastRun)) / 1000);
-            return alert(`⏳ Cooldown active! Please wait ${left}s before launching the next AdsBitvex ad.`);
+            return alert(`⏳ Cooldown active! Please wait ${left}s.`);
         }
 
         if (typeof window.showadsbitvex !== 'function') {
@@ -1022,9 +926,6 @@
         }
 
         adsbitvexInFlight = true;
-        const adsbitvexCardEl = document.getElementById('adsbitvexCard');
-        if (adsbitvexCardEl) adsbitvexCardEl.classList.add('cooldown-active');
-
         let redirectDetected = false;
         const blurHandler = () => { redirectDetected = true; };
         const visibilityHandler = () => { if (document.hidden) redirectDetected = true; };
@@ -1048,11 +949,8 @@
             }
 
             adsbitvexCountToday += 1;
-            if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            }
             grantReward(10, 'AdsBitvex Network', 'ads');
-            alert(`🎉 Ad watched! +10 HOWL credited (${adsbitvexCountToday} today).`);
+            alert(`🎉 Ad watched! +10 HOWL credited.`);
         }).catch((e) => {
             window.removeEventListener('blur', blurHandler);
             document.removeEventListener('visibilitychange', visibilityHandler);
@@ -1060,11 +958,6 @@
             adsbitvexLastRun = Date.now();
             localStorage.setItem(`howl_adsbitvex_cd_${currentUserId}`, adsbitvexLastRun.toString());
             adsbitvexInFlight = false;
-
-            if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            }
-            console.error('AdsBitvex ad error:', e);
             alert('⚠️ Ad closed early or failed to load.');
         });
     }
@@ -1075,17 +968,13 @@
             const leftSecs = Math.ceil((300000 - (now - telegaLastRun)) / 1000);
             const mins = Math.floor(leftSecs / 60);
             const secs = leftSecs % 60;
-            return alert(`⏳ Telega Cooldown active! Please wait ${mins}m ${secs}s before starting another Telega ad.`);
+            return alert(`⏳ Telega cooldown active! Wait ${mins}m ${secs}s.`);
         }
 
         const btn = document.getElementById(buttonId);
         if (btn.classList.contains('loading')) return;
         btn.classList.add('loading');
         
-        const desc = btn.querySelector('.task-details p');
-        const originalText = desc ? desc.textContent : `Unlimited high-tier reward`;
-        if (desc) desc.textContent = "Loading Ad Feed...";
-
         if (window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
@@ -1102,62 +991,71 @@
                 const safetyTimeout = setTimeout(() => {
                     if (!isResolved) {
                         isResolved = true;
-                        resetTelegaButton(btn, originalText);
-                        alert("⚠️ Ad inventory currently empty. Please try again shortly.");
+                        btn.classList.remove('loading');
+                        alert("⚠️ Ad inventory empty. Please try again shortly.");
                     }
                 }, 10000);
 
                 const adResult = telegaAds.ad_show({ adBlockUuid: uuid });
-
                 if (adResult && typeof adResult.then === 'function') {
                     adResult.then(() => {
                         if (isResolved) return;
                         isResolved = true;
                         clearTimeout(safetyTimeout);
-
                         telegaLastRun = Date.now();
                         localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
-
                         grantReward(rewardAmount, 'Telega.io', 'ads');
-                        resetTelegaButton(btn, originalText);
+                        btn.classList.remove('loading');
                         alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
                     }).catch(() => {
                         if (isResolved) return;
                         isResolved = true;
                         clearTimeout(safetyTimeout);
-
                         telegaLastRun = Date.now();
                         localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
-
-                        resetTelegaButton(btn, originalText);
+                        btn.classList.remove('loading');
                         alert("Ad closed or inventory exhausted.");
                     });
-                } else {
-                    if (isResolved) return;
-                    isResolved = true;
-                    clearTimeout(safetyTimeout);
-
-                    telegaLastRun = Date.now();
-                    localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
-
-                    grantReward(rewardAmount, 'Telega.io', 'ads');
-                    resetTelegaButton(btn, originalText);
-                    alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
                 }
             } catch {
-                resetTelegaButton(btn, originalText);
-                alert("Ad execution failed. Check network connection.");
+                btn.classList.remove('loading');
+                alert("Ad execution failed.");
             }
         } else {
-            resetTelegaButton(btn, originalText);
-            alert("Telega.io SDK loading. Please retry in a moment.");
+            btn.classList.remove('loading');
+            alert("Telega.io SDK loading. Please retry.");
         }
     }
 
-    function resetTelegaButton(btn, originalText) {
-        btn.classList.remove('loading');
-        const desc = btn.querySelector('.task-details p');
-        if (desc) desc.textContent = originalText;
+    function startInterstitialTask() {
+        const now = Date.now();
+        if (now - interstitialLastRun < 15000) {
+            const left = Math.ceil((15000 - (now - interstitialLastRun)) / 1000);
+            return alert(`⏳ Please wait ${left}s before watching another interstitial.`);
+        }
+
+        if (typeof window.aclib === 'undefined' || typeof window.aclib.runInterstitial !== 'function') {
+            return alert('Interstitial ad engine is initializing. Please retry in a moment.');
+        }
+
+        try {
+            if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            }
+
+            window.aclib.runInterstitial({
+                zoneId: '11952938'
+            });
+
+            interstitialLastRun = Date.now();
+            localStorage.setItem(`howl_interstitial_cd_${currentUserId}`, interstitialLastRun.toString());
+
+            grantReward(15, 'Interstitial Network', 'ads');
+            alert('🎉 Interstitial launched! +15 HOWL credited.');
+        } catch (err) {
+            console.error('Interstitial display error:', err);
+            alert('Failed to load interstitial ad.');
+        }
     }
 
     document.getElementById('submitWithdraw').addEventListener('click', () => {
@@ -1176,16 +1074,9 @@
             btn.textContent = "📤 Submit Payout Request";
             return;
         }
-        if (!number) {
+        if (!number || isNaN(amount) || amount < 25000 || amount > balance) {
             if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            alert("Please provide a valid destination address or UID.");
-            btn.disabled = false;
-            btn.textContent = "📤 Submit Payout Request";
-            return;
-        }
-        if (isNaN(amount) || amount < 25000 || amount > balance) {
-            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            alert("Invalid payout amount specified.");
+            alert("Invalid payout details.");
             btn.disabled = false;
             btn.textContent = "📤 Submit Payout Request";
             return;
@@ -1206,7 +1097,6 @@
             alert("Withdrawal request dispatched successfully!");
             
             balance -= amount;
-            
             let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
             addToHistory('withdraw', `📤 Payout Request<br>💰 Amount: ${amount} HOWL ($${usdVal})<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
             

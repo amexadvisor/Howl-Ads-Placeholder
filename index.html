@@ -696,52 +696,46 @@
         }
     }
 
+    // REWARD_ENDPOINT_URL: point this at wherever you deploy api-reward.js
+    // (e.g. Vercel gives you https://yourapp.vercel.app/api/reward).
+    // The browser's Supabase client only ever has the public/anon key, and
+    // Row Level Security is blocking writes to `users` from that key — so
+    // balance updates now go through this server endpoint (service role key,
+    // bypasses RLS) instead of calling supabaseClient.from('users').upsert()
+    // directly from the browser.
+    const REWARD_ENDPOINT_URL = '/api/reward';
+
     async function syncBalanceToSupabase(newBalance) {
         try {
-            await supabaseClient
-                .from('users')
-                .upsert(
-                    { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
-                    { onConflict: 'user_id' }
-                );
+            const response = await fetch(
+                `${REWARD_ENDPOINT_URL}?user_id=${encodeURIComponent(currentUserId)}&balance=${encodeURIComponent(newBalance)}&mode=set`
+            );
+            if (!response.ok) {
+                console.log('Failed to sync balance to server.');
+            }
         } catch (err) {
-            console.log('Failed to sync balance to Supabase.');
+            console.log('Failed to sync balance to server.');
         }
     }
 
-    // Mirrors the read-current-balance -> add reward -> upsert pattern from the
-    // PubScale S2S postback: Supabase is treated as the source of truth for the
-    // reward amount, rather than trusting the client's in-memory `balance` (which
-    // can drift if a previous sync silently failed, or across multiple devices).
+    // Calls the server-side reward endpoint (service role key, bypasses RLS)
+    // to atomically add rewardAmount to this user's balance in Supabase, and
+    // returns the confirmed new balance so the client never has to guess.
     async function addRewardToSupabase(rewardAmount) {
         try {
-            const { data: userData, error: fetchError } = await supabaseClient
-                .from('users')
-                .select('balance')
-                .eq('user_id', currentUserId)
-                .maybeSingle();
+            const response = await fetch(
+                `${REWARD_ENDPOINT_URL}?user_id=${encodeURIComponent(currentUserId)}&value=${encodeURIComponent(rewardAmount)}`
+            );
 
-            if (fetchError) {
-                console.error('[BALANCE] Failed to fetch current balance before reward:', fetchError.message);
-            }
-
-            const currentServerBalance = userData?.balance || 0;
-            const newBalance = currentServerBalance + rewardAmount;
-
-            const { error: upsertError } = await supabaseClient
-                .from('users')
-                .upsert(
-                    { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
-                    { onConflict: 'user_id' }
-                );
-
-            if (upsertError) {
-                console.error('[BALANCE] Failed to update balance in Supabase:', upsertError.message);
+            if (!response.ok) {
+                const errBody = await response.text();
+                console.error('[BALANCE] Reward endpoint returned an error:', errBody);
                 return null;
             }
 
-            console.log(`[BALANCE] +${rewardAmount} applied. Server balance now ${newBalance}.`);
-            return newBalance;
+            const result = await response.json();
+            console.log(`[BALANCE] +${rewardAmount} applied. Server balance now ${result.balance}.`);
+            return result.balance;
         } catch (err) {
             console.error('[BALANCE] Exception while updating balance in Supabase:', err);
             return null;

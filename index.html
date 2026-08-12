@@ -17,6 +17,7 @@
   <script src="https://sdk.tads.me/tads.js"></script>
   <!-- Supabase JS Client UMD -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
     :root {
@@ -294,8 +295,6 @@
     #withdraw p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; font-weight: 500; }
     #withdraw p strong { color: var(--mint); }
   </style>
-  
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -499,7 +498,15 @@
 <script>
     const supabaseUrl = 'https://iqtygrrdvxvkzqmglkwy.supabase.co';
     const supabaseKey = 'sb_publishable_fgMcfZ7_Rcw6-EGAq_JZOg_ApepsDyN';
-    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+    let supabaseClient = null;
+
+    try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+            supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        }
+    } catch (e) {
+        console.warn("Supabase init deferred:", e);
+    }
 
     let balance = 0;
     let adsbitvexCountToday = 0;
@@ -508,6 +515,7 @@
     let tgUser = null;
     let currentUserId = 'guest_user';
 
+    let adsbitvexInFlight = false;
     let adsbitvexLastRun = 0;
     let telegaLastRun = 0;
     let tadsLastRun = 0;
@@ -515,10 +523,16 @@
     let tadsController = null;
 
     let telegaAds = null;
-    if (typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
-        telegaAds = window.TelegaIn.AdsController.create_miniapp({
-            token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
-        });
+    function initTelegaSdk() {
+        if (!telegaAds && typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
+            try {
+                telegaAds = window.TelegaIn.AdsController.create_miniapp({
+                    token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
+                });
+            } catch (err) {
+                console.error("Telega Init Error:", err);
+            }
+        }
     }
 
     function getRandomTadsCooldown() {
@@ -562,7 +576,6 @@
                     type: 'static',
                     debug: false,
                     onClickReward: (adId) => {
-                        console.log('Reward verified for clicked ad:', adId);
                         grantReward(20, 'TADS Interactive Task', 'ads');
                         alert("🎉 Ad interacted! +20 HOWL credited.");
                     },
@@ -595,6 +608,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         initApp();
+        initTelegaSdk();
         ensureTadsScript().then(() => initTadsSDK());
         setInterval(updateCooldownTimers, 1000);
         
@@ -604,7 +618,7 @@
         const splashEl = document.getElementById('splash-screen');
 
         function tickSplash() {
-            percentTracker += Math.floor(Math.random() * 6) + 3;
+            percentTracker += Math.floor(Math.random() * 8) + 4;
             if (percentTracker >= 100) percentTracker = 100;
 
             if (percentEl) percentEl.textContent = `${percentTracker}%`;
@@ -615,19 +629,23 @@
                     if (splashEl) splashEl.classList.add('fade-out');
                 }, 350);
             } else {
-                setTimeout(tickSplash, 280);
+                setTimeout(tickSplash, 180);
             }
         }
         tickSplash();
     });
 
     function initApp() {
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
-            if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-                tgUser = Telegram.WebApp.initDataUnsafe.user;
+        try {
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+                    tgUser = Telegram.WebApp.initDataUnsafe.user;
+                }
             }
+        } catch (e) {
+            console.warn("Telegram WebApp context error:", e);
         }
 
         currentUserId = tgUser && tgUser.id ? tgUser.id.toString() : 'guest_user';
@@ -683,6 +701,19 @@
 
     async function loadUserBalanceAndHistory(userId) {
         const userIdStr = userId ? userId.toString() : 'guest_user';
+
+        if (!supabaseClient) {
+            try {
+                if (window.supabase && typeof window.supabase.createClient === 'function') {
+                    supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                }
+            } catch (e) {}
+        }
+
+        if (!supabaseClient) {
+            renderHistory();
+            return;
+        }
 
         try {
             const { data: userData, error: userError } = await supabaseClient
@@ -741,6 +772,7 @@
     }
 
     async function logTransactionToSupabase(type, detail, meta = {}) {
+        if (!supabaseClient) return;
         try {
             await supabaseClient.from('transactions').insert({
                 user_id: currentUserId,
@@ -755,7 +787,8 @@
 
     function showView(viewId) {
         document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
+        const targetView = document.getElementById(viewId);
+        if (targetView) targetView.classList.add('active');
         
         document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.querySelector(`.nav-button[onclick="showView('${viewId}')"]`);
@@ -772,28 +805,47 @@
         document.querySelectorAll('#tasks-view .category-tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('#tasks-view .earn-section-panel').forEach(panel => panel.classList.remove('active'));
 
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-        document.getElementById(`panel-${tabName}`).classList.add('active');
-        document.getElementById('earn-tabs').style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        const targetPanel = document.getElementById(`panel-${tabName}`);
+        if (targetTab) targetTab.classList.add('active');
+        if (targetPanel) targetPanel.classList.add('active');
+        
+        const tabsContainer = document.getElementById('earn-tabs');
+        if (tabsContainer) {
+            tabsContainer.style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
+        }
     }
 
     function switchHistoryTab(tabName) {
         document.querySelectorAll('#history-view .category-tab').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('#history-view .earn-section-panel').forEach(panel => panel.classList.remove('active'));
 
-        document.getElementById(`history-tab-${tabName}`).classList.add('active');
-        document.getElementById(`history-panel-${tabName}`).classList.add('active');
-        document.getElementById('history-tabs').style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
+        const targetTab = document.getElementById(`history-tab-${tabName}`);
+        const targetPanel = document.getElementById(`history-panel-${tabName}`);
+        if (targetTab) targetTab.classList.add('active');
+        if (targetPanel) targetPanel.classList.add('active');
+
+        const tabsContainer = document.getElementById('history-tabs');
+        if (tabsContainer) {
+            tabsContainer.style.setProperty('--active-index', TAB_ORDER.indexOf(tabName));
+        }
     }
     
     function loadData() {
         const savedData = localStorage.getItem(`howlRewardsBotV6_${currentUserId}`);
         if (savedData) {
-            const data = JSON.parse(savedData);
-            balance = data.balance || 0;
-            adsbitvexCountToday = data.adsbitvexCountToday || 0;
-            lastResetDate = data.lastResetDate || new Date().toDateString();
-            historyLog = data.historyLog || [];
+            try {
+                const data = JSON.parse(savedData);
+                balance = data.balance || 0;
+                adsbitvexCountToday = data.adsbitvexCountToday || 0;
+                lastResetDate = data.lastResetDate || new Date().toDateString();
+                historyLog = data.historyLog || [];
+            } catch (e) {
+                balance = 0;
+                adsbitvexCountToday = 0;
+                lastResetDate = new Date().toDateString();
+                historyLog = [];
+            }
         } else {
             balance = 0;
             adsbitvexCountToday = 0;
@@ -817,16 +869,16 @@
 
     function checkStoredCooldowns() {
         const storedAdsbitvex = localStorage.getItem(`howl_adsbitvex_cd_${currentUserId}`);
-        if (storedAdsbitvex) adsbitvexLastRun = parseInt(storedAdsbitvex);
+        if (storedAdsbitvex) adsbitvexLastRun = parseInt(storedAdsbitvex) || 0;
 
         const storedTelega = localStorage.getItem(`howl_telega_cd_${currentUserId}`);
-        if (storedTelega) telegaLastRun = parseInt(storedTelega);
+        if (storedTelega) telegaLastRun = parseInt(storedTelega) || 0;
 
         const storedTads = localStorage.getItem(`howl_tads_cd_${currentUserId}`);
-        if (storedTads) tadsLastRun = parseInt(storedTads);
+        if (storedTads) tadsLastRun = parseInt(storedTads) || 0;
 
         const storedTadsDuration = localStorage.getItem(`howl_tads_duration_${currentUserId}`);
-        if (storedTadsDuration) tadsCurrentCooldown = parseInt(storedTadsDuration);
+        if (storedTadsDuration) tadsCurrentCooldown = parseInt(storedTadsDuration) || 5000;
     }
 
     function updateCooldownTimers() {
@@ -838,16 +890,18 @@
         const adsbitvexCD = document.getElementById('adsbitvexCD');
         const adsbitvexArrow = document.getElementById('adsbitvexArrow');
 
-        if (adsbitvexInFlight || adsbitvexDiff < 5) {
-            const left = Math.max(0, 5 - adsbitvexDiff);
-            adsbitvexCard.classList.add('cooldown-active');
-            adsbitvexCD.style.display = 'inline-block';
-            adsbitvexCD.textContent = adsbitvexInFlight ? '…' : `${left}s`;
-            adsbitvexArrow.style.display = 'none';
-        } else {
-            adsbitvexCard.classList.remove('cooldown-active');
-            adsbitvexCD.style.display = 'none';
-            adsbitvexArrow.style.display = 'flex';
+        if (adsbitvexCard && adsbitvexCD && adsbitvexArrow) {
+            if (adsbitvexInFlight || adsbitvexDiff < 5) {
+                const left = Math.max(0, 5 - adsbitvexDiff);
+                adsbitvexCard.classList.add('cooldown-active');
+                adsbitvexCD.style.display = 'inline-block';
+                adsbitvexCD.textContent = adsbitvexInFlight ? '…' : `${left}s`;
+                adsbitvexArrow.style.display = 'none';
+            } else {
+                adsbitvexCard.classList.remove('cooldown-active');
+                adsbitvexCD.style.display = 'none';
+                adsbitvexArrow.style.display = 'flex';
+            }
         }
 
         // Telega timer
@@ -856,18 +910,20 @@
         const telegaCD = document.getElementById('telegaBtn1CD');
         const telegaArrow = document.getElementById('telegaBtn1Arrow');
 
-        if (telegaDiff < 300) {
-            const leftSecs = 300 - telegaDiff;
-            const mins = Math.floor(leftSecs / 60);
-            const secs = leftSecs % 60;
-            telegaCard.classList.add('cooldown-active');
-            telegaCD.style.display = 'inline-block';
-            telegaCD.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            telegaArrow.style.display = 'none';
-        } else {
-            telegaCard.classList.remove('cooldown-active');
-            telegaCD.style.display = 'none';
-            telegaArrow.style.display = 'flex';
+        if (telegaCard && telegaCD && telegaArrow) {
+            if (telegaDiff < 300) {
+                const leftSecs = 300 - telegaDiff;
+                const mins = Math.floor(leftSecs / 60);
+                const secs = leftSecs % 60;
+                telegaCard.classList.add('cooldown-active');
+                telegaCD.style.display = 'inline-block';
+                telegaCD.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                telegaArrow.style.display = 'none';
+            } else {
+                telegaCard.classList.remove('cooldown-active');
+                telegaCD.style.display = 'none';
+                telegaArrow.style.display = 'flex';
+            }
         }
 
         // TADS dynamic timer
@@ -892,12 +948,16 @@
     }
 
     function updateDisplay() {
-        document.getElementById('balance-value').textContent = balance.toLocaleString();
-        document.getElementById('balance2').textContent = balance.toLocaleString();
+        const balEl = document.getElementById('balance-value');
+        const bal2El = document.getElementById('balance2');
+        if (balEl) balEl.textContent = balance.toLocaleString();
+        if (bal2El) bal2El.textContent = balance.toLocaleString();
         
         const usdValue = (balance / 10000).toFixed(2);
-        document.getElementById('usd-value').textContent = usdValue;
-        document.getElementById('usd-balance2').textContent = usdValue;
+        const usdEl = document.getElementById('usd-value');
+        const usd2El = document.getElementById('usd-balance2');
+        if (usdEl) usdEl.textContent = usdValue;
+        if (usd2El) usd2El.textContent = usdValue;
 
         const countEl = document.getElementById('adsbitvex-count-today');
         if (countEl) countEl.textContent = adsbitvexCountToday;
@@ -908,17 +968,23 @@
     
     function loadTelegramUser() {
         const profilePicDiv = document.getElementById('profile-pic');
+        const usernameDiv = document.getElementById('username');
+
         if (tgUser) {
             const fullName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
-            document.getElementById('username').textContent = fullName || 'Telegram User';
-            if (tgUser.photo_url) {
-                profilePicDiv.innerHTML = `<img src="${tgUser.photo_url}" alt="Avatar">`;
-            } else {
-                profilePicDiv.innerHTML = `<span>${(tgUser.first_name || 'U').charAt(0)}</span>`;
+            if (usernameDiv) usernameDiv.textContent = fullName || 'Telegram User';
+            if (profilePicDiv) {
+                if (tgUser.photo_url) {
+                    profilePicDiv.innerHTML = `<img src="${tgUser.photo_url}" alt="Avatar">`;
+                } else {
+                    profilePicDiv.innerHTML = `<span>${(tgUser.first_name || 'U').charAt(0)}</span>`;
+                }
             }
         } else {
-            document.getElementById('username').textContent = 'Web Operator';
-            profilePicDiv.innerHTML = `<img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="Avatar">`;
+            if (usernameDiv) usernameDiv.textContent = 'Web Operator';
+            if (profilePicDiv) {
+                profilePicDiv.innerHTML = `<img src="https://i.ibb.co/2mX3Qcm/IMG-20260805-193857-910.jpg" alt="Avatar">`;
+            }
         }
     }
 
@@ -985,12 +1051,10 @@
         updateDisplay();
         addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
         saveData();
-        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
     }
-
-    let adsbitvexInFlight = false;
 
     function startAdsBitvexTask() {
         if (adsbitvexInFlight) return;
@@ -1002,7 +1066,7 @@
         }
 
         if (typeof window.showadsbitvex !== 'function') {
-            return alert('AdsBitvex SDK not loaded properly.');
+            return alert('AdsBitvex SDK not loaded properly. Please refresh or check connection.');
         }
 
         adsbitvexInFlight = true;
@@ -1022,7 +1086,7 @@
             adsbitvexInFlight = false;
 
             if (!redirectDetected) {
-                if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                     Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                 }
                 return alert('⚠️ No redirect detected. Please tap on the ad to claim your reward.');
@@ -1052,18 +1116,14 @@
         }
 
         const btn = document.getElementById(buttonId);
-        if (btn.classList.contains('loading')) return;
-        btn.classList.add('loading');
+        if (btn && btn.classList.contains('loading')) return;
+        if (btn) btn.classList.add('loading');
         
-        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
 
-        if (!telegaAds && typeof window.TelegaIn !== 'undefined' && window.TelegaIn.AdsController) {
-            telegaAds = window.TelegaIn.AdsController.create_miniapp({
-                token: '9101d2da-5ee3-47ef-bdb9-b3046b9e6b3e'
-            });
-        }
+        initTelegaSdk();
 
         if (telegaAds) {
             try {
@@ -1071,7 +1131,7 @@
                 const safetyTimeout = setTimeout(() => {
                     if (!isResolved) {
                         isResolved = true;
-                        btn.classList.remove('loading');
+                        if (btn) btn.classList.remove('loading');
                         alert("⚠️ Ad inventory empty. Please try again shortly.");
                     }
                 }, 10000);
@@ -1085,7 +1145,7 @@
                         telegaLastRun = Date.now();
                         localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
                         grantReward(rewardAmount, 'Telega.io', 'ads');
-                        btn.classList.remove('loading');
+                        if (btn) btn.classList.remove('loading');
                         alert(`🎉 Telega ad completed! Earned +${rewardAmount} HOWL.`);
                     }).catch(() => {
                         if (isResolved) return;
@@ -1093,16 +1153,16 @@
                         clearTimeout(safetyTimeout);
                         telegaLastRun = Date.now();
                         localStorage.setItem(`howl_telega_cd_${currentUserId}`, telegaLastRun.toString());
-                        btn.classList.remove('loading');
+                        if (btn) btn.classList.remove('loading');
                         alert("Ad closed or inventory exhausted.");
                     });
                 }
-            } catch {
-                btn.classList.remove('loading');
+            } catch (err) {
+                if (btn) btn.classList.remove('loading');
                 alert("Ad execution failed.");
             }
         } else {
-            btn.classList.remove('loading');
+            if (btn) btn.classList.remove('loading');
             alert("Telega.io SDK loading. Please retry.");
         }
     }
@@ -1145,7 +1205,7 @@
             return alert("⚠️ TADS Network could not load. Please disable ad-blockers / DNS filters and refresh.");
         }
 
-        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
         }
 
@@ -1179,14 +1239,18 @@
         const number = document.getElementById('number').value.trim();
         
         if (balance < 25000) {
-            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            }
             alert("Minimum payout threshold is 25,000 HOWL ($2.50).");
             btn.disabled = false;
             btn.textContent = "📤 Submit Payout Request";
             return;
         }
         if (!number || isNaN(amount) || amount < 25000 || amount > balance) {
-            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            }
             alert("Invalid payout details.");
             btn.disabled = false;
             btn.textContent = "📤 Submit Payout Request";
@@ -1204,7 +1268,9 @@
             body: JSON.stringify({ chat_id: "@cryptoadspayment", text: msg, parse_mode: "Markdown" })
         }).then(response => {
             if (!response.ok) throw new Error();
-            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
             alert("Withdrawal request dispatched successfully!");
             
             balance -= amount;
@@ -1227,7 +1293,7 @@
         const referralLink = `https://t.me/${botUsername}/ads?startapp=${userId}`;
         const text = `🚀 Join HOWL Rewards and earn instant crypto payouts. Launch now!`;
         const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(text)}`;
-        if (window.Telegram && Telegram.WebApp.openTelegramLink) {
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
             Telegram.WebApp.openTelegramLink(shareUrl);
         } else {
             window.open(shareUrl, '_blank');

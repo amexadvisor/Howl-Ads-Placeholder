@@ -365,7 +365,7 @@
           <div class="user-info">
             <h2 class="username" id="username">Loading...</h2>
             <div class="badge-container">
-              <span class="title"><i class="fa-solid fa-shield-halved" style="color:var(--mint);"></i> Verified Earner</span>
+              <span class="title"><i class="fa-solid fa-shield-halved" style="color:var(--primary);"></i> Verified Earner</span>
               <div class="live-indicator"><span class="live-dot"></span> LIVE</div>
             </div>
           </div>
@@ -394,7 +394,7 @@
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
         <div class="task-card" onclick="showView('withdraw')">
-            <div class="task-icon" style="color: var(--amber); background: var(--amber-soft);"><i class="fa-solid fa-wallet"></i></div>
+            <div class="task-icon" style="color: var(--accent); background: rgba(92,122,166,0.12); box-shadow: inset 0 0 0 1px rgba(92,122,166,0.3);"><i class="fa-solid fa-wallet"></i></div>
             <div class="task-details"><h3>Secure Withdrawal</h3><p>Transfer accumulated HOWL to your wallet.</p></div>
             <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
         </div>
@@ -426,7 +426,7 @@
           </div>
 
           <div class="task-card" id="telegaBtn1" onclick="startTelegaTask('ad8bc6ba-ffd3-4022-8c02-8f4d74562a1f', 50, 'telegaBtn1')">
-              <div class="task-icon" style="color: var(--amber); background: var(--amber-soft);"><i class="fa-solid fa-bullhorn"></i></div>
+              <div class="task-icon" style="color: #b8794f; background: rgba(184,121,79,0.12); box-shadow: inset 0 0 0 1px rgba(184,121,79,0.3);"><i class="fa-solid fa-bullhorn"></i></div>
               <div class="task-details">
                 <h3>Telega Pro Ad (+50 HOWL)</h3>
                 <p>Unlimited high-tier reward (5m cooldown)</p>
@@ -451,7 +451,7 @@
           <h2 class="section-title"><i class="fa-solid fa-clipboard-question"></i> Market Surveys</h2>
           
           <div class="task-card" onclick="alert('Survey modules will load available forms soon.')">
-              <div class="task-icon" style="color: var(--mint); background: var(--mint-soft);"><i class="fa-solid fa-clipboard-user"></i></div>
+              <div class="task-icon" style="color: var(--accent); background: rgba(92,122,166,0.12); box-shadow: inset 0 0 0 1px rgba(92,122,166,0.3);"><i class="fa-solid fa-clipboard-user"></i></div>
               <div class="task-details"><h3>Daily Opinion Survey</h3><p>Answer brief questionnaires (+1000 HOWL)</p></div>
               <div class="task-action-meta"><div class="task-arrow"><i class="fa-solid fa-play"></i></div></div>
           </div>
@@ -550,6 +550,7 @@
             if (barEl) barEl.style.width = `${percentTracker}%`;
 
             if (percentTracker >= 100) {
+                // Hold briefly at 100% so it visibly registers, then reveal the dashboard.
                 setTimeout(() => {
                     if (splashEl) splashEl.classList.add('fade-out');
                 }, 350);
@@ -590,7 +591,7 @@
         }
     }
 
-    async function setupPostbackQueryListener() {
+    function setupPostbackQueryListener() {
         const urlParams = new URLSearchParams(window.location.search);
         const postbackUserId = urlParams.get('user_id');
         const postbackValue = urlParams.get('value');
@@ -608,45 +609,12 @@
                     localStorage.setItem('howl_processed_tokens', JSON.stringify(processedTokens));
                 }
 
-                // STEP 1: FETCH & UPDATE USER BALANCE FOR POSTBACKS
-                try {
-                    const { data: userData, error: fetchError } = await supabaseClient
-                        .from('users')
-                        .select('balance')
-                        .eq('user_id', currentUserId)
-                        .maybeSingle();
-
-                    if (fetchError) {
-                        console.error('Error fetching postback balance:', fetchError);
-                        return;
-                    }
-
-                    const currentBalance = userData?.balance || 0;
-                    const newBalance = currentBalance + rewardAmount;
-
-                    const { error: upsertError } = await supabaseClient
-                        .from('users')
-                        .upsert(
-                            { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
-                            { onConflict: 'user_id' }
-                        );
-
-                    if (upsertError) {
-                        console.error('Failed to save postback balance:', upsertError);
-                        return;
-                    }
-
-                    balance = newBalance;
-                    updateDisplay();
-                    addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount, offerId: offerId });
-                    
-                    localStorage.setItem(`howlRewardsBotV6_${currentUserId}`, JSON.stringify({ balance, adsbitvexCountToday, lastResetDate, historyLog }));
-
-                    if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-                        Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                    }
-                } catch(e) {
-                    console.error('Error applying postback reward:', e);
+                balance += rewardAmount;
+                updateDisplay();
+                addToHistory('offerwall', `+${rewardAmount} HOWL from Partner Offerwall`, { rewardAmount: rewardAmount, offerId: offerId });
+                saveData();
+                if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 }
 
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -663,10 +631,12 @@
                 .from('users')
                 .select('balance')
                 .eq('user_id', userIdStr)
-                .maybeSingle();
+                .single();
 
             if (userError) {
-                console.warn('[DIAGNOSTIC] User balance fetch warning:', userError.message);
+                console.warn('[DIAGNOSTIC] User balance fetch warning or not found:', userError.message);
+                // No row yet for this user_id — this is a brand new user, not a
+                // shared-data bug. Reset instead of leaving a stale in-memory value.
                 balance = 0;
                 updateDisplay();
             } else if (userData && typeof userData.balance === 'number') {
@@ -728,17 +698,53 @@
 
     async function syncBalanceToSupabase(newBalance) {
         try {
-            const { error } = await supabaseClient
+            await supabaseClient
                 .from('users')
                 .upsert(
                     { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
                     { onConflict: 'user_id' }
                 );
-            if (error) {
-                console.error('Failed to sync balance to Supabase:', error.message);
-            }
         } catch (err) {
-            console.error('Failed to sync balance to Supabase:', err);
+            console.log('Failed to sync balance to Supabase.');
+        }
+    }
+
+    // Mirrors the read-current-balance -> add reward -> upsert pattern from the
+    // PubScale S2S postback: Supabase is treated as the source of truth for the
+    // reward amount, rather than trusting the client's in-memory `balance` (which
+    // can drift if a previous sync silently failed, or across multiple devices).
+    async function addRewardToSupabase(rewardAmount) {
+        try {
+            const { data: userData, error: fetchError } = await supabaseClient
+                .from('users')
+                .select('balance')
+                .eq('user_id', currentUserId)
+                .maybeSingle();
+
+            if (fetchError) {
+                console.error('[BALANCE] Failed to fetch current balance before reward:', fetchError.message);
+            }
+
+            const currentServerBalance = userData?.balance || 0;
+            const newBalance = currentServerBalance + rewardAmount;
+
+            const { error: upsertError } = await supabaseClient
+                .from('users')
+                .upsert(
+                    { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
+                    { onConflict: 'user_id' }
+                );
+
+            if (upsertError) {
+                console.error('[BALANCE] Failed to update balance in Supabase:', upsertError.message);
+                return null;
+            }
+
+            console.log(`[BALANCE] +${rewardAmount} applied. Server balance now ${newBalance}.`);
+            return newBalance;
+        } catch (err) {
+            console.error('[BALANCE] Exception while updating balance in Supabase:', err);
+            return null;
         }
     }
 
@@ -806,6 +812,8 @@
             lastResetDate = data.lastResetDate || new Date().toDateString();
             historyLog = data.historyLog || [];
         } else {
+            // No cache for this specific user_id — start clean. Don't inherit
+            // whatever a different account left behind on this device.
             balance = 0;
             adsbitvexCountToday = 0;
             lastResetDate = new Date().toDateString();
@@ -932,16 +940,16 @@
         const buildHistoryCard = (item) => {
             let icon = '<i class="fa-solid fa-plus-circle"></i>';
             if (item.type === 'withdraw') {
-                icon = '<i class="fa-solid fa-paper-plane" style="color: var(--amber);"></i>';
+                icon = '<i class="fa-solid fa-paper-plane" style="color: var(--accent);"></i>';
             } else if (item.type === 'survey') {
-                icon = '<i class="fa-solid fa-clipboard-question" style="color: var(--mint);"></i>';
+                icon = '<i class="fa-solid fa-clipboard-question" style="color: var(--accent);"></i>';
             } else if (item.type === 'offerwall') {
-                icon = '<i class="fa-solid fa-gift" style="color: var(--amber);"></i>';
+                icon = '<i class="fa-solid fa-gift" style="color: var(--gold);"></i>';
             }
 
             let metaDetails = '';
             if (item.meta && (item.meta.taskId || item.meta.rewardAmount)) {
-                metaDetails = `<div class="detail" style="color:var(--mint); font-family:monospace; margin-top:3px;">`;
+                metaDetails = `<div class="detail" style="color:var(--primary); font-family:monospace; margin-top:3px;">`;
                 if (item.meta.taskId) metaDetails += `ID: ${item.meta.taskId} `;
                 if (item.meta.rewardAmount) metaDetails += `| Reward: +${item.meta.rewardAmount} HOWL`;
                 metaDetails += `</div>`;
@@ -993,55 +1001,20 @@
     }
 
     async function grantReward(amount, sourceName, type = 'ads', meta = {}) {
-        try {
-            // ------------------------------------------------------------------
-            // STEP 1: FETCH & UPDATE USER BALANCE
-            // ------------------------------------------------------------------
-            const { data: userData, error: fetchError } = await supabaseClient
-                .from('users')
-                .select('balance')
-                .eq('user_id', currentUserId)
-                .maybeSingle();
-
-            if (fetchError) {
-                console.error('Error fetching balance:', fetchError);
-                return;
-            }
-
-            const currentBalance = userData?.balance || 0;
-            const newBalance = currentBalance + amount;
-
-            // ------------------------------------------------------------------
-            // STEP 2: UPSERT NEW BALANCE
-            // ------------------------------------------------------------------
-            const { error: upsertError } = await supabaseClient
-                .from('users')
-                .upsert(
-                    { user_id: currentUserId, balance: newBalance, updated_at: new Date().toISOString() },
-                    { onConflict: 'user_id' }
-                );
-
-            if (upsertError) {
-                console.error('CRITICAL BALANCE ERROR:', upsertError);
-                return;
-            }
-
-            // Update UI & Local Memory State
-            balance = newBalance;
-            updateDisplay();
-            
-            // ------------------------------------------------------------------
-            // STEP 3: LOG TRANSACTION TO HISTORY & DATABASE
-            // ------------------------------------------------------------------
-            addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
-            
-            localStorage.setItem(`howlRewardsBotV6_${currentUserId}`, JSON.stringify({ balance, adsbitvexCountToday, lastResetDate, historyLog }));
-
-            if (window.Telegram && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            }
-        } catch (error) {
-            console.error('Execution Exception:', error.message || error);
+        const confirmedBalance = await addRewardToSupabase(amount);
+        if (confirmedBalance !== null) {
+            balance = confirmedBalance;
+        } else {
+            // Supabase write failed (offline, RLS, etc.) — fall back to an
+            // optimistic local increment so the UI isn't stuck stale. saveData()
+            // below will retry syncing this value to Supabase.
+            balance += amount;
+        }
+        updateDisplay();
+        addToHistory(type, `+${amount} HOWL from ${sourceName}`, meta);
+        saveData();
+        if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.notificationOccurred('success');
         }
     }
 
@@ -1078,6 +1051,9 @@
             }
 
             adsbitvexCountToday += 1;
+            if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+            }
             grantReward(10, 'AdsBitvex Network', 'ads');
             alert(`🎉 Ad watched! +10 HOWL credited (${adsbitvexCountToday} today).`);
         }).catch((e) => {

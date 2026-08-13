@@ -454,7 +454,7 @@
             <option value="BINANCE UID">BINANCE UID</option>
             <option value="BITGET UID">BITGET UID</option>
           </select>
-          <input type="number" id="amount" placeholder="AMOUNT (MIN 200 HOWL = $0.02)">
+          <input type="number" id="amount" placeholder="AMOUNT (MIN 0.02 USDT EQUIVALENT)">
           <input type="text" id="number" placeholder="WALLET ADDRESS / UID">
           <button id="submitWithdraw" class="btn">📤 Submit Payout Request</button>
         </div>
@@ -1229,7 +1229,7 @@
     }
 
     // ==========================================
-    // WITHDRAWAL LOGIC (Aligned with Bot Rules)
+    // WITHDRAWAL LOGIC (Aligned with Bot Rules & @howl_ads_bot)
     // ==========================================
     document.getElementById('submitWithdraw').addEventListener('click', () => {
         const btn = document.getElementById('submitWithdraw');
@@ -1247,10 +1247,10 @@
         }
 
         const amount = parseFloat(amountInput);
-        const minLimit = 200;   // Equivalent to $0.02 USDT (assuming 10000 HOWL = $1.00)
+        const minLimit = 200;   // Equivalent to 0.02 USDT
         const maxLimit = 10000000;
 
-        // 2. Validate Amount Range (Min $0.02 / 200 HOWL)
+        // 2. Validate Amount Range
         if (amount < minLimit || amount > maxLimit) {
             if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
@@ -1276,57 +1276,44 @@
         btn.disabled = true;
         btn.textContent = "⏳ Processing Withdrawal...";
 
-        // 4. Calculate 30% Fee & Final Payout Amount
+        // 4. Calculate 30% Fee & Final Payout Amount (Converting HOWL to USDT equivalent for the bot command format)
         const feeRate = 0.30;
-        const taxFee = amount * feeRate;
-        const finalAmount = amount - taxFee;
-        const usdFinal = (finalAmount / 10000).toFixed(4);
-        const usdFee = (taxFee / 10000).toFixed(4);
+        const amountUSDT = amount / 10000; // 10000 HOWL = 1 USDT
+        const taxFeeUSDT = amountUSDT * feeRate;
+        const finalAmountUSDT = amountUSDT - taxFeeUSDT;
 
-        const date = new Date().toLocaleString();
-        const userInfo = tgUser ? `@${tgUser.username || tgUser.first_name} (ID: ${tgUser.id})` : 'Web Operator';
+        const currency = method.includes("USDT") ? "USDT" : "USDT";
+        const username = tgUser ? (tgUser.username || 'N/A') : 'N/A';
+
+        // Format payload exactly matching the bot code handler format
+        const botPayload = `Withdrawal Request:\nUser: @${username}\nWallet: ${recipient} (${method})\nAmount: ${amountUSDT.toFixed(4)} ${currency}\nFinal Payout: ${finalAmountUSDT.toFixed(4)} ${currency}`;
         
-        const msg = `<b>📤 New Mini App Withdrawal Request</b>\n\n` +
-                    `<b>👤 User:</b> ${userInfo}\n` +
-                    `<b>📅 Date:</b> ${date}\n` +
-                    `<b>💰 Gross Amount:</b> ${amount} HOWL\n` +
-                    `<b>💸 Fee (30%):</b> ${taxFee.toFixed(2)} HOWL ($${usdFee})\n` +
-                    `<b>✅ Net Final Payout:</b> ${finalAmount.toFixed(2)} HOWL ($${usdFinal})\n` +
-                    `<b>🏦 Method:</b> ${method}\n` +
-                    `<b>📱 Recipient:</b> <code>${recipient}</code>`;
+        // Deduct balance locally & sync
+        balance -= amount;
+        updateDisplay();
+        saveData();
 
-        // Dispatch notification to payment channel
-        fetch("https://api.telegram.org/bot7281899679:AAHbYMtelNIyu-8Tq8HgBuvBmUO6WjvxuFM/sendMessage", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: "@cryptoadspayment", text: msg, parse_mode: "HTML" })
-        }).then(response => {
-            if (!response.ok) throw new Error("Telegram API Error");
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+        }
 
-            // Deduct balance only on successful dispatch
-            balance -= amount;
+        let maskedRecipient = recipient.length > 15 ? recipient.slice(0, 12) + '...' + recipient.slice(-4) : recipient;
+        addToHistory('withdraw', `📤 Withdrawal Requested<br>💰 Net: ${finalAmountUSDT.toFixed(4)} ${currency} (Fee: 30%)<br>🏦 ${method}: ${maskedRecipient}`);
 
-            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-            }
+        // Open Telegram to send message directly to @howl_ads_bot via start/text parameter
+        const botUsername = "howl_ads_bot";
+        const telegramUrl = `https://t.me/${botUsername}?text=${encodeURIComponent(botPayload)}`;
 
-            let maskedRecipient = recipient.length > 15 ? recipient.slice(0, 12) + '...' + recipient.slice(-4) : recipient;
-            addToHistory('withdraw', `📤 Withdrawal Successful<br>💰 Net: ${finalAmount.toFixed(2)} HOWL (Fee: 30%)<br>🏦 ${method}: ${maskedRecipient}`);
+        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
+            Telegram.WebApp.openTelegramLink(telegramUrl);
+        } else {
+            window.open(telegramUrl, '_blank');
+        }
 
-            updateDisplay();
-            saveData();
-            alert(`✅ Withdrawal Successful!\nNet Payout: ${finalAmount.toFixed(2)} HOWL ($${usdFinal})`);
-            document.getElementById('amount').value = '';
-            document.getElementById('number').value = '';
-        }).catch((err) => {
-            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            }
-            alert("❌ Withdrawal Failed\nNetwork connection error. Try again later.");
-        }).finally(() => {
-            btn.disabled = false;
-            btn.textContent = "📤 Submit Payout Request";
-        });
+        btn.disabled = false;
+        btn.textContent = "📤 Submit Payout Request";
+        document.getElementById('amount').value = '';
+        document.getElementById('number').value = '';
     });
 
     function shareApp() {

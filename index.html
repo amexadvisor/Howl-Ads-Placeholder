@@ -450,12 +450,11 @@
         <p>💼 AVAILABLE HOWL: <strong><span id="balance2">0</span> HOWL</strong> (≈ $<span id="usd-balance2">0.00</span>)</p>
         <div class="form">
           <select id="method">
+            <option value="USDT BEP20">USDT BEP20 (BSC)</option>
             <option value="BINANCE UID">BINANCE UID</option>
             <option value="BITGET UID">BITGET UID</option>
-            <option value="USDT BEP20">USDT BEP20</option>
-            <option value="USDT TRC20">USDT TRC20</option>
           </select>
-          <input type="number" id="amount" placeholder="AMOUNT (MIN 25000 HOWL = $2.50)">
+          <input type="number" id="amount" placeholder="AMOUNT (MIN 200 HOWL = $0.02)">
           <input type="text" id="number" placeholder="WALLET ADDRESS / UID">
           <button id="submitWithdraw" class="btn">📤 Submit Payout Request</button>
         </div>
@@ -1229,58 +1228,101 @@
         }
     }
 
+    // ==========================================
+    // WITHDRAWAL LOGIC (Aligned with Bot Rules)
+    // ==========================================
     document.getElementById('submitWithdraw').addEventListener('click', () => {
         const btn = document.getElementById('submitWithdraw');
-        btn.disabled = true;
-        btn.textContent = "⏳ Processing Request...";
-        
         const method = document.getElementById('method').value;
-        const amount = parseFloat(document.getElementById('amount').value);
-        const number = document.getElementById('number').value.trim();
-        
-        if (balance < 25000) {
+        const amountInput = document.getElementById('amount').value.trim();
+        const recipient = document.getElementById('number').value.trim();
+
+        // 1. Validate Numeric Amount
+        if (!amountInput || !amountInput.replace(".", "", 1).match(/^\d+$/)) {
             if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('error');
             }
-            alert("Minimum payout threshold is 25,000 HOWL ($2.50).");
-            btn.disabled = false;
-            btn.textContent = "📤 Submit Payout Request";
-            return;
-        }
-        if (!number || isNaN(amount) || amount < 25000 || amount > balance) {
-            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
-            }
-            alert("Invalid payout details.");
-            btn.disabled = false;
-            btn.textContent = "📤 Submit Payout Request";
+            alert("❌ ልክ ያልሆነ ቁጥር (Invalid Number)\nእባክዎ ትክክለኛ የቁጥር መጠን ያስገቡ፦");
             return;
         }
 
+        const amount = parseFloat(amountInput);
+        const minLimit = 200;   // Equivalent to $0.02 USDT (assuming 10000 HOWL = $1.00)
+        const maxLimit = 10000000;
+
+        // 2. Validate Amount Range (Min $0.02 / 200 HOWL)
+        if (amount < minLimit || amount > maxLimit) {
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            }
+            alert(`❌ የተሳሳተ የወጭ መጠን (Invalid Amount Range)\nቢያንስ ${minLimit} እና ቢበዛ ${maxLimit} HOWL ማውጣት ይችላሉ።`);
+            return;
+        }
+
+        // 3. Validate User Balance
+        if (balance < amount) {
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            }
+            alert("❌ ሂሳብዎ በቂ አይደለም (Insufficient Balance)\nYᴏᴜ Dᴏ Nᴏᴛ Hᴀᴠᴇ Sᴜғғɪᴄɪᴇɴᴛ Bᴀʟᴀɴᴄᴇ");
+            return;
+        }
+
+        if (!recipient) {
+            alert("⚠️ እባክዎ የቦርሳ አድራሻ ወይም UID ያስገቡ (Please enter wallet address or UID)");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "⏳ Processing Withdrawal...";
+
+        // 4. Calculate 30% Fee & Final Payout Amount
+        const feeRate = 0.30;
+        const taxFee = amount * feeRate;
+        const finalAmount = amount - taxFee;
+        const usdFinal = (finalAmount / 10000).toFixed(4);
+        const usdFee = (taxFee / 10000).toFixed(4);
+
         const date = new Date().toLocaleString();
         const userInfo = tgUser ? `@${tgUser.username || tgUser.first_name} (ID: ${tgUser.id})` : 'Web Operator';
-        const usdVal = (amount / 10000).toFixed(2);
-        const msg = `💸 *Secure Payout Request*\n\n👤 *User:* ${userInfo}\n📅 *Date:* ${date}\n💰 *Amount:* ${amount} HOWL ($${usdVal})\n📱 *Method:* ${method}\n📞 *Address:* ${number}`;
         
+        const msg = `<b>📤 New Mini App Withdrawal Request</b>\n\n` +
+                    `<b>👤 User:</b> ${userInfo}\n` +
+                    `<b>📅 Date:</b> ${date}\n` +
+                    `<b>💰 Gross Amount:</b> ${amount} HOWL\n` +
+                    `<b>💸 Fee (30%):</b> ${taxFee.toFixed(2)} HOWL ($${usdFee})\n` +
+                    `<b>✅ Net Final Payout:</b> ${finalAmount.toFixed(2)} HOWL ($${usdFinal})\n` +
+                    `<b>🏦 Method:</b> ${method}\n` +
+                    `<b>📱 Recipient:</b> <code>${recipient}</code>`;
+
+        // Dispatch notification to payment channel
         fetch("https://api.telegram.org/bot7281899679:AAHbYMtelNIyu-8Tq8HgBuvBmUO6WjvxuFM/sendMessage", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: "@cryptoadspayment", text: msg, parse_mode: "Markdown" })
+            body: JSON.stringify({ chat_id: "@cryptoadspayment", text: msg, parse_mode: "HTML" })
         }).then(response => {
-            if (!response.ok) throw new Error();
+            if (!response.ok) throw new Error("Telegram API Error");
+
+            // Deduct balance only on successful dispatch
+            balance -= amount;
+
             if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
                 Telegram.WebApp.HapticFeedback.notificationOccurred('success');
             }
-            alert("Withdrawal request dispatched successfully!");
-            
-            balance -= amount;
-            let maskedNumber = number.length > 15 ? number.slice(0, 15) + '****' + number.slice(-4) : number;
-            addToHistory('withdraw', `📤 Payout Request<br>💰 Amount: ${amount} HOWL ($${usdVal})<br>🏦 Method: ${method}<br>📱 Address: ${maskedNumber}`);
-            
+
+            let maskedRecipient = recipient.length > 15 ? recipient.slice(0, 12) + '...' + recipient.slice(-4) : recipient;
+            addToHistory('withdraw', `📤 Withdrawal Successful<br>💰 Net: ${finalAmount.toFixed(2)} HOWL (Fee: 30%)<br>🏦 ${method}: ${maskedRecipient}`);
+
             updateDisplay();
             saveData();
-        }).catch(() => {
-            alert("Network connection error. Try again later.");
+            alert(`✅ Withdrawal Successful!\nNet Payout: ${finalAmount.toFixed(2)} HOWL ($${usdFinal})`);
+            document.getElementById('amount').value = '';
+            document.getElementById('number').value = '';
+        }).catch((err) => {
+            if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            }
+            alert("❌ Withdrawal Failed\nNetwork connection error. Try again later.");
         }).finally(() => {
             btn.disabled = false;
             btn.textContent = "📤 Submit Payout Request";

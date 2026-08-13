@@ -1229,7 +1229,7 @@
     }
 
     // ==========================================
-    // WITHDRAWAL LOGIC (Aligned with Bot Rules & @howl_ads_bot)
+    // WITHDRAWAL LOGIC (Backend Data Transfer via Telegram sendData)
     // ==========================================
     document.getElementById('submitWithdraw').addEventListener('click', () => {
         const btn = document.getElementById('submitWithdraw');
@@ -1276,17 +1276,28 @@
         btn.disabled = true;
         btn.textContent = "⏳ Processing Withdrawal...";
 
-        // 4. Calculate 30% Fee & Final Payout Amount (Converting HOWL to USDT equivalent for the bot command format)
+        // 4. Calculate 30% Fee & Final Payout Amount
         const feeRate = 0.30;
         const amountUSDT = amount / 10000; // 10000 HOWL = 1 USDT
         const taxFeeUSDT = amountUSDT * feeRate;
         const finalAmountUSDT = amountUSDT - taxFeeUSDT;
 
-        const currency = method.includes("USDT") ? "USDT" : "USDT";
+        const currency = "USDT";
         const username = tgUser ? (tgUser.username || 'N/A') : 'N/A';
 
-        // Format payload exactly matching the bot code handler format
-        const botPayload = `Withdrawal Request:\nUser: @${username}\nWallet: ${recipient} (${method})\nAmount: ${amountUSDT.toFixed(4)} ${currency}\nFinal Payout: ${finalAmountUSDT.toFixed(4)} ${currency}`;
+        // Construct structured payload for the bot's backend handler
+        const payloadObject = {
+            action: "withdraw",
+            user_id: currentUserId,
+            username: username,
+            method: method,
+            recipient: recipient,
+            amount_howl: amount,
+            amount_usdt: Number(amountUSDT.toFixed(4)),
+            fee_usdt: Number(taxFeeUSDT.toFixed(4)),
+            final_payout_usdt: Number(finalAmountUSDT.toFixed(4)),
+            timestamp: Date.now()
+        };
         
         // Deduct balance locally & sync
         balance -= amount;
@@ -1300,20 +1311,14 @@
         let maskedRecipient = recipient.length > 15 ? recipient.slice(0, 12) + '...' + recipient.slice(-4) : recipient;
         addToHistory('withdraw', `📤 Withdrawal Requested<br>💰 Net: ${finalAmountUSDT.toFixed(4)} ${currency} (Fee: 30%)<br>🏦 ${method}: ${maskedRecipient}`);
 
-        // Open Telegram to send message directly to @howl_ads_bot via start/text parameter
-        const botUsername = "howl_ads_bot";
-        const telegramUrl = `https://t.me/${botUsername}?text=${encodeURIComponent(botPayload)}`;
-
-        if (window.Telegram && Telegram.WebApp && Telegram.WebApp.openTelegramLink) {
-            Telegram.WebApp.openTelegramLink(telegramUrl);
+        // Send data directly to the bot securely and close the Mini App
+        if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.sendData === 'function') {
+            Telegram.WebApp.sendData(JSON.stringify(payloadObject));
         } else {
-            window.open(telegramUrl, '_blank');
+            alert("⚠️ Telegram WebApp environment required for automated submission.");
+            btn.disabled = false;
+            btn.textContent = "📤 Submit Payout Request";
         }
-
-        btn.disabled = false;
-        btn.textContent = "📤 Submit Payout Request";
-        document.getElementById('amount').value = '';
-        document.getElementById('number').value = '';
     });
 
     function shareApp() {
